@@ -862,7 +862,7 @@ class NimbleRecord {
 						if(isset($arguments[1]) && !empty($arguments[1])) {
 							$args = array_merge($args, $arguments[1]);
 						}
-						$return = call_user_func_array(array('Validate', $klass_method), array($args));
+						$return = call_user_func_array(array('NimbleValidation', $klass_method), array($args));
 						$this->process_error_return($return);
 					}
 				}else{
@@ -871,7 +871,7 @@ class NimbleRecord {
 					if(isset($arguments[1]) && !empty($arguments[1])) {
 						$args = array_merge($args, $arguments[1]);
 					}
-					$return = call_user_func_array(array('Validate', $klass_method), array($args));
+					$return = call_user_func_array(array('NimbleValidation', $klass_method), array($args));
 					$this->process_error_return($return);
 				}
 			}
