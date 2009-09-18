@@ -62,11 +62,11 @@ class NimbleRecord {
 	* returns the quoted table name
 	*/
 	protected static function table_name() {
-		if(isset(static::$table_names[static::$class]) && !empty(static::$table_names[static::$class])) { 
-			$name = static::$table_names[static::$class];
+		if(isset(static::$table_names[static::class_name()]) && !empty(static::$table_names[static::class_name()])) { 
+			$name = static::$table_names[static::class_name()];
 		}else{
-			static::$table_names[static::$class] = strtolower(Inflector::pluralize(static::$class));
-			$name = static::$table_names[static::$class];
+			static::$table_names[static::class_name()] = strtolower(Inflector::pluralize(static::class_name()));
+			$name = static::$table_names[static::class_name()];
 		}
 		return "`{$name}`";
 	}
@@ -109,13 +109,14 @@ class NimbleRecord {
 		return static::$database;
 	}
 	
-	public function class_name() {
-		return static::$class;
+	public static function class_name() {
+		return get_called_class();
 	}
 	
 	public static function get_class() {
 		if(!isset(static::$my_class) && empty(static::$my_class)) {
-			static::$my_class = new static::$class;
+			$class =  static::class_name();
+			static::$my_class = new $class;
 		}
 		return static::$my_class;
 	}
@@ -374,7 +375,7 @@ class NimbleRecord {
 	public function after_validation() {}
 	
 	public static function run_validations($klass) {	
-		foreach(get_class_methods(static::$class) as $method) {
+		foreach(get_class_methods(static::class_name()) as $method) {
 			$matches = array();
 			if(preg_match('/^validators_for_([0-9a-z_]+)/', $method, $matches)) {
 			$columns = explode('_and_', $matches[1]);
@@ -410,7 +411,8 @@ class NimbleRecord {
   * @todo add multi conditional support
   */
   public static function exists($col, $value) {
-    $sql = 'SELECT 1 from ' . static::table_name() . ' WHERE (`' . static::sanatize_input_array($col) . '`= ' . "'" . static::sanatize_input_array($value) . "') LIMIT 0,1";
+    $sql = 'SELECT 1 from ' . static::table_name() . ' WHERE (`' . static::sanatize_input_array($col) . '`= ' . 
+					 "'" . static::sanatize_input_array($value) . "') LIMIT 0,1";
     $result = static::execute($sql);
     $return = $result->fetch_assoc();
     if(isset($return['1'])) {
@@ -431,7 +433,8 @@ class NimbleRecord {
 	public function after_create()  {}
 	
 	public static function create($attributes = array()) {
-		$klass = new static::$class;
+		$c = static::class_name();
+		$klass = new $c;
 		$klass->row = array_merge($klass->row, $attributes);
 		static::getErrors($klass);
     call_user_func_array(array($klass, 'before_create'), array());
@@ -721,7 +724,8 @@ class NimbleRecord {
 		if (empty($result_set)){
 			throw new RecordNotFound();
 		}
-	$object = new static::$class;
+	$c = static::class_name();
+	$object = new $c;
 	$object->from_array($result_set);
 	return $object;
   }
@@ -949,7 +953,7 @@ class NimbleRecord {
 
 	protected function association_foreign_key($association_name) {
 		$associations = $this->associations();
-		return strtolower(static::$class) . '_id';
+		return strtolower(static::class_name()) . '_id';
 	}
 
 	protected function association_table_name($association_name) {
@@ -997,7 +1001,7 @@ class NimbleRecord {
 
 		if ($include_head){
 			$xw->startDocument('1.0','UTF-8');
-			$xw->startElement(strtolower(static::$class));
+			$xw->startElement(strtolower(static::class_name()));
 		}
 		foreach($this->row as $key => $value) {
 		$xw->writeElement($key, $value);

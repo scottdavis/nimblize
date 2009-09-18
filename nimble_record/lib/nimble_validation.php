@@ -61,37 +61,44 @@
         }
 		
 		
-		
-		public static function format_of($args = array('column_name', 'value', 'regex')) {						
+		/* tested */
+		public static function format_of($args = array('column_name', 'value', 'with')) {						
 			$defaults = array('message' => 'is invalid');
 			$args = array_merge($defaults, $args);
-			if(!preg_match($args['regex'], $args['value'])) {
+			if(!preg_match($args['with'], (string) $args['value'])) {
 				return self::false_result($args['column_name'], $args['message']);
 			}else{
 				return array(true);
 			}
         }
-		
-		public static function length_of($args = array('column_name', 'value', 'length')) {
+		/** tested */
+		public static function length_of($args = array('column_name', 'value', 'length', 'in')) {
 			$defaults = array('message' => 'is the wrong length');
 			$args = array_merge($defaults, $args);	
-			if(is_array($args['length'])) {
-				if(!in_array(strlen($args['value']))){
-					return self::false_result($args['column_name'], $args['message']);
+			if(isset($args['length']) && !empty($args['length']) && strlen($args['value']) === (int) $args['length']) {
+				return array(true);
+			}elseif(isset($args['in']) && !empty($args['in'])){
+				if(is_string($args['in']) && strpos($args['in'], '..') !== false) {
+					$range = explode('..', $args['in']);
+					$first = (int) $range[0];
+					$last = (int) $range[1];
+				}elseif(is_array($args['in'])){
+					$first = $args['in'][0];
+					$last = array_pop($args['in']);
 				}else{
-					return array(true);
+					throw new NimbleRecordException("input needs to either be a string 1..4 or an array(1,4)");
 				}
+				$l = strlen($args['value']);
+				if($first <= $l && $last >= $l) {
+					return array(true);
+				}else{
+					return self::false_result($args['column_name'], $args['message']);
+				}	
 			}else{
-				(int) $l = $length;
-				if(strlen($value) !== $l){
-					return self::false_result($args['column_name'], $args['message']);
-				}else{
-					return array(true);
-				}
-			}
-		
+				return self::false_result($args['column_name'], $args['message']);
+			}	
 		}
-		
+		/** tested */
 		public static function numercality_of($args = array('column_name', 'value')) {
 			$defaults = array('message' => 'must be an integer');
 			$args = array_merge($defaults, $args);
@@ -102,11 +109,11 @@
 			}
 		}
 		
-		
+		/** tested */
 		public static function presence_of($args = array('column_name', 'value')) {
 			$defaults = array('message' => "can not be blank");
 			$args = array_merge($defaults, $args);
-			if(empty($args['value'])) {
+			if(!isset($args['value']) || empty($args['value'])) {
 				return self::false_result($args['column_name'], $args['message']);
 			}else{
 				return array(true);
@@ -115,7 +122,7 @@
 		
     
     public static function uniqueness_of($args = array('column_name', 'value', 'class')) {
-      $defaults = array('message' => ": {$args['value']} already exsists try something else");
+      $defaults = array('message' => ": {$args['value']} already exists try something else");
 			$args = array_merge($defaults, $args);
       $fail = call_user_func_array(array($args['class'], 'exists'), array($args['column_name'], $args['value']));
       if($fail) {
