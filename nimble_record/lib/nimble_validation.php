@@ -1,6 +1,22 @@
 <?php
 
+	/**
+	* This class handles all the validations for models
+	* each validation is called with a magic method
+	*/
+
+
+
+
 	class NimbleValidation {
+		
+		
+		public static function _methods() {
+			$a = get_class_methods();
+			
+			
+		}
+		
 	
 		/** tested */
 		public static function acceptance_of($args = array('column_name', 'value')) {
