@@ -3,7 +3,11 @@
 class NimbleRecord {
 	/** public vars */
 	public static $query_log = array();
-
+	public static $class;
+	public static $debug = false;
+	public static $test_mode = false;
+	public static $adapter = NULL;
+	public static $max_rows_for_cache = 500;
 	/** protected vars */
 	protected static $database;
 	protected static $connection;
@@ -15,10 +19,8 @@ class NimbleRecord {
 	protected static $validations = array();
 	protected static $my_class;
 	protected static $table_names = array();
-	public static $test_mode = false;
-	public static $adapter = NULL;
 	protected static $temp = array();
-	public static $class;
+	
 	
 	
 	var $update_mode = false;
@@ -62,13 +64,14 @@ class NimbleRecord {
 	* returns the quoted table name
 	*/
 	protected static function table_name() {
-		if(isset(static::$table_names[static::class_name()]) && !empty(static::$table_names[static::class_name()])) { 
-			$name = static::$table_names[static::class_name()];
+		$class = static::class_name();
+		if(isset(static::$table_names[$class]) && !empty(static::$table_names[$class])) { 
+			$name = static::$table_names[$class];
 		}else{
-			static::$table_names[static::class_name()] = strtolower(Inflector::pluralize(static::class_name()));
-			$name = static::$table_names[static::class_name()];
+			static::$table_names[$class] = strtolower(Inflector::pluralize($class));
+			$name = static::$table_names[$class];
 		}
-		return "`{$name}`";
+		return static::$adapter->quote_table_name($name);
 	}
 	
 	
@@ -78,13 +81,6 @@ class NimbleRecord {
 	
 	public static function test_mode() {
 		return static::$test_mode;
-	}
-	
-	/**
-	* returns unquoted table name
-	*/
-	public static function real_table_name() {
-		return static::$table_name;
 	}
 	/**
 	* returns name of the primary key field
@@ -124,13 +120,12 @@ class NimbleRecord {
 
 	private static function sanatize_input_array($input) {
 		if(is_array($input)) {
-		$clean_values = array();
-		foreach($input as $value) {
-			array_push($clean_values, static::$adapter->escape($value));
-		}
-		return $clean_values;
+			$clean_values = array();
+			foreach($input as $value) {
+				array_push($clean_values, static::$adapter->escape($value));
+			}
+			return $clean_values;
 		}else{
-		//if its an int make it a string
 			return static::$adapter->escape((string) $input);
 		}
 	}
@@ -161,7 +156,7 @@ class NimbleRecord {
 	* @param $options Array
 	*/
 	public static function count($options = array('column' => '*', 'conditions' => NULL)) {
-		self::check_args_for_math_functions($options);
+		static::check_args_for_math_functions($options);
 		$sql = 'SELECT count(' . $options['column'] . ') AS count_all FROM ' . self::table_name();
 		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
 		$sql .= ';';
@@ -173,7 +168,7 @@ class NimbleRecord {
 	* @param $options Array
 	*/
 	public static function sum($options = array('column' => NULL, 'conditions' => NULL)) {
-		self::check_args_for_math_functions($options);
+		static::check_args_for_math_functions($options);
 		$sql = 'SELECT sum('. self::table_name() . '.' . $options['column'] . ') as sum_all FROM ' . self::table_name();
 		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
 		return self::execute_query($sql, false)->sum_all;
@@ -184,7 +179,7 @@ class NimbleRecord {
 	* @param $options Array
 	*/
 	public static function max($options = array('column' => NULL, 'conditions' => NULL)) {
-		self::check_args_for_math_functions($options);
+		static::check_args_for_math_functions($options);
 		$sql = 'SELECT max('. self::table_name() . '.' . $options['column'] . ') as max_all FROM ' . self::table_name();
 		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
 		return self::execute_query($sql, false)->max_all;
@@ -195,7 +190,7 @@ class NimbleRecord {
 	* @param $options Array
 	*/
 	public static function min($options = array('column' => NULL, 'conditions' => NULL)) {
-		self::check_args_for_math_functions($options);
+		static::check_args_for_math_functions($options);
 		$sql = 'SELECT min('. self::table_name() . '.' . $options['column'] . ') as min_all FROM ' . self::table_name();
 		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
 		return self::execute_query($sql, false)->min_all;
@@ -278,21 +273,6 @@ class NimbleRecord {
     $sql = 'DELETE FROM ' . self::table_name() . $where;
     return self::execute($sql);
   }
-  
-  public function destroy() {
-    self::delete($this->id);
-  }
-	
-	public static function delete_all() {
-		$sql = 'DELETE FROM ' . self::table_name() . ';';
-		return self::execute($sql);
-	}
-	
-	public static function truncate() {
-		$sql = 'TRUNCATE ' . self::table_name() . ';';
-		return self::execute($sql);
-	}
-	
 	
 	private static function build_find_sql($array_or_id) {
 		$all = false;
@@ -365,6 +345,28 @@ class NimbleRecord {
 	*/
 	
 	/**
+	* START DELETE METHODS
+	*/
+	
+	public function destroy() {
+    self::delete($this->id);
+  }
+	
+	public static function delete_all() {
+		$sql = 'DELETE FROM ' . self::table_name() . ';';
+		return self::execute($sql);
+	}
+	
+	public static function truncate() {
+		$sql = 'TRUNCATE ' . self::table_name() . ';';
+		return self::execute($sql);
+	}
+  
+	/**
+	* END DELETE METHODS
+	*/
+	
+	/**
 	* START VALIDATION CHECKS
 	*/
 	
@@ -375,13 +377,7 @@ class NimbleRecord {
 	public function after_validation() {}
 	
 	public static function run_validations($klass) {	
-		foreach(get_class_methods(static::class_name()) as $method) {
-			$matches = array();
-			if(preg_match('/^validators_for_([0-9a-z_]+)/', $method, $matches)) {
-			$columns = explode('_and_', $matches[1]);
-			call_user_func_array(array($klass, $method), array($columns));
-			}
-		}
+		call_user_func_array(array($klass, 'validations'), array());
 	}
 	
 	public static function getErrors($klass) {
@@ -394,7 +390,7 @@ class NimbleRecord {
 	}
 	
 	
-	public function isValid() {
+	public function is_valid() {
 		static::getErrors($this);
 		return count($this->errors) == 0 ? true : false; 
 	}
@@ -438,16 +434,29 @@ class NimbleRecord {
 		$klass->row = array_merge($klass->row, $attributes);
 		static::getErrors($klass);
     call_user_func_array(array($klass, 'before_create'), array());
-		$klass->row = self::update_timestamps(array('created_at', 'updated_at'), $klass->row);
+		/** Update timestamps if the columns exsist */
+		$columns = static::columns();
+		$columns = array_flip($columns);
+		if(isset($columns['created_at']) && isset($columns['updated_at'])) {
+			$klass->row = self::update_timestamps(array('created_at', 'updated_at'), $klass->row);
+		}
+		unset($columns);
+		
 		$sql = 'INSERT INTO ' . self::table_name() ;
 		$keys = array_keys($klass->row);
 		$values = array_values($klass->row);
-		$clean = self::sanatize_input_array($values);
-		$keys = self::sanatize_input_array($keys);
+		$clean = static::sanatize_input_array($values);
+		$keys = static::sanatize_input_array($keys);
 		$clean = static::prepair_nulls($clean);
+		
+		
+		
 		$sql .= " (`" . join("`, `", $keys) . "`) VALUES (" .  join(", ", $clean) . ");";
+		
+		
+		
 		if(count($klass->errors) == 0 && self::execute_insert_query($sql)) {
-			array_push(self::$query_log, "CREATE: $sql");
+			array_push(static::$query_log, "CREATE: $sql");
 			$klass->row['id'] = static::insert_id();
 			$klass->saved = true;
 			call_user_func_array(array($klass, 'after_create'), array());
@@ -479,7 +488,7 @@ class NimbleRecord {
 	
 	private static function update_timestamps($timestamp_cols, $attributes) {
 		$columns = self::columns();
-		$time = NimbleDateHelper::to_string('db', time());
+		$time = DateHelper::to_string('db', time());
 		foreach($timestamp_cols as $ts) {
 			if(in_array($ts, $columns)) {
 				$attributes = array_merge($attributes, array($ts => $time));
@@ -510,7 +519,12 @@ class NimbleRecord {
     call_user_func_array(array($klass, 'before_update'), array());
 		$sql = 'UPDATE ' . self::table_name() . ' SET ';
 		$updates = array();
-		$attributes = self::update_timestamps(array('updated_at'), $attributes);
+		/** Update timestamp if the column exsists */
+		$columns = static::columns();
+		if(isset($columns['updated_at'])) {
+			$attributes = self::update_timestamps(array('updated_at'), $attributes);
+		}
+		unset($columns);
 		foreach ($klass->row as $key => $value) {
 	  		array_push($updates, '`' . self::sanatize_input_array($key) . "` = " . $clean = static::prepair_nulls(self::sanatize_input_array($value)) . "");
 		}
@@ -568,23 +582,74 @@ class NimbleRecord {
 	/**
 	* START PRIVATE UTILITY METHODS
 	*/
+	
+	/**
+	*
+	* CACHEING FUNCTIONS
+	*
+	*/
+	
+	/** 
+	* Checks if the current query is cached
+	*/
+	
+	private static function is_query_cached($sql) {
+		return isset(static::$query_cache[static::generate_hash_key($sql)]) && !empty(static::$query_cache[static::generate_hash_key($sql)]);
+	}
+	
+	/**
+	* Fetches a query result from the cache
+	*/
+	
+	private static function fetch_query_data_from_cache($sql) {
+		if(static::$debug) {
+			array_push(static::$query_log, "CACHED: $sql");
+		}
+		return static::$query_cache[static::generate_hash_key($sql)];
+	}
+	
+	/**
+	* sets a value in the cache
+	*/
+	
+	public static function cache($key, $value) {
+		return self::$query_cache[static::generate_hash_key($key)] = $value;
+	}
+	
+	/**
+	* Resets query cache
+	*/
+	
+	public static function reset_cache() {
+		static::$query_cache = array();
+		return true;
+	}
+	
+	
+	public static function generate_hash_key($string) {
+		return hash('md5', $string);
+	}
+	
+	public static function remove_from_cache($key) {
+		unset(static::$query_cache[$key]);
+		return true;
+	}
+	
 	/**
 	* Method load_columns
 	* Fetches all the columns from this table for validations and packs them into a cached array
 	*/
 	private static function load_columns() {
-		$sql = 'SHOW COLUMNS FROM ' . self::table_name();
-		if (isset(self::$query_cache[md5(strtolower($sql))])) {
-			array_push(self::$query_log, "CACHED: $sql");
-			return self::$query_cache[md5(strtolower($sql))];
+		$sql = static::$adapter->load_column_sql(static::table_name());
+		if (static::is_query_cached($sql)) {
+			return static::fetch_query_data_from_cache($sql);
 		}else{
-			$result = static::$adapter->query($sql);
-			array_push(self::$query_log, $sql);
+			$result = static::execute($sql);
 			$output = array();
 			while($row = $result->fetch_assoc()) {
 				array_push($output, $row);
 			}
-			self::$query_cache[md5(strtolower($sql))] = $output;
+			static::cache($sql, $output);
 			return $output;
 		}
 	}
@@ -596,10 +661,24 @@ class NimbleRecord {
 		$columns = self::load_columns();
 		$output = array();
 		foreach($columns as $column) {
-			array_push($output, $column['Field']);
+			$output[] = $column['Field'];
 		}
 		return $output;
 	}
+	
+	/**
+	* Method columns
+	* Sets the static variable self::$columns with the results from self::column_array()
+	* @param $override Boolean - will reload the columns
+	*/
+	private static function columns($override = false) {
+		if($override || empty(static::$columns)) {
+			static::$columns = static::column_array();
+		}
+		return static::$columns;
+	}
+	
+	
 	/**
 	* Method column_validations
 	* Builds and array of required columns based on if the column is allowed to be null or not
@@ -615,18 +694,9 @@ class NimbleRecord {
 			}
 		}
 	}
-	
-	/**
-	* Method columns
-	* Sets the static variable self::$columns with the results from self::column_array()
-	* @param $override Boolean - will reload the columns
-	*/
-	private static function columns($override = false) {
-		self::$columns = self::column_array();
-		return self::$columns;
-	}
 
-  	/**
+
+  /**
 	* Method execute_query
 	* use self::execute_query('SELECT * FROM `foo` WHERE `foo`.id = 1', false)
 	* @param sql String
@@ -634,16 +704,22 @@ class NimbleRecord {
 	*/
 	public static function execute_query($sql, $all = true, $cache = true){
 		//fetch query cache if it exsists
-		if ($cache && isset(self::$query_cache[md5(strtolower($sql))])) {
-			array_push(self::$query_log, "CACHED: $sql");
-			return self::$query_cache[md5(strtolower($sql))];
+		if ($cache && static::is_query_cached($sql)) {
+			array_push(static::$query_log, "CACHED: $sql");
+			return static::fetch_query_data_from_cache($sql);
 		}else{
 			//execute query and set cache pointer
 			array_push(static::$query_log, $sql);
 			$result = static::execute($sql);
-			$return =  $all ? static::to_objects($result) : static::to_object($result->fetch_assoc());
+			
+			$key = '';
 			if($cache) {
-				self::$query_cache[md5(strtolower($sql))] = $return;
+				$key = static::generate_hash_key($sql);
+			}
+			
+			$return =  $all ? static::to_objects($result, $key) : static::to_object(static::class_name(), $result->fetch_assoc());
+			if($cache && $result->num_rows() <= static::$max_rows_for_cache) {
+				static::cache($sql, $return);
 			}
 			if($result) {
 				$result->free();
@@ -690,6 +766,9 @@ class NimbleRecord {
 		if(static::test_mode()){
 			echo $sql . "\n\n";
 		}
+		if(static::$debug) {
+			array_push(self::$query_log, $sql);
+		}
 		return static::$adapter->query($sql);
 	}
 	
@@ -699,7 +778,9 @@ class NimbleRecord {
 	*/
 	public static function select_one($sql) {
 		$result = self::execute($sql);
-		return $result->fetch_assoc();
+		$r = $result->fetch_assoc();
+		$result->free();
+		return $r;
 	}
 	
 	
@@ -708,25 +789,27 @@ class NimbleRecord {
 	* use self::to_objects($result)
 	* @param array $result_set_array
 	*/
-	private static function to_objects($result_set_array) {
+	private static function to_objects($result_set_array, $key='') {
+		$class = static::class_name();
 		$object_list = array();
 		while($result_set = $result_set_array->fetch_assoc()) {
-		  array_push($object_list, self::to_object($result_set));
+		  array_push($object_list, self::to_object($class, $result_set));
 		}
-		return new ResultCollection($object_list);
+		return new NimbleResult($object_list, array('key' => $key));
 	}
   	/**
 	* Method to_object
 	* use self::to_object($result_set)
 	* @param array $result_set 
 	*/
-  private static function to_object($result_set) {
+  private static function to_object($class, $result_set) {
 		if (empty($result_set)){
 			throw new RecordNotFound();
 		}
-	$c = static::class_name();
-	$object = new $c;
-	$object->from_array($result_set);
+	$object = new $class;
+	$object->row = $result_set;
+	unset($result_set);
+	unset($class);
 	return $object;
   }
 	/**
@@ -747,8 +830,14 @@ class NimbleRecord {
   protected $row;
 
   public function __construct($args = array()) {
+	$this->row = array();
   $this->errors = array();
-	foreach(static::columns() as $col) {
+
+	if(isset(static::$columns) && !empty(static::$columns)) {
+		static::$columns = static::columns();
+	}
+
+	foreach(static::$columns as $col) {
 		$this->row[$col] = NULL;
 	}
   $this->row = array_merge($this->row, $args);
@@ -765,16 +854,6 @@ class NimbleRecord {
       return NULL;
     }
   }
-  /**
-	* Method from_array
-	* @access private
-	* @param $result_set Array
-	* sets the global row value to a result array;
-	*/
-	private function from_array($result_set) {
-		$this->row = $result_set;
-	}
-
 
 	/**
 	* Work in progress
@@ -804,10 +883,11 @@ class NimbleRecord {
     }
   }
     
+	public function validations() {}
 	
 	public function process_error_return($return) {
 		if(!$return[0]) {
-			array_push($this->errors, array($return[1] => $return[2]));
+			$this->errors[$return[1]] = $return[2];
 		}
 	}
 	/**
@@ -847,6 +927,7 @@ class NimbleRecord {
 		}
 		/**This is a special case because we do not want uniqueness_of being called on an update
 		 * sice it already exsists... because we are updating it!
+		 * @todo handel this from the NimbleValidation Class
 		 */
 		if($this->update_mode && preg_match('/uniqueness_of/', $method)) {
 			return;
@@ -854,7 +935,9 @@ class NimbleRecord {
 		
 		if(preg_match('/^validates_[0-9a-z_]+/', $method, $matches)) {
 			$klass_method = str_replace('validates_', '', $method);
-			if(in_array($klass_method, get_class_methods('Validate'))) {
+			//faster then in_array
+			$validation_methods = array_flip(get_class_methods('NimbleValidation'));
+			if(isset($validation_methods[$klass_method])) {
 				if(count($arguments[0]) > 1){
 					foreach($arguments[0] as $column) {
             if(!isset($this->row[$column])) {
@@ -923,7 +1006,9 @@ class NimbleRecord {
 	* PROTECTED UTILITY METHODS
 	*
 	*/
-
+	
+	public function associations() {}
+	
 	protected function association_has_many_exists($association_name) {
 		$associations = $this->associations();
 		if (isset($associations['has_many'])){
