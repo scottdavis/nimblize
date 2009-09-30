@@ -890,7 +890,59 @@ class NimbleRecord {
 	* MAGIC METHODS
 	*/
 	
+	private static function process_associations($class) {
+		$class_name = static::class_name();
+		if(isset(static::$associations[$class_name]) && !empty(static::$associations[$class_name])) {
+			return static::$associations[$class_name];
+		}else{
+			call_user_func_array(array($class, 'associations'), array());
+		}
+	}
+	/**
+	* Start association setters
+	*/ 
+	public function belongs_to() {
+		$args = func_get_args();
+		$this->merge_assocs('belongs_to', $args);
+	}
+	
+	public function has_many() {
+		$args = func_get_args();
+		$this->merge_assocs('has_many', $args);
+	}
+	
+	public function has_many_polymorphic() {
+		$args = func_get_args();
+		$this->merge_assocs('has_many_polymorphic', $args);
+	}
+	
+	public function belongs_to_polymorphic() {
+		$args = func_get_args();
+		$this->merge_assocs('belongs_to_polymorphic', $args);
+	}
+	
+	public function has_and_belongs_to_many() {
+		$args = func_get_args();
+		$this->merge_assocs('has_and_belongs_to_many', $args);
+	}
+	/**
+	* End association setters
+	*/
+	
+	private function merge_assocs($key, $value) {
+		if(!isset(static::$associations[$class_name])) {
+			static::$associations[$class_name] = array();
+		}
+		if(!isset(static::$associations[$class_name][$key])) {
+			static::$associations[$class_name][$key] = array();
+		}
+		static::$associations[$class_name][$key] = array_merge(static::$associations[$class_name][$key], $value);
+	}
+	
 	public function __get($var) {
+		
+		static::process_associations($this);
+		
 		if(isset($this->row[$var])) {
 			return stripslashes($this->row[$var]);
 		} elseif(is_null($this->row[$var]) && in_array($var, static::columns())){
@@ -1006,7 +1058,7 @@ class NimbleRecord {
 	public function associations() {}
 	
 	protected function association_has_many_exists($association_name) {
-		$associations = $this->associations();
+		$associations = static::$associations;
 		if (isset($associations['has_many'])){
 			return isset($associations['has_many'][$association_name]) || in_array($association_name, $associations['has_many']);
 		}else{
@@ -1015,7 +1067,7 @@ class NimbleRecord {
 	}
 	
 	protected function association_has_many_polymorphic_exists($association_name) {
-		$associations = $this->associations();
+		$associations = static::$associations;
 		if (isset($associations['has_many_polymorphic'])){
 			return isset($associations['has_many_polymorphic'][$association_name]) || in_array($association_name, $associations['has_many_polymorphic']);
 		}else{
@@ -1024,7 +1076,7 @@ class NimbleRecord {
 	} 
 
 	protected function association_belongs_to_exists($association_name) {
-		$associations = $this->associations();
+		$associations = static::$associations;
 		if(isset($associations['belongs_to'])){
 			return isset($associations['belongs_to'][$association_name]) || in_array($association_name, $associations['belongs_to']);
 		}else{
@@ -1033,7 +1085,7 @@ class NimbleRecord {
 	}
 
 	protected function association_foreign_key($association_name) {
-		$associations = $this->associations();
+		$associations = static::$associations;
 		return strtolower(static::class_name()) . '_id';
 	}
 
