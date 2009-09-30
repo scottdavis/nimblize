@@ -130,6 +130,9 @@ abstract class AbstractAdapter {
 			return false;
 		}
 		
+		public function load_column_sql($table) {
+			return 'SHOW COLUMNS FROM ' . $table;
+		}
 		
 	}
 	
