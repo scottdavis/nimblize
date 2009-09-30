@@ -89,10 +89,6 @@ class NimbleRecord {
 		return static::$primary_key_field;
 	}
 
-	protected static function associations() {
-		return static::$associations;
-	}
-
 	protected static function connection() {
 		return static::$connection;
 	}
