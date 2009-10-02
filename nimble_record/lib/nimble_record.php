@@ -8,12 +8,12 @@ class NimbleRecord {
 	public static $test_mode = false;
 	public static $adapter = NULL;
 	public static $max_rows_for_cache = 500;
+	public static $associations = array();
 	/** protected vars */
 	protected static $database;
 	protected static $connection;
 	protected static $table;
 	protected static $primary_key_field = 'id';
-	protected static $associations = array();
 	protected static $query_cache = array();
 	protected static $columns = array();
 	protected static $validations = array();
@@ -828,7 +828,7 @@ class NimbleRecord {
   public function __construct($args = array()) {
 	$this->row = array();
   $this->errors = array();
-
+	static::process_associations($this);
 	if(isset(static::$columns) && !empty(static::$columns)) {
 		static::$columns = static::columns();
 	}
@@ -891,12 +891,7 @@ class NimbleRecord {
 	*/
 	
 	private static function process_associations($class) {
-		$class_name = static::class_name();
-		if(isset(static::$associations[$class_name]) && !empty(static::$associations[$class_name])) {
-			return static::$associations[$class_name];
-		}else{
-			call_user_func_array(array($class, 'associations'), array());
-		}
+		call_user_func_array(array($class, 'associations'), array());
 	}
 	/**
 	* Start association setters
@@ -930,6 +925,7 @@ class NimbleRecord {
 	*/
 	
 	private function merge_assocs($key, $value) {
+		$class_name = static::class_name();
 		if(!isset(static::$associations[$class_name])) {
 			static::$associations[$class_name] = array();
 		}
@@ -937,21 +933,20 @@ class NimbleRecord {
 			static::$associations[$class_name][$key] = array();
 		}
 		static::$associations[$class_name][$key] = array_merge(static::$associations[$class_name][$key], $value);
+		static::$associations[$class_name][$key] = array_unique(static::$associations[$class_name][$key]);
 	}
 	
 	public function __get($var) {
-		
-		static::process_associations($this);
-		
 		if(isset($this->row[$var])) {
+			if(is_null($this->row[$var]) && in_array($var, static::columns())){
+				return null;
+			}
 			return stripslashes($this->row[$var]);
-		} elseif(is_null($this->row[$var]) && in_array($var, static::columns())){
-			return null;
-		}elseif($this->association_has_many_exists($var)) {
+		}elseif($this->association_exists('has_many', $var)) {
 			return $this->association_has_many_find($var);
-		}elseif($this->association_has_many_polymorphic_exists($var)) {
+		}elseif($this->association_exists('has_many_polymorphic', $var)) {
 			return $this->association_has_many_polymorphic_find($var);
-		} elseif($this->association_belongs_to_exists($var)) {
+		} elseif($this->association_exists('belongs_to', $var)) {
 			return $this->association_belongs_to_find($var);
 		} else {
 			throw new NimbleRecordException("Property not found in record.");
@@ -974,7 +969,7 @@ class NimbleRecord {
 			$this->row[$method] = $arguments;
 		}
 		/**This is a special case because we do not want uniqueness_of being called on an update
-		 * sice it already exsists... because we are updating it!
+		 * since it already exsists... because we are updating it!
 		 * @todo handel this from the NimbleValidation Class
 		 */
 		if($this->update_mode && preg_match('/uniqueness_of/', $method)) {
@@ -1057,28 +1052,11 @@ class NimbleRecord {
 	
 	public function associations() {}
 	
-	protected function association_has_many_exists($association_name) {
-		$associations = static::$associations;
-		if (isset($associations['has_many'])){
-			return isset($associations['has_many'][$association_name]) || in_array($association_name, $associations['has_many']);
-		}else{
-			return false;
-		}
-	}
-	
-	protected function association_has_many_polymorphic_exists($association_name) {
-		$associations = static::$associations;
-		if (isset($associations['has_many_polymorphic'])){
-			return isset($associations['has_many_polymorphic'][$association_name]) || in_array($association_name, $associations['has_many_polymorphic']);
-		}else{
-			return false;
-		}
-	} 
-
-	protected function association_belongs_to_exists($association_name) {
-		$associations = static::$associations;
-		if(isset($associations['belongs_to'])){
-			return isset($associations['belongs_to'][$association_name]) || in_array($association_name, $associations['belongs_to']);
+	protected function association_exists($key, $association_name) {
+		$associations = static::$associations[static::class_name()];
+		if (isset($associations[$key])) {
+			$associations = array_flip($associations[$key]);
+			return isset($associations[$association_name]);
 		}else{
 			return false;
 		}
