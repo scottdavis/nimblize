@@ -27,6 +27,9 @@
 			unset($this);
 		}
 
+		public function first() {
+			return $this->array[0];
+		}
 
 		public function to_xml($options = array()) {
 			$klass = $this->array[0]->class_name();
@@ -37,7 +40,7 @@
 			$xw->startElement(strtolower($plural)); 
 				foreach($this->array as $value) {
 					$xw->startElement(strtolower($klass));
-				$xw->writeRaw($value->to_xml(false));
+					$xw->writeRaw($value->to_xml(false));
 					$xw->endElement();
 				}
 			$xw->endElement(); 
