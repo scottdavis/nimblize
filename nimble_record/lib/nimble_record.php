@@ -333,44 +333,15 @@ class NimbleRecord {
 		return array($sql, $all);
 	}
 
-
-	
-	
-  	/**
+  /**
 	* Method find_all
 	* use self::find_all(array('condtions' => 'name = bob')) or self::find_all()
 	* @param options Array
 	*/
-	public static function find_all($options = array()) {
+	public static function find_all(array $options = array()) {
 		return self::find('all', $options);
 	}
 	
-	/**
-	* Method find_by
-	* use self::find_by(array('condtions' => 'name = bob')) or self::find_all()
-	* @param options Array
-	*/
-	public static function find_by($options = array()) {
-		$sql = 'SELECT * FROM ' . self::table_name() .  
-		(isset($options['conditions'])  ? ' WHERE ' . $options['conditions']  : '') . 
-		(isset($options['order'])       ? ' ORDER BY ' . $options['order']      : '') .
-		(isset($options['limit'])       ? ' LIMIT ' . $options['limit']       : '') .  ';';
-		return self::execute_query($sql, false);
-	}
-	
-	/**
-	* Method _find_by
-	* find_by without cache
-	* use self::find_by(array('condtions' => 'name = bob')) or self::find_all()
-	* @param options Array
-	*/
-	public static function _find_by($options = array()) {
-		$sql = 'SELECT * FROM ' . self::table_name() .  
-		(isset($options['conditions'])  ? ' WHERE ' . $options['conditions']  : '') . 
-		(isset($options['order'])       ? ' ORDER BY ' . $options['order']      : '') .
-		(isset($options['limit'])       ? ' LIMIT ' . $options['limit']       : '') .  ';';
-		return self::execute_query($sql, false, false);
-	}
 	
 	/**
 	* END FIND METHODS
