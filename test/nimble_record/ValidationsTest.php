@@ -1,7 +1,15 @@
 <?php
-	require_once(dirname(__FILE__) . '/config.php');
+	require_once(dirname(__FILE__) . '/test_config.php');
 
 	class ValidationsTest extends PHPUnit_Framework_TestCase {
+		
+		public function setUp() {
+			NimbleRecord::start_transaction();
+		}
+		
+		public function tearDown() {
+			NimbleRecord::end_transaction();
+		}
 		
 		public function acceptance_false_provider() {
 			$b = array(
@@ -253,7 +261,7 @@
 			$this->assertFalse($valid[0]);
 		}
 		
-		public function test_uniqueness_of() {
+		public function test_uniqueness_of() {			
 			$valid = NimbleValidation::uniqueness_of(array('column_name' => 'name', 'value' => 'dfsdgdsgdsg', 'class' => 'User'));
 			$this->assertTrue($valid[0]);
 		}

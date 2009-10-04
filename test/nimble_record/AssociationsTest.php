@@ -1,5 +1,5 @@
 <?php
-	require_once(dirname(__FILE__) . '/config.php');
+	require_once(dirname(__FILE__) . '/test_config.php');
 
 	class AssociationsTest extends PHPUnit_Framework_TestCase {
 	
@@ -69,8 +69,42 @@
 			$u->photos;
 			$this->assertTrue(isset(User::$associations['User']['has_many']));
 			$this->assertTrue(in_array('photos', User::$associations['User']['has_many']));
+		}
+		
+		
+		public function testForeignKeyfunction() {
+			$key = User::association_foreign_key('User');
+			$this->assertEquals('user_id', $key);
+		}
+		
+		public function testForeignKeyCustomSuffix() {
+			$old = NimbleRecord::$foreign_key_suffix;
+			NimbleRecord::$foreign_key_suffix = 'foo';
+			$key = User::association_foreign_key('User');
+			$this->assertEquals('user_foo', $key);
+			NimbleRecord::$foreign_key_suffix = $old;
+		}
+		
+		public function testAssociationModel() {
+			$name = User::association_model('photos');
+			$this->assertEquals('Photo', $name);
+		}
+		
+		public function testAssociationLoadsData() {
+			refresh_user_data();
 			
-			
+			$users = User::find_all(array('include' => 'photos'));
+			foreach($users as $user) {
+				foreach($user->photos as $photo) {
+					$this->assertEquals($user->id, $photo->user_id);
+				}
+			}
+		}
+		
+		
+		public function testTest() {
+			$u = User::find('first', array('conditions' => 'my_int = 3'));
+			$this->assertEquals($u->my_int, '3');
 		}
 		
 	}

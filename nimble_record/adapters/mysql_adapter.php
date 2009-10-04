@@ -44,7 +44,7 @@ require_once(dirname(__FILE__) . '/abstract_adapter.php');
 		public function query($sql) {
 			$result = mysql_query($sql, $this->connection);
 			if($result === false) {
-				throw new Exception('Query Failed: ' . mysql_error($this->connection));
+				throw new Exception('Query Failed: ' . mysql_error($this->connection) . ': ' . $sql);
 			}
 			return new MysqlQueryResult($result);
 		}

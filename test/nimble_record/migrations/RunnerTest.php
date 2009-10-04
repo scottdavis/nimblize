@@ -8,6 +8,7 @@ require_once(dirname(__FILE__) . '/../config.php');
 class RunnerTest extends PHPUnit_Framework_TestCase {
 	
 	public function setUp() {
+		NimbleRecord::start_transaction();
 		MigrationRunner::$dir = dirname(__FILE__) . '/test';
 		MigrationRunner::create_migration_table();
 	}
@@ -72,6 +73,7 @@ class RunnerTest extends PHPUnit_Framework_TestCase {
 	
 	public function tearDown() {
 		MigrationRunner::drop_migration_table();
+		NimbleRecord::end_transaction();
 	}
 	
 }

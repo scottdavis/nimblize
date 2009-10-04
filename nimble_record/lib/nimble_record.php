@@ -9,11 +9,14 @@ class NimbleRecord {
 	public static $adapter = NULL;
 	public static $max_rows_for_cache = 500;
 	public static $associations = array();
+	public static $foreign_key_suffix = 'id';
+	public static $primary_key_field = 'id';
+	public static $table_name_prefix = '';
+	
 	/** protected vars */
 	protected static $database;
 	protected static $connection;
 	protected static $table;
-	protected static $primary_key_field = 'id';
 	protected static $query_cache = array();
 	protected static $columns = array();
 	protected static $validations = array();
@@ -26,13 +29,14 @@ class NimbleRecord {
 	var $update_mode = false;
 	var $saved;
 	var $errors;
+	var $preloaded_associations = array();
 	
 	/**
 	* Required
 	* connects to the data base and stores the connection
 	* @param $db_settings_name Array
 	*/
-	public static function establish_connection($db_settings_name) {
+	public static function establish_connection(array $db_settings_name) {
 		$file = strtolower($db_settings_name['adapter']) . '_adapter';
 		$filename = $file . '.php';
 		/**
@@ -140,7 +144,7 @@ class NimbleRecord {
 	* @see self::check_args_for_math_functions($options)
 	* @param $options array('column' => 'name', 'conditions' => array('id' => 1))  
 	*/
-	protected static function check_args_for_math_functions($options){
+	protected static function check_args_for_math_functions(array $options){
 		//verify options contains a column value
 		if(!is_array($options) || !isset($options['column'])){
 			throw new NimbleRecordException('InvalidArguments - please include a column ex. array(\'column\' => \'id\')');
@@ -151,7 +155,7 @@ class NimbleRecord {
 	* use Class::count(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function count($options = array('column' => '*', 'conditions' => NULL)) {
+	public static function count(array $options = array('column' => '*', 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
 		$sql = 'SELECT count(' . $options['column'] . ') AS count_all FROM ' . self::table_name();
 		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
@@ -163,7 +167,7 @@ class NimbleRecord {
 	* use Class::sum(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function sum($options = array('column' => NULL, 'conditions' => NULL)) {
+	public static function sum(array $options = array('column' => NULL, 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
 		$sql = 'SELECT sum('. self::table_name() . '.' . $options['column'] . ') as sum_all FROM ' . self::table_name();
 		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
@@ -174,7 +178,7 @@ class NimbleRecord {
 	* @uses Class::max(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function max($options = array('column' => NULL, 'conditions' => NULL)) {
+	public static function max(array $options = array('column' => NULL, 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
 		$sql = 'SELECT max('. self::table_name() . '.' . $options['column'] . ') as max_all FROM ' . self::table_name();
 		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
@@ -185,7 +189,7 @@ class NimbleRecord {
 	* @uses Class::min(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function min($options = array('column' => NULL, 'conditions' => NULL)) {
+	public static function min(array $options = array('column' => NULL, 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
 		$sql = 'SELECT min('. self::table_name() . '.' . $options['column'] . ') as min_all FROM ' . self::table_name();
 		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
@@ -270,30 +274,72 @@ class NimbleRecord {
     return self::execute($sql);
   }
 	
+	private static function build_conditions_from_array($array) {
+		$out = array();
+		foreach($array as $key => $value) {
+			$out[] =  "$key = '$value'";
+		}
+		return $out;
+	}
+	
+	
 	private static function build_find_sql($array_or_id) {
+		$temp = array_pop($array_or_id);
+		(is_array($temp)) ? $options = $temp : $array_or_id[] = $temp;
+		unset($temp);
 		$all = false;
+		$final_options = array();
+		$final_options['conditions'] = array();
 		$clean = self::sanatize_input_array($array_or_id);
-		if($array_or_id[0] == 'first') {
-			$limit = '0,1';
-		}
-		elseif(count($clean) == 1){
-			$where = "id = " . $clean[0];
-		}
-		elseif(is_array($clean)) {
+		$num_args = count($array_or_id);
+		if($num_args > 1) {
 			$all = true;
-			$where = "id IN (" . join(',', $clean) . ")";
+			$final_options['conditions'][] = "id IN (" . join(',', $clean) . ")";
+		}elseif($num_args == 1 && $array_or_id[0] != 'first'){
+			$final_options['conditions'][] = "id = " . $clean[0];
+		}
+		if($num_args == 1) {
+			switch($array_or_id[0]) {
+				case 'first':
+					$final_options['limit'] = '0,1';
+				break;
+				case 'all':
+					$all = true;
+				break;
+			}
+		}
+	
+		if(isset($options)) {
+			if(isset($options['conditions'])) {
+				if(is_array($options['conditions'])) {
+					$final_options['conditions'] = array_merge($final_options['conditions'], static::build_conditions_from_array($options['conditions']));
+				}else{
+					$final_options['conditions'][] = $options['conditions'];
+				}
+			}
+			if(isset($options['limit'])) {
+				$final_options['limit'] = $options['limit'];
+			}
+			if(isset($options['order'])) {
+				$final_options['order'] = $options['order'];
+			}
 		}
 		$sql = "SELECT * FROM " . self::table_name();
-		if(isset($where)) {
-			$sql .= ' WHERE (' . $where . ')';
+		$conditions = join(' AND ', $final_options['conditions']);
+		if(!empty($conditions)) {
+			$sql .= ' WHERE(' . $conditions . ')';
 		}
-		if(isset($limit)){
-			$sql .= ' LIMIT ' . $limit;
+		if(!empty($final_options['order']))	{
+			$sql .= ' ORDER BY ' . $final_options['order'];
 		}
-		$sql .=';';
+		if(!empty($final_options['limit'])) {
+			$sql .= ' LIMIT ' . $final_options['limit'];
+		}
 		return array($sql, $all);
 	}
 
+
+	
 	
   	/**
 	* Method find_all
@@ -424,7 +470,7 @@ class NimbleRecord {
 	public function before_create() {}
 	public function after_create()  {}
 	
-	public static function create($attributes = array()) {
+	public static function create(array $attributes = array()) {
 		$c = static::class_name();
 		$klass = new $c;
 		$klass->row = array_merge($klass->row, $attributes);
@@ -464,7 +510,7 @@ class NimbleRecord {
 		
 	}
 	
-	public static function _create($attributes = array()) {
+	public static function _create(array $attributes = array()) {
 		$create = self::create($attributes);
 		if(count($create->errors)) {
 			throw new NimbleRecordException(join("\n", $create->errors[0]));
@@ -482,7 +528,7 @@ class NimbleRecord {
 	}
 	
 	
-	private static function update_timestamps($timestamp_cols, $attributes) {
+	private static function update_timestamps(array $timestamp_cols, array $attributes) {
 		$columns = self::columns();
 		$time = DateHelper::to_string('db', time());
 		foreach($timestamp_cols as $ts) {
@@ -668,10 +714,11 @@ class NimbleRecord {
 	* @param $override Boolean - will reload the columns
 	*/
 	private static function columns($override = false) {
-		if($override || empty(static::$columns)) {
-			static::$columns = static::column_array();
+		$class = self::class_name();
+		if($override || empty(self::$columns[$class])) {
+			self::$columns[$class] = self::column_array();
 		}
-		return static::$columns;
+		return self::$columns[$class];
 	}
 	
 	
@@ -1061,25 +1108,26 @@ class NimbleRecord {
 			return false;
 		}
 	}
-
-	protected function association_foreign_key($association_name) {
-		$associations = static::$associations;
-		return strtolower(static::class_name()) . '_id';
+	public static function association_foreign_key($association_name) {
+		return Inflector::foreignKey(static::class_name(), static::$foreign_key_suffix);
 	}
 
-	protected function association_table_name($association_name) {
-		$name = $this->association_model($association_name);
-		return strtolower(call_user_func("$name::table_name"));
+	public function association_table_name($association_name) {
+		$name = static::association_model($association_name);
+		return static::$table_name_prefix . strtolower(call_user_func("$name::table_name"));
 	}
 
-	protected function association_model($association_name) {
+	public static function association_model($association_name) {
 		return Inflector::classify($association_name);
 	}
 
 	protected function association_has_many_find($association_name) {
+		if(isset($preloaded_associations[$association_name])) {
+			return $preloaded_associations[$association_name];
+		}
 		$primary_key_field = static::primary_key_field();
 		$primary_key_value = static::$adapter->escape($this->row[$primary_key_field]);
-		$conditions = $this->association_table_name($association_name) . '.' . $this->association_foreign_key($association_name) . ' = ' . $primary_key_value;
+		$conditions = static::association_table_name($association_name) . '.' . static::association_foreign_key($association_name) . ' = ' . $primary_key_value;
 		$association_model = $this->association_model($association_name);
 		$find_array = call_user_func("$association_model::find_all", 
 		  array('conditions' => $conditions)

@@ -415,9 +415,9 @@ class Inflector {
 * @param string $class_name
 * @return string
 */
-  public static function foreignKey($class_name, $separate_class_name_and_id_with_underscore = true)
+  public static function foreignKey($class_name, $suffix = 'id', $separate_class_name_and_id_with_underscore = true)
   {
-      return Inflector::underscore(Inflector::demodulize($class_name)).($separate_class_name_and_id_with_underscore ? "_id" : "id");
+      return Inflector::underscore(Inflector::demodulize($class_name)).($separate_class_name_and_id_with_underscore ? "_" . $suffix : $suffix);
   }
  
   public static function toFullName($name, $correct)
