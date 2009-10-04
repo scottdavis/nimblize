@@ -246,21 +246,16 @@ class NimbleRecord {
 	* @param string|integer|array $args
 	*/
 	public static function find() {
-		$array_or_id = func_get_args();
-		$return = self::build_find_sql($array_or_id);
-		$sql = $return[0];
-		$all = $return[1];
-		return self::execute_query($sql, $all);
+		$args = func_get_args();
+		$return = self::build_find_sql($args);
+		return self::execute_query($return[0], $return[1]);
 	}
 		
 	
 	public static function _find() {
-		$array_or_id = func_get_args();
-		$return = self::build_find_sql($array_or_id);
-		$sql = $return[0];
-		$all = $return[1];
-		return self::execute_query($sql, $all, false);
-	
+		$args = func_get_args();
+		$return = self::build_find_sql($args);
+		return self::execute_query($return[0], $return[1], false);
 	}
   
   public static function delete($id) {
@@ -295,7 +290,7 @@ class NimbleRecord {
 		if($num_args > 1) {
 			$all = true;
 			$final_options['conditions'][] = "id IN (" . join(',', $clean) . ")";
-		}elseif($num_args == 1 && $array_or_id[0] != 'first'){
+		}elseif($num_args == 1 && $array_or_id[0] != 'first' && $array_or_id[0] != 'all'){
 			$final_options['conditions'][] = "id = " . $clean[0];
 		}
 		if($num_args == 1) {
@@ -347,12 +342,7 @@ class NimbleRecord {
 	* @param options Array
 	*/
 	public static function find_all($options = array()) {
-		$sql = 'SELECT * FROM ' . self::table_name() .  
-		(isset($options['conditions'])  ? ' WHERE ' . $options['conditions']  : '') . 
-		(isset($options['order'])       ? ' ORDER BY ' . $options['order']      : '') . 
-		(isset($options['limit'])       ? ' LIMIT ' . $options['limit']       : '') . ';';
-		
-		return self::execute_query($sql, true);
+		return self::find('all', $options);
 	}
 	
 	/**
