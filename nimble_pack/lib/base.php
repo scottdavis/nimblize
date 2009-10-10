@@ -5,14 +5,7 @@ require_once(dirname(__FILE__) . '/helper.php');
 require_once(dirname(__FILE__) . '/route.php');
 require_once(dirname(__FILE__) . '/route/url_builder.php');
 require_once(dirname(__FILE__) . '/support/base.php');
-
-/**
-	* Load these only if we are in php version 5.3 
-	* Magic happends here
-	*/
-if(version_compare(PHP_VERSION, '5.3', '>=')) {
-	require_once(dirname(__FILE__) . '/mailer.php');
-}
+require_once(dirname(__FILE__) . '/mailer.php');
 
 /**
  * Nimble is the base class in the application.
@@ -102,8 +95,8 @@ class Nimble
             /** Only declared variables in URL regex */
             $matches = $this->parse_urls_args($matches);
             $this->klass = new $conf[1]();
-			/** set the layout tempalte to the default */
-			$this->klass->set_layout_template();
+						/** set the layout tempalte to the default */
+						$this->klass->set_layout_template();
             $this->klass->format = ($conf[4]) ? array_pop($matches) : 'html';
 
             ob_start();
@@ -114,40 +107,39 @@ class Nimble
             // call methods on controller class
             call_user_func_array(array($this->klass , $conf[2]), $matches);
 				
-        if(!$this->klass->has_rendered && isset($this->config['view_path'])) {
-          /**
-          * Add inflector for this type of code from now on
-          */
-          $dir = str_replace('Controller', '', $conf[1]);
-          $dir = strtolower(Inflector::underscore($dir));
-          $view = FileUtils::join($dir, $conf[2] . '.php');
-          $this->klass->render($view);
-        }
+       		 if(!$this->klass->has_rendered && isset($this->config['view_path'])) {
+		          /**
+		          * Add inflector for this type of code from now on
+		          */
+		          $dir = str_replace('Controller', '', $conf[1]);
+		          $dir = strtolower(Inflector::underscore($dir));
+		          $view = FileUtils::join($dir, $conf[2] . '.php');
+		          $this->klass->render($view);
+		        }
 				
-        // call after filters
-        call_user_func(array($this->klass, "run_after_filters"), $conf[2]);
+        		// call after filters
+        		call_user_func(array($this->klass, "run_after_filters"), $conf[2]);
 
-        $out = ob_get_clean();
-        	if (count($this->klass->headers)>0){
-	          foreach($this->klass->headers as $header){
-	             if(!$this->test_mode) {
-								header($header[0], true, empty($header[1]) ? null : $header[1]);
+        		$out = ob_get_clean();
+		        	if (count($this->klass->headers)>0){
+			          foreach($this->klass->headers as $header){
+			             if(!$this->test_mode) {
+										header($header[0], true, empty($header[1]) ? null : $header[1]);
+									}
+			          }
+			        } 
+        			print $out;
+							if(!$test){
+								exit();
 							}
-	          }
-	        } 
-        print $out;
-		if(!$test){
-			exit();
-		}
-      }
-    }
-
-        if(empty($_SERVER['REQUEST_METHOD']) && !$test){
-          throw new NimbleException('No Request Paramater');
-        }
-		if(!$test){
-			call_user_func(array('r404' , $_SERVER['REQUEST_METHOD'])); 
-		}		
+					}
+				}
+       	if(empty($_SERVER['REQUEST_METHOD']) && !$test){
+         	throw new NimbleException('No Request Paramater');
+       	}
+				if(!$test){
+					call_user_func(array('r404' , $_SERVER['REQUEST_METHOD'])); 
+				}		
     }
 
     /**

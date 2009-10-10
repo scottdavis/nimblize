@@ -411,7 +411,7 @@ class NimbleRecord {
   */
   public static function exists($col, $value) {
     $sql = 'SELECT 1 from ' . static::table_name() . ' WHERE (`' . static::sanatize_input_array($col) . '`= ' . 
-					 "'" . static::sanatize_input_array($value) . "') LIMIT 0,1";
+		"'" . static::sanatize_input_array($value) . "') LIMIT 0,1";
     $result = static::execute($sql);
     $return = $result->fetch_assoc();
     if(isset($return['1'])) {

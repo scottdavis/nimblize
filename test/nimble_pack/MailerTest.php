@@ -1,7 +1,6 @@
 <?php
 require_once('PHPUnit/Framework.php');
-require_once('../nimble.php');
-if(version_compare(PHP_VERSION, '5.3', '>=')) {
+	require_once(dirname(__FILE__) . '/../../nimblize.php');
 	require_once(dirname(__FILE__) . '/model/mailer_test_model.php');
 	class MailerTest extends PHPUnit_Framework_TestCase {	
 		
@@ -42,6 +41,6 @@ if(version_compare(PHP_VERSION, '5.3', '>=')) {
 			
 	}
 	
-}
+
 
 ?>
