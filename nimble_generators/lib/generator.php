@@ -276,6 +276,13 @@
 			touch(FileUtils::join(NIMBLE_ROOT, 'app', 'view', strtolower(Inflector::underscore($class)), strtolower($method) . '.php'));
 			touch(FileUtils::join(NIMBLE_ROOT, 'app', 'view', strtolower(Inflector::underscore($class)), strtolower($method) . '.txt'));
 		}
+		
+		
+		
+		public function migration($name, $table='') {
+			$class_name = INflector::classify($name);
+			$out = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'migration.tmpl'));
+		}
 
 	}
 

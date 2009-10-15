@@ -1,5 +1,6 @@
 <?php
 	session_start();
+	
 	/**
 	* This file boots and loads the framework
 	* In order for the enviroments to work correctly add the line below to your server apache config
@@ -42,6 +43,7 @@
 			closedir($dh);
 		}
 	}
+	
 	/** load nimble */
 	require_once('nimble/nimble.php');
 	/** Set the path to the view templates */
