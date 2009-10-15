@@ -1,0 +1,35 @@
+<?php
+	/**
+		* @package model
+		*/
+		
+		class {class_name} extends NimbleRecord {
+			
+			public function associations() {
+				/**
+					* Association loading goes here ex. 
+					* $this->has_many('foo')
+					* $this->belongs_to('bar')
+					*/
+			}
+			
+			public function validations() {
+				/**
+					* Column validations go here ex.
+					* $this->validates_presance_of('foo')
+					*/
+			}
+			
+			/**
+				* NimbleRecord Callbacks 
+				* feel free to remove if you don't need them
+				*/
+			protected function before_update() {}
+			protected function after_update() {}
+			protected function before_create() {}
+			protected function after_create() {}
+			
+		
+		}
+
+?>

@@ -31,7 +31,6 @@
 		}
 		
 		public function testJavascriptTagHelperUrl() {
-	
 			$regex = '!\<script\stype\=\"text/javascript\"\ssrc=\"http\://java[0-9]\.js\"\>\</script\>!';
 			$tags = AssetTag::javascript_include_tag('http://java1.js', 'http://java2.js', 'http://java3.js');
 			$array = explode("\n", trim($tags));
