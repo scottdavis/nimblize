@@ -23,9 +23,8 @@
 		* @param string $env - Enviroment name
 		*/
 		public static function database_config($path, $env) {
-			$db = fopen($path, "w");
-			fwrite($db, preg_replace('/\[env\]/', $env, file_get_contents(TEMPLATE_PATH . DIRECTORY_SEPARATOR . 'database.json')));
-			fclose($db);
+			$string = str_replace('[env]', $env, file_get_contents(FileUtils::join(TEMPLATE_PATH, 'database.json')));
+			static::write_file($path, $string);
 		}
 	
 		/**
@@ -85,11 +84,10 @@
 			$path = FileUtils::join(NIMBLE_ROOT, 'test', 'unit');
 			$test_path = 'nimblize/nimble_test/lib/unit_test.php';
 			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'unit_test.tmpl'));
-			
+			$string = str_replace(array('{class_name}', '{test_path}'), array($class_name, $test_path), $string);
 			FileUtils::mkdir_p($path);
-			$file = fopen(FileUtils::join($path, $class_name . 'Test.php'), "w");
-			fwrite($file, $string);
-			fclose($path);
+			$file_path = FileUtils::join($path, $class_name . 'Test.php');
+			static::write_file($file_path, $string);
 		}
 		
 		/**
