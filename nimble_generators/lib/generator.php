@@ -5,12 +5,11 @@
 	*/
 
 
-	require_once(dirname(__FILE__) . '/../../lib/support/file_utils.php');
-	require_once(dirname(__FILE__) . '/../../lib/support/file_utils.php');
+	require_once(dirname(__FILE__) . '/../../nimble_support/lib/file_utils.php');
 	$folder = dirname(__FILE__);
 
 	define('TEMPLATE_PATH', FileUtils::join($folder, '..', 'templates'));
-	define('SCRIPT_PATH', FileUtils::join($folder, '..', '..', 'bin'));
+	define('SCRIPT_PATH', FileUtils::join($folder, '..', '..', 'nimble_scripts'));
 
 	/**
 	* @package Generators
@@ -116,7 +115,7 @@
 		public static function model($name) {
 			$class_name = Inflector::classify($name);
 			$path = FileUtils::join(NIMBLE_ROOT, 'app', 'model', $class_name . '.php');
-			$string = file_get_contents(FileUtils::join(TEMPLATE_ROOT, 'model.tmpl'));	
+			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'model.tmpl'));	
 			$string = str_replace('{class_name}', $class_name, $string);
 			static::write_file($path, $string);
 		}
@@ -133,8 +132,8 @@
 			FileUtils::mkdir_p($view_path);
 			$methods = static::create_view_functions($view_path);
 			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'controller.tmpl'));
-			$string = str_replace(array('{class_name}', '{template_path}', '{methods}'), array($class_name, $view_path, $methods));
-			static::write_file($path, $string);
+			$string = str_replace(array('{class_name}', '{template_path}', '{methods}'), array($class_name, $view_path, $methods), $string);
+			static::write_file($path_name, $string);
 		}
 
 		/**
@@ -255,7 +254,7 @@
 				$up .= '			$this->go()';
 				$down .= '			$this->drop_table("' . $table . '")';				
 			}
-			$out = str_replace(array('{name}', '{up}', '{down}'), array($class_name, $up, $down))
+			$out = str_replace(array('{name}', '{up}', '{down}'), array($class_name, $up, $down));
 			static::write_file($path, $out);
 			
 			
