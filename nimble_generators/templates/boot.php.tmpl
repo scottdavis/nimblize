@@ -68,7 +68,8 @@
 	// load any custom enviroment config options
 	// Nimble::Log('loading ' . NIMBLE_ENV . ' enviroment');
 	require_once(FileUtils::join(dirname(__FILE__), NIMBLE_ENV, 'config.php'));
-
+	require_once(FileUtils::join(NIMBLE_ROOT, 'app', 'controller', 'application_controller.php'));
+	
 	/** load controlers and models */
 	foreach(array('model', 'controller') as $dir) {
 		__load_files(FileUtils::join(dirname(__FILE__), '..', 'app', $dir));

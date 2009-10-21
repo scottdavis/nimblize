@@ -18,7 +18,7 @@
 		
 		
 		public static function generate_blank_php_file($path) {
-			copy(FileUtils::join(TEMPLATE_PATH, 'empty.php'), $path);
+			copy(FileUtils::join(TEMPLATE_PATH, 'empty_php.tmpl'), $path);
 		}
 		
 		/**
@@ -59,6 +59,7 @@
 						continue;
 					}
 					copy(FileUtils::join(SCRIPT_PATH, $file), FileUtils::join($path, $file));
+					chmod(FileUtils::join($path, $file), 0775);
 				}
 			}
 		}
@@ -86,7 +87,7 @@
 		public static function unit_test($name) {
 			$class_name = Inflector::classify($name);
 			$path = FileUtils::join(NIMBLE_ROOT, 'test', 'unit');
-			$test_path = 'nimblize/nimble_test/lib/unit_test.php';
+			$test_path = 'nimblize/nimble_test/lib/phpunit_testcase.php';
 			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'unit_test.tmpl'));
 			$string = str_replace(array('{class_name}', '{test_path}'), array($class_name, $test_path), $string);
 			FileUtils::mkdir_p($path);
@@ -101,7 +102,7 @@
 				
 		public static function functional_test($name) {
 			$class_name = Inflector::classify($name);
-			$test_path = 'nimblize/nimble_test/lib/functional_test.php';
+			$test_path = 'nimblize/nimble_test/lib/phpunit_testcase.php';
 			$path = FileUtils::join(NIMBLE_ROOT, 'test', 'functional');
 			$file_path = FileUtils::join($path, $class_name . 'ControllerTest.php');
 			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'functional_test.tmpl'));
@@ -130,14 +131,20 @@
 			* @todo need to add name space support
 			* @param string $name - suffix you want the name the controller
 			*/
-		public static function controller($name) {
+		public static function controller($name, $views=true) {
 			$class_name = Inflector::classify($name);
-			$path_name = FileUtils::join(NIMBLE_ROOT, 'app', 'controller', $class_name . 'Controller.php');
+			$path_name = FileUtils::join(NIMBLE_ROOT, 'app', 'controller', Inflector::underscore($class_name) . '_controller.php');
 			$view_path = FileUtils::join(NIMBLE_ROOT, 'app', 'view', strtolower(Inflector::underscore($class_name)));
-			FileUtils::mkdir_p($view_path);
-			$methods = static::create_view_functions($view_path);
+			if($views) {
+				FileUtils::mkdir_p($view_path);
+				$methods = static::create_view_functions($view_path);
+				$type = "ApplicationController";
+			}else{
+				$methods = '';
+				$type = "Controller";
+			}
 			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'controller.tmpl'));
-			$string = str_replace(array('{class_name}', '{template_path}', '{methods}'), array($class_name, $view_path, $methods), $string);
+			$string = str_replace(array('{class_name}', '{template_path}', '{methods}', '{type}'), array($class_name, $view_path, $methods, $type), $string);
 			static::write_file($path_name, $string);
 		}
 

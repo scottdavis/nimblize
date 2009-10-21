@@ -8,12 +8,12 @@
 
 	require_once('nimblize/nimblize.php');
 	require_once('nimblize/nimble_generators/lib/generator.php');
-	
 	if(count($argv) > 2) {
 		die("Please supply a Project name");
 	}
 	$app = $argv[1];
 	/** init app folder */
+	define("NIMBLE_ROOT", $app);
 	mkdir($app);
 	/** make app dir */
 	mkdir(FileUtils::join($app,'app'));
@@ -21,9 +21,10 @@
 	foreach(array('controller', 'model', 'view') as $dir) {
 		mkdir(FileUtils::join($app,'app', $dir));
 	}
-  			Generator::htaccess(FileUtils::join($app, '.htaccess'));
+  Generator::htaccess(FileUtils::join($app, '.htaccess'));
 	FileUtils::mkdir_p(FileUtils::join($app, 'app', 'view', 'layout'));
 	touch(FileUtils::join($app, 'app', 'view', 'layout', 'application.php'));
+	Generator::controller('Application', false);
 	/** init config files */
 	mkdir(FileUtils::join($app, 'config'));
 	Generator::generate_blank_php_file(FileUtils::join($app, 'config', 'config.php'));

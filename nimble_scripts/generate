@@ -30,6 +30,7 @@
 				$parent = '';
 			}
 			Generator::model($argv[2], $parent);
+			Generator::migration($argv[2], Inflector::tableize($argv[2]));
 		break;
 		
 		
@@ -66,8 +67,7 @@
 		case 'migration':
 			$args = $argv;
 			$name = $argv[2];
-			$table = (!isset($argv[3])) ? Inflector::tableize($argv[2]) : $argv[3];
-			Generator::migration($name, $table);
+			Generator::migration($name);
 			exit();
 		break;
 	
