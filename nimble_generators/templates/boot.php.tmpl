@@ -45,7 +45,7 @@
 	}
 	
 	/** load nimble */
-	require_once('nimble/nimble.php');
+	require_once('nimblize/nimblize.php');
 	/** Set the path to the view templates */
 	Nimble::set_config('view_path', FileUtils::join(dirname(__FILE__), '..', 'app', 'view'));
 	/** set the default plugin path */
@@ -74,10 +74,15 @@
 		__load_files(FileUtils::join(dirname(__FILE__), '..', 'app', $dir));
 	}
 	
+	
+	//load database connection
+	$database_info = json_decode(file_get_contents(FileUtils::join(NIMBLE_ROOT, 'config', NIMBLE_ENV, 'database.json')), true);
+	$database_info = $database_info[NIMBLE_ENV];
+	NimbleRecord::establish_connection($database_info);
+	
 	/** boot the framework */
-	if (defined("NIMBLE_RUN")) {
-	  if (NIMBLE_RUN) { Run(); }
-			Run(false);
+	if (defined("NIMBLE_TEST") && NIMBLE_TEST) { 
+		Run(true); 
 	} else {
   	Run();
   }

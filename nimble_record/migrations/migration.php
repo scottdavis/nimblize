@@ -6,13 +6,13 @@
 	
 		static $show_sql = true;
 	
-		public function create_database($database_name, $charset = 'utf8') {
-			return $this->execute("CREATE DATABASE `" . $database_name . "` DEFAULT CHARACTER SET `" . $charset . "`");
+		public static function create_database($database_name, $charset = 'utf8') {
+			return static::execute("CREATE DATABASE `" . $database_name . "` DEFAULT CHARACTER SET `" . $charset . "`");
 		}
 		
 		
-		public function drop_database($database_name) {
-			return $this->execute("DROP DATABASE IF EXISTS `" . $database_name . "`");
+		public static function drop_database($database_name) {
+			return static::execute("DROP DATABASE IF EXISTS `" . $database_name . "`");
 		}
 		
 		
@@ -25,7 +25,7 @@
 		}
 		
 		public function drop_table($table_name) {
-			return $this->execute('DROP TABLE IF EXISTS ' . self::quote_table_name($table_name));
+			return static::execute('DROP TABLE IF EXISTS ' . self::quote_table_name($table_name));
 		}
 		
 		public function remove_column($table_name, $column) {
@@ -36,7 +36,7 @@
 			$column_data = NimbleRecord::select_one("SHOW COLUMNS FROM " . self::quote_table_name($table_name) . " LIKE '" . $column_name . "'", false);
 			$current_type = $column_data['Type'];
 			$rename_column_sql = "ALTER TABLE " . self::quote_table_name($table_name) . " CHANGE " . self::quote_column_name($column_name) ." " . self::quote_column_name($new_column_name) . ' ' . $current_type;
-			$this->execute($rename_column_sql);
+			static::execute($rename_column_sql);
 		}
 	
 		
@@ -49,7 +49,7 @@
 		}
 		
 		
-		public function execute($sql) {
+		public static function execute($sql) {
 			if(static::$show_sql) {
 				echo $sql . "\n\n";
 			}

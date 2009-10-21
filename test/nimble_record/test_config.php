@@ -31,9 +31,8 @@
 
 
 	function reload_database_tables() {
-		$m = new Migration();
-		$m->drop_database(MYSQL_DATABASE);
-		$m->create_database(MYSQL_DATABASE);
+		Migration::drop_database(MYSQL_DATABASE);
+		Migration::create_database(MYSQL_DATABASE);
 	}
 
 	//load the test database

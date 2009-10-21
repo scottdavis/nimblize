@@ -1,9 +1,10 @@
 {"[env]":
-	[
-		{"username":""}, 
-		{"password":""}, 
-		{"database":""}, 
-		{"host":"localhost"},
-		{"socket":""}
-	]
+		{
+			"username":"", 
+			"password":"", 
+			"database":"", 
+			"host":"localhost",
+			"adapter":"mysql"
+		}
 }
+

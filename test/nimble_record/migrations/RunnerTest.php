@@ -28,6 +28,11 @@ class RunnerTest extends PHPUnit_Framework_TestCase {
 			$this->assertEquals(MigrationRunner::current_version(), 123456789);
 	}
 	
+	public function testMigrationTableExsists() {
+		$test = MigrationRunner::migration_table_exists();
+		$this->assertTrue($test);
+	}
+	
 	public function testMigrateEmptyString() {
 		MigrationRunner::migrate('');
 		$this->assertEquals(MigrationRunner::current_version(), 123456789);

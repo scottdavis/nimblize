@@ -15,7 +15,12 @@
 	* @package Generators
 	*/
 	class Generator {
-
+		
+		
+		public static function generate_blank_php_file($path) {
+			copy(FileUtils::join(TEMPLATE_PATH, 'empty.php'), $path);
+		}
+		
 		/**
 		* Creates the database config files for a specified enviromant
 		* @param string $path - Path to creat file
@@ -243,19 +248,22 @@
 		
 		
 		
-		public static function migration($name, $path, $table='') {
-			$class_name = INflector::classify($name);
+		public static function migration($name, $table='') {
+			$path = FileUtils::join(NIMBLE_ROOT, 'db', 'migrations');
+			FileUtils::mkdir_p($path);
+			$file_name = time() . '_' . $name . '.php';
+			$class_name = Inflector::classify($name);
 			$out = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'migration.tmpl'));
 			$up = '';
 			$down = '';
 			if(!empty($table)) {
-				$up .= '			$this->create_table("' . $table . '")';
-				$up .= '				//enter column definitions here';
-				$up .= '			$this->go()';
-				$down .= '			$this->drop_table("' . $table . '")';				
+				$up .= '$t = $this->create_table("' . $table . '");';
+				$up .= "\n" . '				//enter column definitions here';
+				$up .= "\n" . '			$t->go();';
+				$down .= '	$this->drop_table("' . $table . '");';				
 			}
-			$out = str_replace(array('{name}', '{up}', '{down}'), array($class_name, $up, $down));
-			static::write_file($path, $out);
+			$out = str_replace(array('{name}', '{up_code}', '{down_code}'), array($class_name, $up, $down), $out);
+			static::write_file(FileUtils::join($path, $file_name), $out);
 			
 			
 		}

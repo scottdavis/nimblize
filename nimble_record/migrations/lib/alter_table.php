@@ -104,7 +104,7 @@
 		public function go($test = false) {
 			foreach($this->columns as $sql) {
 				if(!$test) {
-					$this->migration->execute($sql . ";");
+				Migration::execute($sql . ";");
 				}
 			}
 		}

@@ -103,9 +103,9 @@
 			(string) $sql = $this->sql;
 			$sql .= ' (' . join(", ", $this->columns) . ')';
 			$sql .= ' ' . $this->options;
-			$out = array($this->migration->execute($sql));
+			$out = array(Migration::execute($sql));
 			foreach($this->other as $other){
-				array_push($out, $this->migration->execute($other));
+				array_push($out, Migration::execute($other));
 			}
 			return $out;
 		}

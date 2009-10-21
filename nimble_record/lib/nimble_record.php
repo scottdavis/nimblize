@@ -12,11 +12,11 @@ class NimbleRecord {
 	public static $foreign_key_suffix = 'id';
 	public static $primary_key_field = 'id';
 	public static $table_name_prefix = '';
-	
+	public static $database;
+	public static $table;
 	/** protected vars */
-	protected static $database;
+
 	protected static $connection;
-	protected static $table;
 	protected static $query_cache = array();
 	protected static $columns = array();
 	protected static $validations = array();
@@ -36,8 +36,9 @@ class NimbleRecord {
 	* connects to the data base and stores the connection
 	* @param $db_settings_name Array
 	*/
-	public static function establish_connection(array $db_settings_name) {
-		$file = strtolower($db_settings_name['adapter']) . '_adapter';
+	public static function establish_connection(array $db_settings) {
+		static::$database = $db_settings['database'];
+		$file = strtolower($db_settings['adapter']) . '_adapter';
 		$filename = $file . '.php';
 		/**
 		* lazy loading of the adapter
@@ -47,7 +48,7 @@ class NimbleRecord {
 			require_once(dirname(__FILE__) . '/../adapters/' . $filename);
 		}
 		$class = Inflector::classify($file);
-		$klass = new $class($db_settings_name);
+		$klass = new $class($db_settings);
 		static::$adapter = $klass;
 	}
 	
