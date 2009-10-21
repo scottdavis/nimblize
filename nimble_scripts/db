@@ -1,0 +1,61 @@
+#! /usr/bin/env php
+<?php
+	define("NIMBLE_TEST", true);
+	$_POST['_method'] = 'get';
+	require_once('nimblize/nimble_record/migrations/lib/migration_runner.php');
+	require_once('nimblize/nimble_record/migrations/migration.php');
+	$nimble_root = dirname(__FILE__) . DIRECTORY_SEPARATOR . '..';
+	require_once(join(DIRECTORY_SEPARATOR, array($nimble_root, 'config', 'boot.php')));
+	MigrationRunner::$dir = FileUtils::join(NIMBLE_ROOT, 'db', 'migrations');
+	
+	if(count($argv) < 2) {
+		die('Not enough args');
+	}
+	
+	
+	function create() {
+		Migration::create_database(NimbleRecord::$database);
+	}
+	
+	function drop() {
+		Migration::drop_database(NimbleRecord::$database);
+	}
+	
+	
+	function _reset() {
+		drop();
+		create();
+		migrate('up');
+	}
+	
+	function migrate($direction = 'up') {
+		MigrationRunner::create_migration_table();
+		$c = MigrationRunner::current_version();
+		$v = MigrationRunner::migrate($direction);
+		if($c == $v) {
+			print('Nothing was done database is at max version' . "\n");
+		}else{
+			print('Migrated ' . $direction . ' to ' . $v . "\n");
+		}
+	}
+	
+	switch($argv[1]) {
+		case 'migrate':
+			$direction = (isset($argv[2]) ? $argv[2] : 'up');
+			migrate($direction);
+		break;
+		case 'create':
+			create();
+		break;
+		case 'drop':
+			drop();
+		break;
+		case 'reset':
+			_reset();
+		break;
+	}
+	
+	
+	
+
+?>

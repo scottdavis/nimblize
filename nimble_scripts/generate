@@ -1,0 +1,88 @@
+#! /usr/bin/env php
+<?php
+	require_once('nimblize/nimblize.php');
+	require_once('nimblize/nimble_generators/lib/generator.php');
+	define('NIMBLE_ROOT', dirname(__FILE__) . DIRECTORY_SEPARATOR . '..');
+	
+	if(count($argv) < 2) {
+		echo NIMBLE_ROOT;
+		display_Help();
+	}
+	
+	
+	function display_help() {
+		echo Generator::help();
+		exit();
+	}
+	
+	
+	switch($argv[1]) {
+	
+		case 'controller':
+			Generator::controller(Inflector::classify($argv[2]));
+		break;
+		
+		
+		case 'model':
+			if(isset($argv[3])) {
+				$parent = $argv[3];
+			}else{
+				$parent = '';
+			}
+			Generator::model($argv[2], $parent);
+		break;
+		
+		
+		case 'test':
+			switch($argv[2]) {
+				case 'functional':
+					if(!isset($argv[3])) {
+						echo "Please supply a test name";
+						return;
+					}
+					Generator::functional_test($argv[3]);
+				break;
+				case 'unit':
+					if(!isset($argv[3])) {
+						echo "Please supply a test name";
+						return;
+					}
+					Generator::unit_test($argv[3]);
+				break;
+			
+			}
+		break;
+		case 'help':
+			echo Generator::help();
+			exit();
+		break;
+		case 'mailer':
+			$new = $argv;
+			$methods = array_splice($new, 3);
+		 	$methods = empty($methods) ? array('foo') : $methods;
+			Generator::mailer($argv[2], $methods);
+			exit();
+		break;
+		case 'migration':
+			$args = $argv;
+			$name = $argv[2];
+			$table = (!isset($argv[3])) ? Inflector::tableize($argv[2]) : $argv[3];
+			Generator::migration($name, $table);
+			exit();
+		break;
+	
+	
+	
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+?>

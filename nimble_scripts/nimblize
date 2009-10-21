@@ -1,0 +1,53 @@
+#! /usr/bin/env php
+<?php
+	/**
+	* This file is the base generator for a nimble project
+	* It creates the MVC folder structure and sets up your .htaccess file 
+	*/
+
+
+	require_once('nimblize/nimblize.php');
+	require_once('nimblize/nimble_generators/lib/generator.php');
+	
+	if(count($argv) > 2) {
+		die("Please supply a Project name");
+	}
+	$app = $argv[1];
+	/** init app folder */
+	mkdir($app);
+	/** make app dir */
+	mkdir(FileUtils::join($app,'app'));
+	/** set up app structure */
+	foreach(array('controller', 'model', 'view') as $dir) {
+		mkdir(FileUtils::join($app,'app', $dir));
+	}
+  			Generator::htaccess(FileUtils::join($app, '.htaccess'));
+	FileUtils::mkdir_p(FileUtils::join($app, 'app', 'view', 'layout'));
+	touch(FileUtils::join($app, 'app', 'view', 'layout', 'application.php'));
+	/** init config files */
+	mkdir(FileUtils::join($app, 'config'));
+	Generator::generate_blank_php_file(FileUtils::join($app, 'config', 'config.php'));
+	/** copy boot.php into place */
+	Generator::boot(FileUtils::join($app, 'config', 'boot.php'));
+	Generator::route(FileUtils::join($app, 'config', 'routes.php'));
+	Generator::r404(FileUtils::join($app, 'config', 'r404.php'));
+	/** set up enviroment structure */
+	foreach(array('production', 'test', 'development', 'staging') as $env) {
+		mkdir(FileUtils::join($app, 'config', $env));
+		/** insert database config files */
+		Generator::database_config(FileUtils::join($app, 'config', $env, 'database.json'), $env);
+		Generator::generate_blank_php_file(FileUtils::join($app, 'config', $env , 'config.php'));
+	}
+	/** create base folders */
+	foreach(array('lib', 'public', 'test', 'plugin', 'script') as $folder) {
+		mkdir(FileUtils::join($app, $folder));
+		if($folder == 'script') {
+			Generator::scripts(FileUtils::join($app, $folder));
+		}
+		if($folder == 'public') {
+			foreach(array('image', 'javascript', 'style') as $sub){
+			  mkdir(FileUtils::join($app, $folder, $sub));
+			}
+		}
+	}
+?>
