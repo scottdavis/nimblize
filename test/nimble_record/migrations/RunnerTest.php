@@ -66,7 +66,7 @@ class RunnerTest extends PHPUnit_Framework_TestCase {
 		MigrationRunner::up(123456789);
 		$this->assertEquals(MigrationRunner::current_version(), 123456789);
 		MigrationRunner::down(123456788);
-		$this->assertEquals(MigrationRunner::current_version(), 123456788);
+		$this->assertEquals(MigrationRunner::current_version(), 0);
 	}
 	
 	public function testGetMaxVersion() {

@@ -120,7 +120,7 @@
 			*/
 		public static function model($name) {
 			$class_name = Inflector::classify($name);
-			$path = FileUtils::join(NIMBLE_ROOT, 'app', 'model', $class_name . '.php');
+			$path = FileUtils::join(NIMBLE_ROOT, 'app', 'model', Inflector::underscore($class_name) . '.php');
 			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'model.tmpl'));	
 			$string = str_replace('{class_name}', $class_name, $string);
 			static::write_file($path, $string);
@@ -258,8 +258,8 @@
 		public static function migration($name, $table='') {
 			$path = FileUtils::join(NIMBLE_ROOT, 'db', 'migrations');
 			FileUtils::mkdir_p($path);
-			$file_name = time() . '_' . $name . '.php';
-			$class_name = Inflector::classify($name);
+			$file_name = time() . '_' . $name . '_migration.php';
+			$class_name = Inflector::classify($name . 'Migration');
 			$out = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'migration.tmpl'));
 			$up = '';
 			$down = '';
@@ -271,8 +271,6 @@
 			}
 			$out = str_replace(array('{name}', '{up_code}', '{down_code}'), array($class_name, $up, $down), $out);
 			static::write_file(FileUtils::join($path, $file_name), $out);
-			
-			
 		}
 
 

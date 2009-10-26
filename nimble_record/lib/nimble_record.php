@@ -14,6 +14,8 @@ class NimbleRecord {
 	public static $table_name_prefix = '';
 	public static $database;
 	public static $table;
+	public static $protected = array();
+	public static $read_only = array();
 	/** protected vars */
 
 	protected static $connection;
@@ -835,17 +837,20 @@ class NimbleRecord {
   protected $row;
 
   public function __construct($args = array()) {
-	$this->row = array();
-  $this->errors = array();
-	static::process_associations($this);
-	if(isset(static::$columns) && !empty(static::$columns)) {
-		static::$columns = static::columns();
-	}
-
-	foreach(static::$columns as $col) {
-		$this->row[$col] = NULL;
-	}
-  $this->row = array_merge($this->row, $args);
+		$this->row = array();
+	  $this->errors = array();
+		static::process_associations($this);
+		//set all columns to NULL
+		foreach(static::columns() as $col) {
+			$this->set_var($col, NULL, false);
+		}
+		//if mass assigning set vars
+		foreach($args as $var => $value) {
+			if(array_include($var, static::$protected)) {
+				throw new NimbleRecordException($var . ': is a protected attribute and can not be mass assigned');
+			}
+	  	$this->set_var($var, $value);
+		}
   }
   /**
   * Method __toString
@@ -868,7 +873,7 @@ class NimbleRecord {
 	  throw new NimbleRecordException("Can't an save empty record.");
     }
     if($this->is_new_record()) {
-      if($class = static::create($this->row)) {
+      if($class = self::create($this->row)) {
         $this->row = $class->row;
       }else{
         $this->errors = $class->errors;
@@ -880,7 +885,7 @@ class NimbleRecord {
       $f = self::primary_key_field();
       $primary_key_value = $this->row[$f];
       unset($this->row[$f]);
-      if($class = static::update($primary_key_value, $this->row)) {
+      if($class = self::update($primary_key_value, $this->row)) {
         $this->row = $class->row;
       }else{
         $this->errors = $class->errors;
@@ -964,14 +969,19 @@ class NimbleRecord {
 	
 	
 	public function __set($var, $value) {
-		$columns = array_flip(static::columns());
-		if(isset($columns[$var])) {
-			$this->row[$var] = $value;
-		}else{
-			throw new NimbleRecordException("Can not set property it does not exsit.");
-		}
+		$this->set_var($var, $value);
 	}
 	
+	private function set_var($var, $value, $read_only_check = true) {
+		if(array_include($var, static::columns())){
+			if($read_only_check && array_include($var, static::$read_only)) {
+				throw new NimbleRecordException($var . ': is a read only attribute');
+			}
+			$this->row[$var] = $value;
+		}else{
+			throw new NimbleRecordException("Can not set property: $var it does not exsit.");
+		}
+	}
 	
 	public function __call($method, $arguments)  {
 		if(in_array($method, static::columns())) {
