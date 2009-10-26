@@ -18,6 +18,7 @@
 				$table2 = $this->create_table('photos');
 					$table2->belongs_to('user');
 					$table2->string('title');
+					$table2->string('description');
 				$table2->go();
 			}
 

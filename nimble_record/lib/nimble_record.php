@@ -16,6 +16,7 @@ class NimbleRecord {
 	public static $table;
 	public static $protected = array();
 	public static $read_only = array();
+	public static $white_list = array();
 	/** protected vars */
 
 	protected static $connection;
@@ -811,7 +812,7 @@ class NimbleRecord {
 	*/
   private static function to_object($class, $result_set) {
 		if (empty($result_set)){
-			throw new RecordNotFound();
+			throw new NimbleRecordNotFound();
 		}
 	$object = new $class;
 	$object->row = $result_set;
@@ -840,18 +841,35 @@ class NimbleRecord {
 		$this->row = array();
 	  $this->errors = array();
 		static::process_associations($this);
+		$all_columns = static::columns();
+		
 		//set all columns to NULL
-		foreach(static::columns() as $col) {
+		foreach($all_columns as $col) {
 			$this->set_var($col, NULL, false);
 		}
+		//if no args process return
+		if(empty($args)) {return;}
+		
+		//if white listing is turned on only allow mass assignment on vars that are in the white list
+		if(!empty(static::$white_list)) {
+			$all_columns = array_intersect($all_columns, static::$white_list);
+		}
+		if(count($bad_params = array_diff(array_keys($args), $all_columns)) > 0) {
+			throw new NimbleRecordException(implode(',', $bad_params) . ': are a protected attribute(s) and can not be mass assigned');
+		}
 		//if mass assigning set vars
-		foreach($args as $var => $value) {
-			if(array_include($var, static::$protected)) {
-				throw new NimbleRecordException($var . ': is a protected attribute and can not be mass assigned');
+		foreach($all_columns as $var) {
+			if(isset($args[$var])) {
+				//process black list
+				if(array_include($var, static::$protected)) {
+					throw new NimbleRecordException($var . ': is a protected attribute and can not be mass assigned');
+				}
+	  		$this->set_var($var, $args[$var]);
 			}
-	  	$this->set_var($var, $value);
 		}
   }
+
+
   /**
   * Method __toString
   * @access public

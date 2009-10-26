@@ -34,7 +34,12 @@
 		public function testReadOnlyException() {
 			$obj = new User(array('address' => 'foo'));
 		}
-		
+		/**
+		* @expectedException NimbleRecordException
+		*/
+		public function testWhitelist() {
+			$obj = new Photo(array('user_id' => User::find('first')->id, 'title' => 'test', 'description' => 'foo'));
+		}
 		
 	}
 	
