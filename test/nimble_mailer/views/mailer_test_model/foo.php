@@ -1,2 +1,2 @@
 PHP TEMPLATE
-<?= $string ?>
+<?php echo $string ?>
