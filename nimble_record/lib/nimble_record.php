@@ -745,6 +745,10 @@ class NimbleRecord {
 		static::execute('ROLLBACK;');
 	}
 	
+	public static function commit_transaction() {
+		static::execute('COMMIT');
+	}
+	
 	public static function execute_insert_query($sql) {
 		$return = static::execute($sql);
 		return $return;

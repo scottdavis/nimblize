@@ -13,6 +13,7 @@ abstract class AbstractAdapter {
 		
 		public function __construct($options) {
 			//$this->logger = new DatabaseLogger();
+			$this->options = $options;
 			$this->connect($options);
 			NimbleRecord::set_connection($this->connection);
 		}
@@ -119,7 +120,7 @@ abstract class AbstractAdapter {
 		}
 		
 		public function table_exists($table) {
-			$result = $this->query('SHOW TABLES');
+			$result = $this->query('SHOW TABLES FROM ' . $this->options['database']);
 			while($row = $result->fetch_assoc()) {
 				$keys = array_keys($row);
 				$_table = $row[$keys[0]];

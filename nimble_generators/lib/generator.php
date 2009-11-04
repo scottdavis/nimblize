@@ -16,6 +16,13 @@
 	*/
 	class Generator {
 		
+		public static function story_helper($path) {
+			copy(FileUtils::join(TEMPLATE_PATH, 'storyhelper.tmpl'), $path);
+		}
+		
+		public static function generate_layout($path) {
+			copy(FileUtils::join(TEMPLATE_PATH, 'layout.tmpl'), $path);
+		}
 		
 		public static function generate_blank_php_file($path) {
 			copy(FileUtils::join(TEMPLATE_PATH, 'empty_php.tmpl'), $path);
@@ -109,7 +116,7 @@
 			if(!is_dir($path)) {
 				FileUtils::mkdir_p($path);
 			}
-			$string = str_replace(array('{class_name}', ' {test_path}'), array($class_name, $test_path));
+			$string = str_replace(array('{class_name}', '{test_path}'), array($class_name, $test_path), $string);
 			static::write_file($file_path, $string);
 		}
 		
@@ -124,6 +131,7 @@
 			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'model.tmpl'));	
 			$string = str_replace('{class_name}', $class_name, $string);
 			static::write_file($path, $string);
+			static::unit_test($name);
 		}
 
 		/**
@@ -146,6 +154,7 @@
 			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'controller.tmpl'));
 			$string = str_replace(array('{class_name}', '{template_path}', '{methods}', '{type}'), array($class_name, $view_path, $methods, $type), $string);
 			static::write_file($path_name, $string);
+			static::functional_test($name);
 		}
 
 		/**

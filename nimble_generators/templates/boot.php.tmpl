@@ -56,7 +56,9 @@
 	Nimble::set_config('stylesheet_folder_url', '/public/style');
 	Nimble::set_config('javascript_folder', FileUtils::join(dirname(__FILE__), '..', 'public', 'javascript'));
 	Nimble::set_config('javascript_folder_url', '/public/javascript');
-  Nimble::set_config('uri', '/');
+	Nimble::set_config('image_url', 'public/image');
+	Nimble::set_config('image_path', FileUtils::join(dirname(__FILE__), '..', 'public', 'image'));
+	Nimble::set_config('uri', '/');
 
 	//define the root 
 	define('NIMBLE_ROOT', FileUtils::join(dirname(__FILE__), '..'));
@@ -82,9 +84,7 @@
 	NimbleRecord::establish_connection($database_info);
 	
 	/** boot the framework */
-	if (defined("NIMBLE_TEST") && NIMBLE_TEST) { 
-		Run(true); 
-	} else {
-  	Run();
-  }
+  if(!defined('CLI_RUNNER')) {
+		Run();
+	}
 ?>

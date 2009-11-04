@@ -7,12 +7,7 @@
 	require_once(dirname(__FILE__) . '/lib/mime.php');
 	require_once(dirname(__FILE__) . '/lib/tag_helper.php');
 	require_once(dirname(__FILE__) . '/lib/string_cacher.php');
-	
-	
-	function array_include($value, $array) {
-		$array = array_flip($array);
-		return isset($array[$value]);
-	}
-	
+	require_once(dirname(__FILE__) . '/lib/form_helper.php');
+	require_once(dirname(__FILE__) . '/lib/global_helper_functions.php');
 	
 ?>

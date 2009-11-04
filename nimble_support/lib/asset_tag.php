@@ -124,9 +124,19 @@
 		
 		}
 		
-		
+		/**
+		* Add an image from the image folder
+		*/
+		public static function image($image, $alt='', $options) {
+			empty($alt) ? $alt = $image : $alt;
+			$nmbl = Nimble::getInstance()->config;
+			$url = $nmbl['image_url'];
+			$image_path = $nmbl['image_path'];
+			$public_path = static::rewrite_asset_path($image, $image_path);
+			$url = $url . '/' . $public_path;
+			return TagHelper::tag('img', array_merge(array('src' => $url, 'alt' => $alt), $options));
 	}
-	
+}
 
 
 ?>

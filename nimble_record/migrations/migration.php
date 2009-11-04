@@ -130,7 +130,7 @@
 		
 		public static function columns($table) {
 			$sql = 'SHOW COLUMNS FROM ' . static::quote_table_name($table);
-			$result = ActivePhp\Base::execute($sql, true);
+			$result = NimbleRecord::execute($sql, true);
 			$output = array();
 			while($row = mysql_fetch_assoc($result)) {
 				array_push($output, $row);

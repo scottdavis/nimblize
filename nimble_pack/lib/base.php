@@ -81,15 +81,17 @@ class Nimble
      * If the client you're using doesn't support sending HTTP requests with methods
      * other than GET or POST, set $_POST['_method'] to the actual HTTP method you wish to use.
      */
-    public function dispatch($test=false)
+    public function dispatch()
     {	
+		if($this->test_mode && !isset($_POST['_method'])) {
+			$_POST['_method'] = 'get';
+		}
 		$this->load_plugins();
       foreach($this->routes as $rule=>$conf) {
         // if a vaild _method is passed in a post set it to the REQUEST_METHOD so that we can route for DELETE and PUT methods
         if(isset($_POST['_method']) && !empty($_POST['_method']) && in_array(strtoupper($_POST['_method']), Route::$allowed_methods)){
             $_SERVER['REQUEST_METHOD'] = strtoupper($_POST['_method']);
         }
-
         /** test to see if its a valid route */
         if (preg_match($conf[0], $this->url, $matches) && $_SERVER['REQUEST_METHOD'] == $conf[3]){
             /** Only declared variables in URL regex */
@@ -129,7 +131,7 @@ class Nimble
 			          }
 			        } 
         			print $out;
-							if(!$test){
+							if(!$this->test_mode){
 								exit();
 							}
 					}
@@ -137,7 +139,11 @@ class Nimble
        	if(empty($_SERVER['REQUEST_METHOD']) && !$test){
          	throw new NimbleException('No Request Paramater');
        	}
-				if(!$test){
+				if(!$this->test_mode){
+					if(NIMBLE_ENV == 'development') {
+						var_dump($this->routes);
+						throw new NimbleException('Path not found: ' . $_GET['url']);
+					}
 					call_user_func(array('r404' , $_SERVER['REQUEST_METHOD'])); 
 				}		
     }

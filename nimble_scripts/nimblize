@@ -23,7 +23,7 @@
 	}
   Generator::htaccess(FileUtils::join($app, '.htaccess'));
 	FileUtils::mkdir_p(FileUtils::join($app, 'app', 'view', 'layout'));
-	touch(FileUtils::join($app, 'app', 'view', 'layout', 'application.php'));
+	Generator::generate_layout(FileUtils::join($app, 'app', 'view', 'layout', 'application.php'));
 	Generator::controller('Application', false);
 	/** init config files */
 	mkdir(FileUtils::join($app, 'config'));
@@ -51,4 +51,7 @@
 			}
 		}
 	}
+	
+	Generator::story_helper(FileUtils::join($app, 'lib', 'story_helper.php'));
+	
 ?>

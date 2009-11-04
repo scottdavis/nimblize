@@ -17,5 +17,27 @@
 		return isset($array[$value]);
 	}
 	
+	/**
+	* Similar to rubys collect method
+	* @param function $func
+	* @param array|interator $array
+	* @uses collect(function($value){return $value+1}, range(1,5));
+	*/
+	function collect($func, $array) {
+		$out = array();
+		foreach($array as $value) {
+			array_push($out, $func($value));
+		}
+		return $out;
+	}
+	/**
+	*
+	* @param string $file
+	* @param string $alt
+	* @param array $options
+	*/
+	function image_tag($file, $alt = '', $options = array()) {
+		echo AssetTag::image($file, $alt, $options);
+	}
 
 ?>
