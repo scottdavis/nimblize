@@ -1062,7 +1062,7 @@ class NimbleRecord {
 	
 	public static function __callStatic($method, $args) {
 		if(preg_match('/^find_by_([a-z0-9_]+)$/', $method, $matches)) {
-
+			$klass = get_called_class();
 			$method_called = array_shift($matches);
 			$i = 0;
 			$where = array();
@@ -1071,11 +1071,11 @@ class NimbleRecord {
 				if(in_array($column, static::columns())) {
 					$col = self::sanatize_input_array($column);
 					$val = self::sanatize_input_array($args[$i]);
-					array_push($where, "$col = '$val'");
+					$where[$col] = $val;
 					$i++;
 				}
 			}
-			return static::find_by(array('conditions' => join(' AND ', $where)));
+			return call_user_func_array(array($klass, 'find'), array('first', array('conditions' => $where)));
 		}
 	}
 

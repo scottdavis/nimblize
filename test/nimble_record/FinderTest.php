@@ -119,6 +119,17 @@
 			$this->assertEquals(0, $user->photos->length);
 		}
 		
+		public function testMagicFinder() {
+			$obj = User::find_by_name('names1');
+			$this->assertEquals($obj->name, 'names1');
+			$this->assertEquals($obj->my_int, 1);
+		}
+		
+		public function testMagicFinderMulti() {
+			$obj = User::find_by_name_and_my_int('names1', 1);
+			$this->assertEquals($obj->name, 'names1');
+			$this->assertEquals($obj->my_int, 1);
+		}
 		
 		
 	}
