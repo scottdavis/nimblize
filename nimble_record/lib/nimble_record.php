@@ -1061,21 +1061,33 @@ class NimbleRecord {
 	}
 	
 	public static function __callStatic($method, $args) {
+		$matches = array();
+		$klass = get_called_class();
 		if(preg_match('/^find_by_([a-z0-9_]+)$/', $method, $matches)) {
-			$klass = get_called_class();
-			$method_called = array_shift($matches);
-			$i = 0;
-			$where = array();
-			$cols = isset($matches[0]) ? explode('_and_', $matches[0]) : $matches;
-			foreach($cols as $column) {
-				if(in_array($column, static::columns())) {
-					$col = self::sanatize_input_array($column);
-					$val = self::sanatize_input_array($args[$i]);
-					$where[$col] = $val;
-					$i++;
-				}
-			}
+			$where = static::build_where_for_magic_find($matches, $args);
 			return call_user_func_array(array($klass, 'find'), array('first', array('conditions' => $where)));
+		}
+		if(preg_match('/^find_all_by_([a-z0-9_]+)$/', $method, $matches)) {
+			$where = static::build_where_for_magic_find($matches, $args);
+			return call_user_func_array(array($klass, 'find'), array('all', array('conditions' => $where)));
+		}
+	}
+
+
+	private static function build_where_for_magic_find($matches, $args) {
+		$method_called = array_shift($matches);
+		$i = 0;
+		$where = array();
+		$cols = isset($matches[0]) ? explode('_and_', $matches[0]) : $matches;
+		
+		foreach($cols as $column) {
+			if(array_include($column, static::columns())) {
+				$col = self::sanatize_input_array($column);
+				$val = self::sanatize_input_array($args[$i]);
+				$where[$col] = $val;
+				$i++;
+			}
+			return $where;
 		}
 	}
 

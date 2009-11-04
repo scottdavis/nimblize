@@ -131,6 +131,14 @@
 			$this->assertEquals($obj->my_int, 1);
 		}
 		
+		public function testMagicFindAllFinder() {
+			$id = User::find_by_name('names1')->id;
+			$obj = Photo::find_all_by_user_id($id);
+			$this->assertEquals($obj->length, 11);
+			foreach($obj as $record) {
+				$this->assertEquals($record->user_id, $id);
+			}
+		}
 		
 	}
 
