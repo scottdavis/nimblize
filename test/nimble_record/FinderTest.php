@@ -119,16 +119,23 @@
 			$this->assertEquals(0, $user->photos->length);
 		}
 		
+		
+		/**
+		* MAGIC FINDER TESTS
+		*/
+		
 		public function testMagicFinder() {
 			$obj = User::find_by_name('names1');
 			$this->assertEquals($obj->name, 'names1');
 			$this->assertEquals($obj->my_int, 1);
+			$this->assertTrue(is_a($obj, 'User'));
 		}
 		
 		public function testMagicFinderMulti() {
 			$obj = User::find_by_name_and_my_int('names1', 1);
 			$this->assertEquals($obj->name, 'names1');
 			$this->assertEquals($obj->my_int, 1);
+			$this->assertTrue(is_a($obj, 'User'));
 		}
 		
 		public function testMagicFindAllFinder() {
