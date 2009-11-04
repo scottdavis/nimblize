@@ -67,6 +67,9 @@ class GeneratorTest extends PHPUnit_Framework_TestCase {
 	  $this->assertFileNotExists(vfsStream::url('root/test/scripts/nimblize'));
 	}
 	
+	/**
+	 * @covers Generator::generate_database_config
+	 */
 	function testDatabaseConfig() {
 		mkdir(vfsStream::url('root/test'), 0777, true);
 		file_put_contents(vfsStream::url('root/template/database.json'), "[env]");
@@ -75,6 +78,19 @@ class GeneratorTest extends PHPUnit_Framework_TestCase {
 		
 		$this->assertFileExists(vfsStream::url('root/test/database'));
 		$this->assertEquals('test', file_get_contents(vfsStream::url('root/test/database')));
+	}
+	
+	function testGenerateModel() {
+		mkdir(vfsStream::url('root/test/unit'), 0777, true);
+		mkdir(vfsStream::url('root/app/model'), 0777, true);
+		file_put_contents(vfsStream::url('root/template/model.tmpl'), "{class_name}");
+		file_put_contents(vfsStream::url('root/template/unit_test.tmpl'), "{class_name}");
+	 	
+	 	Generator::generate_model("Test");
+	 	
+		$this->assertFileExists(vfsStream::url('root/app/model/test.php'));
+		$this->assertEquals('Test', file_get_contents(vfsStream::url('root/app/model/test.php')));
+		$this->assertFileExists(vfsStream::url('root/test/unit/TestTest.php'));	 	
 	}
 }
 

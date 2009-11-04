@@ -89,15 +89,14 @@
 		/**
 			* Creates a model class with option of a parent to extend
 			* @param string $name the name of the class
-			*
 			*/
-		public static function model($name) {
+		public static function generate_model($name) {
 			$class_name = Inflector::classify($name);
 			$path = FileUtils::join(static::$nimble_root, 'app', 'model', Inflector::underscore($class_name) . '.php');
 			$string = file_get_contents(FileUtils::join(static::$template_path, 'model.tmpl'));	
 			$string = str_replace('{class_name}', $class_name, $string);
 			static::write_file($path, $string);
-			static::unit_test($name);
+			static::generate_test('unit', $name);
 		}
 
 		/**
