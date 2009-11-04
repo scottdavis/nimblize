@@ -10,10 +10,12 @@ class GeneratorTest extends PHPUnit_Framework_TestCase {
 		vfsStreamWrapper::register();
 		$root = new vfsStreamDirectory('root');
 		$root->addChild(new vfsStreamDirectory('template'));
+		$root->addChild(new vfsStreamDirectory('scripts'));
 		$root->addChild(new vfsStreamDirectory('target'));	
 		vfsStreamWrapper::setRoot($root);	
 
 		Generator::$template_path = vfsStream::url('root/template');
+		Generator::$script_path = vfsStream::url('root/scripts');
 		Generator::$nimble_root = vfsStream::url('root');
 	}
 	
@@ -29,23 +31,40 @@ class GeneratorTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider providerTestGenerateTemplate
 	 */
 	function testGenerateTemplate($name, $is_generated) {
-		vfsStreamWrapper::getRoot()->getChild('template')->addChild(vfsStream::newFile('new.tmpl'));
+		file_put_contents(vfsStream::url('root/template/new.tmpl'), "");
 		
 		call_user_func("Generator::generate_${name}", vfsStream::url('root/target/made-it'));
 		
-		$this->assertEquals($is_generated, vfsStreamWrapper::getRoot()->hasChild('target/made-it'));
+		$this->assertEquals($is_generated, file_exists(vfsStream::url('root/target/made-it')));
 	}
 	
+	/**
+	 * @covers Generator::generate_test
+	 */
 	function testGenerateTest() {
-		vfsStreamWrapper::getRoot()->addChild(new vfsStreamDirectory('test'));
-		vfsStreamWrapper::getRoot()->getChild('test')->addChild(new vfsStreamDirectory('unit'));
-		vfsStreamWrapper::getRoot()->getChild('template')->addChild(vfsStream::newFile('unit_test.tmpl')->withContent('{class_name}'));
+		mkdir(vfsStream::url('root/test/unit'), 0777, true);
+		file_put_contents(vfsStream::url('root/template/unit_test.tmpl'), '{class_name}');
 		
 		Generator::generate_test('unit', 'Unit');
 		
 		$this->assertTrue(vfsStreamWrapper::getRoot()->hasChild('test/unit/UnitTest.php'));
 		$this->assertEquals("Unit", file_get_contents(vfsStream::url('test/unit/UnitTest.php')));
-		
+	}
+	
+	/**
+	 * @covers Generator::generate_scripts
+	 */
+	function testGenerateScripts() {
+	  file_put_contents(vfsStream::url('root/scripts/nimblize'), 'no');	
+	  file_put_contents(vfsStream::url('root/scripts/test'), 'yes');	
+	  
+	  mkdir(vfsStream::url('root/test/scripts'), 0777, true);
+	  Generator::$nimble_root = vfsStream::url('root/test');
+	  
+	  Generator::generate_scripts(vfsStream::url('root/test/scripts'));
+	  
+	  $this->assertFileExists(vfsStream::url('root/test/scripts/test'));
+	  $this->assertFileNotExists(vfsStream::url('root/test/scripts/nimblize'));
 	}
 }
 

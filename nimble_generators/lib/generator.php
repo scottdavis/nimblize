@@ -34,19 +34,26 @@
 		}
 	
 		/**
-		* Creates the script directory and copies everything from bin except nimblize
-		* @param string $path - path you want the script folder located
-		*/
-		public static function scripts($path) {
-			$ignore = array('nimblize', '.', '..');
-			if($dir = opendir(static::$script_path)){
+		 * Copy global user scripts into the target script directory.
+		 * @param string $path The target path for scripts. Will not be generated if it doesn't exist.
+		 */
+		public static function generate_scripts($path) {
+			if (!is_dir($path)) { throw new Exception("Target directory does not exist: ${path}"); }
+			
+			$ignore = array('nimblize');
+			if ($dir = opendir(static::$script_path)){
 				while (($file = readdir($dir)) !== false) {
-					if(array_include($file, $ignore)) {
-						continue;
+					if (in_array($file, $ignore)) { continue; }
+					$source_file = FileUtils::join(static::$script_path, $file);
+					if (is_file($source_file)) {
+						$target_file = FileUtils::join($path, $file);
+						copy($source_file, $target_file);
+						@chmod($target_file, 0775);
 					}
-					copy(FileUtils::join(static::$script_path, $file), FileUtils::join($path, $file));
-					chmod(FileUtils::join($path, $file), 0775);
 				}
+				closedir($dir);
+			} else {
+			  throw new Exception("Source directory cannot be read: " . static::$script_path);	
 			}
 		}
 
