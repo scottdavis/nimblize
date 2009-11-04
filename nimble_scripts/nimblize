@@ -8,12 +8,14 @@
 
 	require_once('nimblize/nimblize.php');
 	require_once('nimblize/nimble_generators/lib/generator.php');
-	if(count($argv) > 2) {
+	if(count($argv) !== 2) {
 		die("Please supply a Project name");
 	}
 	$app = $argv[1];
 	/** init app folder */
-	define("NIMBLE_ROOT", $app);
+	define("NIMBLE_ROOT", getcwd() . DIRECTORY_SEPARATOR . $app);
+	Generator::$nimble_root = NIMBLE_ROOT;
+	
 	mkdir($app);
 	/** make app dir */
 	mkdir(FileUtils::join($app,'app'));
@@ -60,4 +62,6 @@
 	}
 	
 	Generator::generate_story_helper(FileUtils::join($app, 'lib', 'story_helper.php'));
+	
+	echo "Bam! It's done!\n";
 ?>

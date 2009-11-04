@@ -1,12 +1,13 @@
 <?php
 	require_once(dirname(__FILE__) . '/../../nimble_support/lib/file_utils.php');
+	require_once(dirname(__FILE__) . '/../../nimble_support/lib/inflector.php');
 
 	/**
 	 * Class for generating the components of a Nimble skeleton.
 	 * @package Generators
 	 */
 	class Generator {
-		public static $template_path, $script_path;
+		public static $template_path, $script_path, $nimble_root;
 		
 		/**
 		 * Handle generating templates magically.
@@ -28,7 +29,7 @@
 		 * @param string $env The name of the environment to generate.
 		 */
 		public static function database_config($path, $env) {
-			$string = str_replace('[env]', $env, file_get_contents(FileUtils::join(TEMPLATE_PATH, 'database.json')));
+			$string = str_replace('[env]', $env, file_get_contents(FileUtils::join(static::$template_path, 'database.json')));
 			static::write_file($path, $string);
 		}
 	
@@ -38,51 +39,46 @@
 		*/
 		public static function scripts($path) {
 			$ignore = array('nimblize', '.', '..');
-			if($dir = opendir(SCRIPT_PATH)){
+			if($dir = opendir(static::$script_path)){
 				while (($file = readdir($dir)) !== false) {
 					if(array_include($file, $ignore)) {
 						continue;
 					}
-					copy(FileUtils::join(SCRIPT_PATH, $file), FileUtils::join($path, $file));
+					copy(FileUtils::join(static::$script_path, $file), FileUtils::join($path, $file));
 					chmod(FileUtils::join($path, $file), 0775);
 				}
 			}
 		}
 
 		/**
-			* Creates a Nimble Unit Test Case
-			* @param string $name name of test
-			*/
-				
-		public static function unit_test($name) {
+		 * Generate a test case.
+		 * @param string $type The type of test to generate.
+		 * @param string $name The class name for the generated test.
+		 */
+		public static function generate_test($type, $name) {
 			$class_name = Inflector::classify($name);
-			$path = FileUtils::join(NIMBLE_ROOT, 'test', 'unit');
-			$test_path = 'nimblize/nimble_test/lib/phpunit_testcase.php';
-			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'unit_test.tmpl'));
-			$string = str_replace(array('{class_name}', '{test_path}'), array($class_name, $test_path), $string);
-			FileUtils::mkdir_p($path);
-			$file_path = FileUtils::join($path, $class_name . 'Test.php');
-			static::write_file($file_path, $string);
-		}
-		
-		/**
-			* Creates a Nimble Unit Test Case
-			* @param string $name name of test
-			*/
+			$path = FileUtils::join(static::$nimble_root, 'test', $type);
+			
+			if (is_dir($path)) {
+  			$test_path = 'nimblize/nimble_test/lib/phpunit_testcase.php';
+				if (($test_case_code = file_get_contents(FileUtils::join(static::$template_path, "${type}_test.tmpl"))) !== false) {
+					$test_case_code = str_replace(
+						array('{class_name}', '{test_path}'),
+						array($class_name, $test_path),
+						$test_case_code
+					);
+				} else {
+					throw new Exception("Test source file for ${type} not found!");	
+				}
 				
-		public static function functional_test($name) {
-			$class_name = Inflector::classify($name);
-			$test_path = 'nimblize/nimble_test/lib/phpunit_testcase.php';
-			$path = FileUtils::join(NIMBLE_ROOT, 'test', 'functional');
-			$file_path = FileUtils::join($path, $class_name . 'ControllerTest.php');
-			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'functional_test.tmpl'));
-			if(!is_dir($path)) {
 				FileUtils::mkdir_p($path);
+				$file_path = FileUtils::join($path, $class_name . 'Test.php');
+				static::write_file($file_path, $test_case_code);				
+			} else {
+				throw new Exception("Test directory for ${type} not found!");	
 			}
-			$string = str_replace(array('{class_name}', '{test_path}'), array($class_name, $test_path), $string);
-			static::write_file($file_path, $string);
 		}
-		
+
 		/**
 			* Creates a model class with option of a parent to extend
 			* @param string $name the name of the class
@@ -90,8 +86,8 @@
 			*/
 		public static function model($name) {
 			$class_name = Inflector::classify($name);
-			$path = FileUtils::join(NIMBLE_ROOT, 'app', 'model', Inflector::underscore($class_name) . '.php');
-			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'model.tmpl'));	
+			$path = FileUtils::join(static::$nimble_root, 'app', 'model', Inflector::underscore($class_name) . '.php');
+			$string = file_get_contents(FileUtils::join(static::$template_path, 'model.tmpl'));	
 			$string = str_replace('{class_name}', $class_name, $string);
 			static::write_file($path, $string);
 			static::unit_test($name);
@@ -104,8 +100,8 @@
 			*/
 		public static function controller($name, $views=true) {
 			$class_name = Inflector::classify($name);
-			$path_name = FileUtils::join(NIMBLE_ROOT, 'app', 'controller', Inflector::underscore($class_name) . '_controller.php');
-			$view_path = FileUtils::join(NIMBLE_ROOT, 'app', 'view', strtolower(Inflector::underscore($class_name)));
+			$path_name = FileUtils::join(static::$nimble_root, 'app', 'controller', Inflector::underscore($class_name) . '_controller.php');
+			$view_path = FileUtils::join(static::$nimble_root, 'app', 'view', strtolower(Inflector::underscore($class_name)));
 			if($views) {
 				FileUtils::mkdir_p($view_path);
 				$methods = static::create_view_functions($view_path);
@@ -114,7 +110,7 @@
 				$methods = '';
 				$type = "Controller";
 			}
-			$string = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'controller.tmpl'));
+			$string = file_get_contents(FileUtils::join(static::$template_path, 'controller.tmpl'));
 			$string = str_replace(array('{class_name}', '{template_path}', '{methods}', '{type}'), array($class_name, $view_path, $methods, $type), $string);
 			static::write_file($path_name, $string);
 			static::functional_test($name);
@@ -191,15 +187,15 @@
 		
 		public static function mailer($name, $methods) {
 			$class_name = Inflector::classify($name);
-			$out = file_get_contents(FileUtils::join(TEMPLATE_APTH, 'mailer.tmpl'));
+			$out = file_get_contents(FileUtils::join(static::$template_path, 'mailer.tmpl'));
 			$methods = '';
-			$template_path = FileUtils::join(NIMBLE_ROOT, 'app', 'view', strtolower(Inflector::underscore($class)));
+			$template_path = FileUtils::join(static::$nimble_root, 'app', 'view', strtolower(Inflector::underscore($class)));
 			foreach($methods as $method) {
 				$methods .= self::mailer_method($method);
 				self::mailer_template($path, $method);
 			}
 			$out = str_replace(array('name', 'template_path', 'methods'), array($class_name, $template_path, $methods), $out);
-			$path_name = FileUtils::join(NIMBLE_ROOT, 'app', 'model', $class_name . '.php');
+			$path_name = FileUtils::join(static::$nimble_root, 'app', 'model', $class_name . '.php');
 			static::write_file($path_name, $out);
 		}
 		
@@ -222,11 +218,11 @@
 		
 		
 		public static function migration($name, $table='') {
-			$path = FileUtils::join(NIMBLE_ROOT, 'db', 'migrations');
+			$path = FileUtils::join(static::$nimble_root, 'db', 'migrations');
 			FileUtils::mkdir_p($path);
 			$file_name = time() . '_' . $name . '_migration.php';
 			$class_name = Inflector::classify($name . 'Migration');
-			$out = file_get_contents(FileUtils::join(TEMPLATE_PATH, 'migration.tmpl'));
+			$out = file_get_contents(FileUtils::join(static::$template_path, 'migration.tmpl'));
 			$up = '';
 			$down = '';
 			if(!empty($table)) {
@@ -244,11 +240,15 @@
 			file_put_contents($path, $string);
 		}
 
+		public static function help() {
+			return file_get_contents(FileUtils::join(static::$template_path, 'help.tmpl'));
+		}
 	}
 
   foreach (array(
   	'template_path' => array(dirname(__FILE__), '..', 'templates'),
   	'script_path' => array(dirname(__FILE__), '..', '..', 'nimble_scripts'),
+  	'nimble_root' => NIMBLE_ROOT
   ) as $name => $path) {
   	Generator::${$name} = FileUtils::join($path);
   }
