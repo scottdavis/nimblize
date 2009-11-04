@@ -66,6 +66,16 @@ class GeneratorTest extends PHPUnit_Framework_TestCase {
 	  $this->assertFileExists(vfsStream::url('root/test/scripts/test'));
 	  $this->assertFileNotExists(vfsStream::url('root/test/scripts/nimblize'));
 	}
+	
+	function testDatabaseConfig() {
+		mkdir(vfsStream::url('root/test'), 0777, true);
+		file_put_contents(vfsStream::url('root/template/database.json'), "[env]");
+		
+		Generator::generate_database_config(vfsStream::url('root/test/database'), 'test');
+		
+		$this->assertFileExists(vfsStream::url('root/test/database'));
+		$this->assertEquals('test', file_get_contents(vfsStream::url('root/test/database')));
+	}
 }
 
 ?>

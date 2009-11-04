@@ -28,7 +28,7 @@
 		 * @param string $path The path where the config file should be generated.
 		 * @param string $env The name of the environment to generate.
 		 */
-		public static function database_config($path, $env) {
+		public static function generate_database_config($path, $env) {
 			$string = str_replace('[env]', $env, file_get_contents(FileUtils::join(static::$template_path, 'database.json')));
 			static::write_file($path, $string);
 		}
