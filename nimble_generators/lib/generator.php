@@ -1,59 +1,37 @@
 <?php
-
-	/**
-	* This File contains all the logic for creating the nimble MVC skeleton
-	*/
-
-
 	require_once(dirname(__FILE__) . '/../../nimble_support/lib/file_utils.php');
-	$folder = dirname(__FILE__);
-
-	define('TEMPLATE_PATH', FileUtils::join($folder, '..', 'templates'));
-	define('SCRIPT_PATH', FileUtils::join($folder, '..', '..', 'nimble_scripts'));
 
 	/**
-	* @package Generators
-	*/
+	 * Class for generating the components of a Nimble skeleton.
+	 * @package Generators
+	 */
 	class Generator {
-		
-		public static function story_helper($path) {
-			copy(FileUtils::join(TEMPLATE_PATH, 'storyhelper.tmpl'), $path);
-		}
-		
-		public static function generate_layout($path) {
-			copy(FileUtils::join(TEMPLATE_PATH, 'layout.tmpl'), $path);
-		}
-		
-		public static function generate_blank_php_file($path) {
-			copy(FileUtils::join(TEMPLATE_PATH, 'empty_php.tmpl'), $path);
-		}
+		public static $template_path, $script_path;
 		
 		/**
-		* Creates the database config files for a specified enviromant
-		* @param string $path - Path to creat file
-		* @param string $env - Enviroment name
-		*/
+		 * Handle generating templates magically.
+		 */
+		public static function __callStatic($method, $arguments) {
+			if (strpos($method, 'generate_') === 0) {
+			  $template_path = FileUtils::join(static::$template_path, str_replace('generate_', '', $method) . '.tmpl');
+			  if (file_exists($template_path)) {			  	
+			  	if (isset($arguments[0])) {
+  					copy($template_path, $arguments[0]);
+			  	}
+			  }
+			}	
+		}
+
+		/**
+		 * Creates the database config files for a specified environment.
+		 * @param string $path The path where the config file should be generated.
+		 * @param string $env The name of the environment to generate.
+		 */
 		public static function database_config($path, $env) {
 			$string = str_replace('[env]', $env, file_get_contents(FileUtils::join(TEMPLATE_PATH, 'database.json')));
 			static::write_file($path, $string);
 		}
 	
-		/**
-		* Creates a boot.php file
-		* @param string $path - path you want to place the boot file
-		*/
-		public static function boot($path) {
-			copy(FileUtils::join(TEMPLATE_PATH, 'boot.php.tmpl'), $path);
-		}
-	
-		/**
-		* Creates a .htaccess file
-		* @param string $path - path you want the htaccess stored
-		*/
-		public static function htaccess($path) {
-			copy(FileUtils::join(TEMPLATE_PATH, 'htaccess.tmpl'), $path);
-		}
-
 		/**
 		* Creates the script directory and copies everything from bin except nimblize
 		* @param string $path - path you want the script folder located
@@ -71,21 +49,6 @@
 			}
 		}
 
-		/**
-		* Creates an empty route file
-		* @param string $path
-		*/
-		public static function route($path) {
-			copy(FileUtils::join(TEMPLATE_PATH, 'route.tmpl'), $path);
-		}
-	
-		/**
-		* Create a r404 class file 
-		* @param string $path - path you want file created
-		*/
-		public static function r404($path) {
-			copy(FileUtils::join(TEMPLATE_PATH, 'r404.tmpl'), $path);
-		}
 		/**
 			* Creates a Nimble Unit Test Case
 			* @param string $name name of test
@@ -219,12 +182,6 @@
 			touch($path);
 		}
 		
-		
-		public static function help() {
-			return file_get_contents(FileUtils::join(TEMPLATE_PATH, 'help.tmpl'));
-		}
-		
-		
 		public static function update($dir) {
 			//update scripts
 			self::scripts(FileUtils::join($dir));
@@ -289,4 +246,11 @@
 
 	}
 
-	?>
+  foreach (array(
+  	'template_path' => array(dirname(__FILE__), '..', 'templates'),
+  	'script_path' => array(dirname(__FILE__), '..', '..', 'nimble_scripts'),
+  ) as $name => $path) {
+  	Generator::${$name} = FileUtils::join($path);
+  }
+  
+?>
