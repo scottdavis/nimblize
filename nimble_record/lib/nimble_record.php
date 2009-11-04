@@ -74,10 +74,10 @@ class NimbleRecord {
 	protected static function table_name() {
 		$class = static::class_name();
 		if(isset(static::$table_names[$class]) && !empty(static::$table_names[$class])) { 
-			$name = static::$table_names[$class];
+			$name = static::$table_name_prefix . static::$table_names[$class];
 		}else{
 			static::$table_names[$class] = strtolower(Inflector::pluralize($class));
-			$name = static::$table_names[$class];
+			$name = static::$table_name_prefix . static::$table_names[$class];
 		}
 		return static::$adapter->quote_table_name($name);
 	}
