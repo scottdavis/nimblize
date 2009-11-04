@@ -18,12 +18,13 @@
   			);
 
 			// self::blue_on_white
-			public static __callStatic($method, $args) {
+			public static function __callStatic($method, $args) {
 				$method = strtolower($method);
 				if(strpos('on', $method) !== false) {
 					
 				}
 			}
+	}
 
 		
 
