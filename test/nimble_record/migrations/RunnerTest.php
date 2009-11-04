@@ -11,6 +11,7 @@ class RunnerTest extends PHPUnit_Framework_TestCase {
 		NimbleRecord::start_transaction();
 		MigrationRunner::$dir = dirname(__FILE__) . '/test';
 		MigrationRunner::create_migration_table();
+		ob_start();
 	}
 	
 	public function testMigrationTable() {
@@ -79,6 +80,7 @@ class RunnerTest extends PHPUnit_Framework_TestCase {
 	public function tearDown() {
 		MigrationRunner::drop_migration_table();
 		NimbleRecord::end_transaction();
+		ob_clean();
 	}
 	
 }

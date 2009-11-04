@@ -33,7 +33,7 @@ class NimbleRecord {
 	var $saved;
 	var $errors;
 	var $preloaded_associations = array();
-	
+	var $new_record = true;
 	/**
 	* Required
 	* connects to the data base and stores the connection
@@ -820,6 +820,7 @@ class NimbleRecord {
 		}
 	$object = new $class;
 	$object->row = $result_set;
+	$object->new_record = false;
 	unset($result_set);
 	unset($class);
 	return $object;
@@ -894,14 +895,22 @@ class NimbleRecord {
 	if(!isset($this->row) || 0 == count($this->row)) {
 	  throw new NimbleRecordException("Can't an save empty record.");
     }
-    if($this->is_new_record()) {
+		/**
+		* CREATE CODE
+		*/
+    if($this->new_record) {
       if($class = self::create($this->row)) {
-        $this->row = $class->row;
-      }else{
+				$this->row = $class->row;
+				return true;
+			}else{
         $this->errors = $class->errors;
+				return false;
       }
     }else{
-      if(!isset($this->row[static::primary_key_field()])) {
+			/**
+			* UPDATE CODE
+			*/
+      if(!isset($this->row[self::primary_key_field()])) {
         throw new NimbleRecordException("Primary key not set for row, cannot save.");
       }
       $f = self::primary_key_field();
@@ -909,8 +918,10 @@ class NimbleRecord {
       unset($this->row[$f]);
       if($class = self::update($primary_key_value, $this->row)) {
         $this->row = $class->row;
+				return true;
       }else{
         $this->errors = $class->errors;
+				return false;
       }
     }
   }
@@ -1071,15 +1082,6 @@ class NimbleRecord {
 	/**
 	* END MAGIC METHODS
 	*/
-	
-	
-	public function is_new_record() {
-		if(isset($this->row) && (count(static::columns()) == count(array_keys($this->row)))) {
-			return true;
-		}else{
-			return false;
-		}
-	}
 	
 	public function __isset($name) {
 		return isset($this->row) && isset($this->row[$name]);

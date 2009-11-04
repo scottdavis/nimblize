@@ -1,5 +1,5 @@
 <?php
-	
+	define("NIMBLE_IS_TESTING", true);
 	require_once(dirname(__FILE__) . '/config.php');
 	
 	

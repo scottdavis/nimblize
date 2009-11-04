@@ -50,8 +50,10 @@ require_once('PHPUnit/Framework.php');
 		public function testInvalidMethodAgainWithPoo() {
 			$_POST['_method'] = 'Poo';
 			$this->Nimble->url = 'test/1';
+			$this->Nimble->test_mode = false;
 			R('test/:id')->controller('Class')->action('method')->on('PUT');
 			$this->Nimble->dispatch();
+			$this->Nimble->test_mode = true;
 		}
 		
 	}

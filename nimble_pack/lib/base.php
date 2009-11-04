@@ -136,8 +136,8 @@ class Nimble
 							}
 					}
 				}
-       	if(empty($_SERVER['REQUEST_METHOD']) && !$test){
-         	throw new NimbleException('No Request Paramater');
+       	if(empty($_SERVER['REQUEST_METHOD']) && !$this->test_mode){
+         	throw new NimbleException('No Request Method');
        	}
 				if(!$this->test_mode){
 					if(NIMBLE_ENV == 'development') {

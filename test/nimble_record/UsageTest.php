@@ -41,6 +41,14 @@
 			$obj = new Photo(array('user_id' => User::find('first')->id, 'title' => 'test', 'description' => 'foo'));
 		}
 		
+		public function testSaveOnNewRecord() {
+			$obj = new User(array('name' => 'bob5000', 'my_int' =>1));
+			$this->assertTrue($obj->save());
+			$this->assertTrue(User::exists('name', 'bob5000'));
+			$this->assertEquals($obj->name, 'bob5000');
+			$this->assertEquals($obj->my_int, 1);
+		}
+		
 	}
 	
 ?>
