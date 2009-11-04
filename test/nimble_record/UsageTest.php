@@ -50,6 +50,17 @@
 			$obj->destroy();
 		}
 		
+		public function testSaveOnNewRecordusingSetters() {
+			$obj = new User();
+			$obj->name = 'bob5000';
+			$obj->my_int = 1;
+			$this->assertTrue($obj->save());
+			$this->assertTrue(User::exists('name', 'bob5000'));
+			$this->assertEquals($obj->name, 'bob5000');
+			$this->assertEquals($obj->my_int, 1);
+			$obj->destroy();
+		}
+		
 		public function testSavedOnExsistingRecord() {
 			$obj = User::find('first', array('conditions' => array('name' => 'names1')));
 			$this->assertEquals($obj->name, 'names1');
