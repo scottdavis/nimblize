@@ -4,8 +4,8 @@
 	require_once(dirname(__FILE__) . '/../../nimblize.php');
 	require_once(dirname(__FILE__) . '/../../nimble_record/migrations/migration.php');
 	require_once(dirname(__FILE__) . '/../../nimble_record/migrations/lib/migration_runner.php');
-	require_once(dirname(__FILE__) . '/model/user.php');
-	require_once(dirname(__FILE__) . '/model/photo.php');
+	require_once(dirname(__FILE__) . '/model/User.php');
+	require_once(dirname(__FILE__) . '/model/Photo.php');
 	$settings = array('host' 			=> 'localhost',
 										'database' 	=> MYSQL_DATABASE,
 										'username'	=> 'root',
