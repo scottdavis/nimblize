@@ -47,8 +47,20 @@
 			$this->assertTrue(User::exists('name', 'bob5000'));
 			$this->assertEquals($obj->name, 'bob5000');
 			$this->assertEquals($obj->my_int, 1);
+			$obj->destroy();
 		}
 		
+		public function testSavedOnExsistingRecord() {
+			$obj = User::find('first', array('conditions' => array('name' => 'names1')));
+			$this->assertEquals($obj->name, 'names1');
+			$new_name = 'this is my new name';
+			$obj->name = $new_name;
+			$this->assertTrue($obj->save());
+			$obj2 = User::find('first', array('conditions' => array('name' => $new_name)));
+			$this->assertEquals($obj2->name, $new_name);
+			$this->assertEquals($obj->new_record, false);
+			$this->assertEquals($obj2->new_record, false);
+		}
 	}
 	
 ?>
