@@ -119,7 +119,7 @@
 			$string = file_get_contents(FileUtils::join(static::$template_path, 'controller.tmpl'));
 			$string = str_replace(array('{class_name}', '{template_path}', '{methods}', '{type}'), array($class_name, $view_path, $methods, $type), $string);
 			static::write_file($path_name, $string);
-			static::functional_test($name);
+			static::generate_test('functional', $name);
 		}
 
 		/**
@@ -185,7 +185,7 @@
 		* @param string $path - path to touch the file
 		*/
 		private static function view($path) {
-			touch($path);
+			@touch($path);
 		}
 		
 		public static function update($dir) {
