@@ -27,7 +27,7 @@ require_once('PHPUnit/Framework.php');
 		}
 
 		public function providerRubyOnRailsRoutes() {
-			$pattern = "[a-zA-Z0-9_-]+";
+			$pattern = "[\sa-zA-Z0-9_-]+";
 
 			return array(
 				array(":id", "(?P<id>{$pattern})"),

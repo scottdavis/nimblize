@@ -2,6 +2,7 @@
 	require_once(dirname(__FILE__) . '/lib/create_table.php');
 	require_once(dirname(__FILE__) . '/lib/alter_table.php');
 	require_once(dirname(__FILE__) . '/../base.php');
+
 	class Migration {
 	
 		static $show_sql = true;

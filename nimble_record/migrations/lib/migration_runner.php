@@ -1,5 +1,5 @@
 <?php
-
+	require_once(dirname(__FILE__) . '/../../../nimble_support/lib/command_line_colors.php');
 	class MigrationRunner {
 		
 		static $dir = 'test';
