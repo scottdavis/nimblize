@@ -440,7 +440,9 @@ class NimbleRecord {
 		$klass = new $c;
 		$klass->row = array_merge($klass->row, $attributes);
 		static::getErrors($klass);
-    call_user_func_array(array($klass, 'before_create'), array());
+		if(count($klass->errors) == 0) {
+    	call_user_func_array(array($klass, 'before_create'), array());
+		}
 		/** Update timestamps if the columns exsist */
 		$columns = static::columns();
 		$columns = array_flip($columns);
@@ -1107,6 +1109,7 @@ class NimbleRecord {
 	public function associations() {}
 	
 	protected function association_exists($key, $association_name) {
+		if(!isset(static::$associations[static::class_name()])) {return false;}
 		$associations = static::$associations[static::class_name()];
 		if (isset($associations[$key])) {
 			$associations = array_flip($associations[$key]);
