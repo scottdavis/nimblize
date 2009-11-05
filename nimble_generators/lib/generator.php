@@ -288,10 +288,13 @@
 
   foreach (array(
   	'template_path' => array(dirname(__FILE__), '..', 'templates'),
-  	'script_path' => array(dirname(__FILE__), '..', '..', 'nimble_scripts'),
-  	'nimble_root' => NIMBLE_ROOT
+  	'script_path' => array(dirname(__FILE__), '..', '..', 'nimble_scripts')
   ) as $name => $path) {
   	Generator::${$name} = FileUtils::join($path);
+  }
+  
+  if (defined('NIMBLE_ROOT')) {
+    Generator::$nimble_root = NIMBLE_ROOT; 
   }
   
 ?>
