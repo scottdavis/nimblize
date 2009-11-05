@@ -216,6 +216,9 @@
 			static::write_file($path_name, $out);
 		}
 		
+		/**
+		 * Generate the mailer method.
+		 */
 		private static function mailer_method($name) {
 			$out = "\n";
 			$out .= "   public function " . $name . '($to)' . " {\n";
@@ -269,6 +272,7 @@
 		
 		/**
 		 * Write a file to the filesystem.
+		 * @access private
 		 */
 		private static function write_file($path, $string) {
 		  file_put_contents($path, $string);
