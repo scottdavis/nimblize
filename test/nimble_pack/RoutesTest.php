@@ -8,6 +8,7 @@
 	class RoutesTest extends PHPUnit_Framework_TestCase {
 		public function setUp() {
 			$_SESSION = array();
+			$_GET = array();
 			$_SESSION['flashes'] = array();
 			$this->Nimble = Nimble::getInstance();
 			$this->Nimble->test_mode = true;
@@ -78,11 +79,27 @@
 				$this->assertEquals('/class/1', url_for('Class', 'Method', 1, 2));
 			}
 			
-			
+			public function testGETisSetFromUrlArgs() {
+				global $_GET;
+				$this->Nimble->routes = array();
+				$this->Nimble->uri = '';
+				Nimble::set_config('url', '/class/1');
+				$this->Nimble->add_url('/class/:method', "MyTestClass", "method");
+				$this->Nimble->dispatch(true);
+				$this->assertTrue(isset($_GET['method']));
+				$this->assertEquals($_GET['method'], '1');
+				
+			}
 			
 			
 
 
+	}
+	
+	class MyTestClass extends Controller {
+		public function method() {
+			
+		}
 	}
 
 ?>

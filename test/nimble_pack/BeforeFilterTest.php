@@ -35,6 +35,10 @@ class BeforeFilterTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue($c->except_index);
 	}
 	
+	public function tareDown() {
+		unset($this->controller);
+	}
+	
 	
 }
 	

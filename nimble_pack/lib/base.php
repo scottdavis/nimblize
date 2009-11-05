@@ -100,6 +100,7 @@ class Nimble
 						/** set the layout tempalte to the default */
 						$this->klass->set_layout_template();
             $this->klass->format = ($conf[4]) ? array_pop($matches) : 'html';
+						$_GET = array_merge($_GET, $matches);
 
             ob_start();
 
