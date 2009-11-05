@@ -2,7 +2,7 @@
 <?php
 	require_once('nimblize/nimblize.php');
 	require_once('nimblize/nimble_generators/lib/generator.php');
-	define('NIMBLE_ROOT', dirname(__FILE__) . DIRECTORY_SEPARATOR . '..');
+	define('NIMBLE_ROOT', getcwd());
 	Generator::$nimble_root = NIMBLE_ROOT;
 	
 	if(count($argv) < 2) {

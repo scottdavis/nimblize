@@ -51,13 +51,20 @@
 	/** create base folders */
 	foreach(array('lib', 'public', 'test', 'plugin', 'script') as $folder) {
 		mkdir(FileUtils::join($app, $folder));
-		if ($folder == 'script') {
-			Generator::generate_scripts(FileUtils::join($app, $folder));
-		}
-		if ($folder == 'public') {
-			foreach(array('image', 'javascript', 'style') as $sub){
-			  mkdir(FileUtils::join($app, $folder, $sub));
-			}
+		switch ($folder) {
+		  case 'script':
+    		Generator::generate_scripts(FileUtils::join($app, $folder));
+    		break;
+    	case 'public':
+  			foreach(array('image', 'javascript', 'style') as $sub){
+  			  mkdir(FileUtils::join($app, $folder, $sub));
+  			}
+  			break;
+  		case 'test':
+  			foreach(array('unit', 'functional') as $sub){
+  			  mkdir(FileUtils::join($app, $folder, $sub));
+  			}
+  			break;
 		}
 	}
 	
