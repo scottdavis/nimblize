@@ -26,6 +26,13 @@ class Inflector {
   * @version $Revision 0.1 $
   */
  
+  public static function __callStatic($method, $arguments) {
+    $internal_method = "_${method}";
+    if (method_exists("Inflector", $internal_method)) {
+      return call_user_func_array("Inflector::${internal_method}", $arguments);
+    }
+  }
+ 
   /**
   * Pluralizes English nouns.
   *
@@ -34,7 +41,7 @@ class Inflector {
   * @param string $word English noun to pluralize
   * @return string Plural noun.
   */  
-  public static function pluralize($word)
+  private static function _pluralize($word)
   {
       $plural = array(
       '/(quiz)$/i' => '\1zes',
@@ -100,7 +107,7 @@ class Inflector {
   * @param string $word English noun to singularize
   * @return string Singular noun.
   */
-  public static function singularize($word)
+  private static function _singularize($word)
   {
       $singular = array (
       '/(quiz)zes$/i' => '\\1',
@@ -172,7 +179,7 @@ class Inflector {
 * @param string $word
 * @return string Pluralized string when number of items is greater than 1
 */
-  public static function conditionalPlural($numer_of_records, $word)
+  private static function _conditionalPlural($numer_of_records, $word)
   {
       return $numer_of_records > 1 ? Inflector::pluralize($word) : $word;
   }
@@ -198,7 +205,7 @@ class Inflector {
 * the words in the title.
 * @return string Text formatted as title
 */
-  public static function titleize($word, $uppercase = '')
+  private static function _titleize($word, $uppercase = '')
   {
       $uppercase = $uppercase == 'first' ? 'ucfirst' : 'ucwords';
       return $uppercase(Inflector::humanize(Inflector::underscore($word)));
@@ -220,7 +227,7 @@ class Inflector {
 * @param string $word Word to convert to camel case
 * @return string UpperCamelCasedWord
 */
-  public static function camelize($word)
+  public static function _camelize($word)
   {
       if(preg_match_all('/\/(.?)/',$word,$got)){
           foreach ($got[1] as $k=>$v){
@@ -247,7 +254,7 @@ class Inflector {
 * @param string $word Word to underscore
 * @return string Underscored word
 */
-  public static function underscore($word)
+  private static function _underscore($word)
   {
       return strtolower(preg_replace('/[^A-Z^a-z^0-9^\/]+/','_',
       preg_replace('/([a-z\d])([A-Z])/','\1_\2',
@@ -275,7 +282,7 @@ class Inflector {
 * instead of just the first one.
 * @return string Human-readable word
 */
-  public static function humanize($word, $uppercase = '')
+  private static function _humanize($word, $uppercase = '')
   {
       $uppercase = $uppercase == 'all' ? 'ucwords' : 'ucfirst';
       return $uppercase(str_replace('_',' ',preg_replace('/_id$/', '',$word)));
@@ -297,7 +304,7 @@ class Inflector {
 * @param string $word Word to lowerCamelCase
 * @return string Returns a lowerCamelCasedWord
 */
-  public static function variablize($word)
+  private static function _variablize($word)
   {
       $word = Inflector::camelize($word);
       return strtolower($word[0]).substr($word,1);
@@ -318,7 +325,7 @@ class Inflector {
 * @param string $class_name Class name for getting related table_name.
 * @return string plural_table_name
 */
-  public static function tableize($class_name)
+  private static function _tableize($class_name)
   {
       return Inflector::pluralize(Inflector::underscore($class_name));
   }
@@ -338,7 +345,7 @@ class Inflector {
 * @param string $table_name Table name for getting related ClassName.
 * @return string SingularClassName
 */
-  public static function classify($table_name)
+  private static function _classify($table_name)
   {
       return Inflector::camelize(Inflector::singularize($table_name));
   }
@@ -356,7 +363,7 @@ class Inflector {
 * @param integer $number Number to get its ordinal value
 * @return string Ordinal representation of given string.
 */
-  public static function ordinalize($number)
+  private static function _ordinalize($number)
   {
       if (in_array(($number % 100),range(11,13))){
           return $number.'th';
@@ -380,13 +387,13 @@ class Inflector {
   // }}}
  
  
-  public static function demodulize($module_name)
+  private static function _demodulize($module_name)
   {
       $module_name = preg_replace('/^.*::/','',$module_name);
       return Inflector::humanize(Inflector::underscore($module_name));
   }
  
-  public static function modulize($module_description)
+  private static function _modulize($module_description)
   {
       return Inflector::camelize(Inflector::singularize($module_description));
   }
@@ -396,14 +403,14 @@ class Inflector {
 * Transforms a string to its unaccented version.
 * This might be useful for generating "friendly" URLs
 */
-  public static function unaccent($text)
+  private static function _unaccent($text)
   {
       return strtr($text, '��������������������������������������������������������������',
                               'AAAAAAACEEEEIIIIDNOOOOOOUUUUYTsaaaaaaaceeeeiiiienoooooouuuuyty');
   }
   
   
-  public static function urlize($text)
+  private static function _urlize($text)
   {
       return trim(Inflector::underscore(Inflector::unaccent($text)),'_');
   }
@@ -415,12 +422,12 @@ class Inflector {
 * @param string $class_name
 * @return string
 */
-  public static function foreignKey($class_name, $suffix = 'id', $separate_class_name_and_id_with_underscore = true)
+  private static function _foreignKey($class_name, $suffix = 'id', $separate_class_name_and_id_with_underscore = true)
   {
       return Inflector::underscore(Inflector::demodulize($class_name)).($separate_class_name_and_id_with_underscore ? "_" . $suffix : $suffix);
   }
  
-  public static function toFullName($name, $correct)
+  private static function _toFullName($name, $correct)
   {
       if (strstr($name, '_') && (strtolower($name) == $name)){
           return Inflector::camelize($name);
