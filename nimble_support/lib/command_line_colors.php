@@ -20,6 +20,8 @@ class CommandLineColor {
  
 			private static $seperator = "\033";
  
+
+			// self::blue_on_white
 			public static function __callStatic($method, $args) {
 				if(strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {return $args[0];}
 				if(empty($args[0])) {return "";}
@@ -37,6 +39,10 @@ class CommandLineColor {
 						$background_color = static::$colors[$color];
 					}
 				}
+				$method = strtolower($method);
+				if(strpos('on', $method) !== false) {
+					
+				}
 				foreach($split as $var) {
 					if(isset(static::$formats[$var])) {
 						$formats[] = static::$formats[$var];
@@ -49,6 +55,7 @@ class CommandLineColor {
 				return static::prepare_string($string, $forground_color, $background_color, $formats);
  
 			}
+			
  
 			private static function prepare_string($string, $forground_color, $background_color, $formats) {
 				$out = array(
@@ -81,6 +88,7 @@ class CommandLineColor {
 				return implode("", $out);
 			}
  
-		}
+	}
+
 
 ?>
