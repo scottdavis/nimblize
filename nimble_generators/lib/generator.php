@@ -180,31 +180,38 @@
     }
 
 		/**
-		* Creates a view template file
-		* @see function create_view_functions
-		* @param string $path - path to touch the file
-		*/
+		 * Creates a view template file
+		 * @see function create_view_functions
+		 * @param string $path The path to touch the file.
+		 */
 		private static function view($path) {
 			@touch($path);
 		}
 		
 		public static function update($dir) {
 			//update scripts
-			self::scripts(FileUtils::join($dir));
+			self::generate_scripts(FileUtils::join($dir));
 			//update boot.php
-			self::boot(FileUtils::join($dir, '..', 'config', 'boot.php'));
+			self::generate_boot(FileUtils::join($dir, '..', 'config', 'boot.php'));
 		}
 		
-		public static function mailer($name, $methods) {
+		/**
+		 * Create templates for mailers.
+		 * @param string $name The name of the mailer.
+		 * @param array $methods The methods to generate.
+		 */
+		public static function generate_mailer($name, $methods = array()) {
 			$class_name = Inflector::classify($name);
 			$out = file_get_contents(FileUtils::join(static::$template_path, 'mailer.tmpl'));
-			$methods = '';
-			$template_path = FileUtils::join(static::$nimble_root, 'app', 'view', strtolower(Inflector::underscore($class)));
-			foreach($methods as $method) {
-				$methods .= self::mailer_method($method);
-				self::mailer_template($path, $method);
+			$template_path = FileUtils::join(static::$nimble_root, 'app', 'view', strtolower(Inflector::underscore($class_name)));
+			
+			$method_output = '';
+			foreach ($methods as $method) {
+				$method_output .= self::mailer_method($method);
+				self::mailer_template($template_path, $method);
 			}
-			$out = str_replace(array('name', 'template_path', 'methods'), array($class_name, $template_path, $methods), $out);
+			
+			$out = str_replace(array('{class_name}', '{template_path}', '{methods}'), array($class_name, $template_path, $method_output), $out);
 			$path_name = FileUtils::join(static::$nimble_root, 'app', 'model', $class_name . '.php');
 			static::write_file($path_name, $out);
 		}
@@ -218,14 +225,17 @@
 			$out .= "	  }\n";
 			return $out;
 		}
-		
+
+    /**
+     * Generate a set of mailer templates, one PHP file and one text file.
+     * @access private
+     */
 		private static function mailer_template($path, $method) {
-			FileUtils::mkdir_p($path);
-			touch(FileUtils::join($path, strtolower($method) . '.php'));
-			touch(FileUtils::join($path, strtolower($method) . '.txt'));
+      FileUtils::mkdir_p($path);
+			foreach (array('php', 'txt') as $type) {
+  			@touch(FileUtils::join($path, strtolower($method) . '.' . $type));
+			}
 		}
-		
-		
 		
 		public static function migration($name, $table='') {
 			$path = FileUtils::join(static::$nimble_root, 'db', 'migrations');
@@ -244,10 +254,9 @@
 			$out = str_replace(array('{name}', '{up_code}', '{down_code}'), array($class_name, $up, $down), $out);
 			static::write_file(FileUtils::join($path, $file_name), $out);
 		}
-
-
+		
 		private static function write_file($path, $string) {
-			file_put_contents($path, $string);
+		  file_put_contents($path, $string);
 		}
 
 		public static function help() {
