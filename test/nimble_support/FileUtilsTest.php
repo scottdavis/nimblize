@@ -2,6 +2,7 @@
 
 require_once('PHPUnit/Framework.php');
 require_once(dirname(__FILE__) . '/../../nimble_support/lib/file_utils.php');
+require_once(dirname(__FILE__) . '/config.php');
 
 class FileUtilsTest extends PHPUnit_Framework_TestCase {
   function testJoin() {
