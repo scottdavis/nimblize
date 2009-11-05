@@ -85,7 +85,6 @@
 		*/
 		private static function asset_id($source, $dir) {
 			$key = $source . '-mtime';
-			$path = FileUtils::join();
 			if(StringCacher::isCached($key)) {
 				return StringCacher::fetch($key);
 			}else{

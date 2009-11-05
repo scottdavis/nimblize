@@ -1,5 +1,7 @@
 <?php
-	define("NIMBLE_IS_TESTING", true);
+	if(!defined('NIMBLE_IS_TESTING')) {
+		define("NIMBLE_IS_TESTING", true);
+	}
 	require_once(dirname(__FILE__) . '/config.php');
 	
 	
