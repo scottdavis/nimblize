@@ -99,9 +99,13 @@
           foreach($klass->routes as $route) {
               $pattern = self::clean_route($route[0]);
               $pattern = empty($pattern) ? 'root path' : $pattern;
-              array_push($out, "Controller: {$route[1]} Action: {$route[2]} Method: {$route[3]} Pattern: " . $pattern);
-          }
-          $return = "\n";
+							$string = CommandLineColor::underline("Controller:") . ' ' . CommandLineColor::yellow($route[1]) . ' ' . 			
+							CommandLineColor::underline('Action:') . ' ' . CommandLineColor::magenta($route[2]) . ' ' . 
+							CommandLineColor::underline('Method:') . ' ' . CommandLineColor::green($route[3]) . ' ' . 
+							CommandLineColor::underline('Pattern:') . ' ' . CommandLineColor::bold_red($pattern);   
+							array_push($out, $string);
+          }  
+     $return = "\n";
           $return .= join("\n", $out);
           $return .= "\n";
           return $cli ? $return : htmlspecialchars($return);

@@ -21,6 +21,14 @@
 		* ALL CHANGES SHOULD BE MADE IN the config.php files
 	**/
 	
+	
+	
+	$env = getenv('NIMBLE_ENV');
+	if(!empty($env)) {
+		$_SERVER['WEB_ENVIRONMENT'] = strtolower($env);
+	}
+	
+	
 	if(!isset($_SERVER['WEB_ENVIRONMENT'])) {
 		$_SERVER['WEB_ENVIRONMENT'] = 'development';
 	}

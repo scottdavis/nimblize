@@ -478,7 +478,7 @@ class NimbleRecord {
 	public static function _create(array $attributes = array()) {
 		$create = self::create($attributes);
 		if(count($create->errors)) {
-			throw new NimbleRecordException(join("\n", $create->errors[0]));
+			throw new NimbleRecordException(join("\n", $create->errors));
 		}
 		if(!$create->saved){
 			throw new NimbleRecordException('Failed to create record');
@@ -899,7 +899,8 @@ class NimbleRecord {
 		* CREATE CODE
 		*/
     if($this->new_record) {
-      if($class = self::create($this->row)) {
+			$class = self::create($this->row);
+      if($class->saved) {
 				$this->row = $class->row;
 				return true;
 			}else{
@@ -916,7 +917,8 @@ class NimbleRecord {
       $f = self::primary_key_field();
       $primary_key_value = $this->row[$f];
       unset($this->row[$f]);
-      if($class = self::update($primary_key_value, $this->row)) {
+			$class = self::update($primary_key_value, $this->row);
+      if($class->saved) {
         $this->row = $class->row;
 				return true;
       }else{
@@ -1027,13 +1029,10 @@ class NimbleRecord {
 		if($this->update_mode && preg_match('/uniqueness_of/', $method)) {
 			return;
 		}
-		
-		if(preg_match('/^validates_[0-9a-z_]+/', $method, $matches)) {
-			$klass_method = str_replace('validates_', '', $method);
-			//faster then in_array
-			$validation_methods = array_flip(get_class_methods('NimbleValidation'));
-			if(isset($validation_methods[$klass_method])) {
-				if(count($arguments[0]) > 1){
+		if(preg_match('/^validates_([0-9a-z_]+)$/', $method, $matches)) {
+			$klass_method = $matches[1];
+			if(array_include($klass_method, get_class_methods('NimbleValidation'))) {
+				if(is_array($arguments[0]) && count($arguments[0]) > 1){
 					foreach($arguments[0] as $column) {
             if(!isset($this->row[$column])) {
               $value = '';
@@ -1048,7 +1047,7 @@ class NimbleRecord {
 						$this->process_error_return($return);
 					}
 				}else{
-					$column = $arguments[0][0];
+					$column = $arguments[0];
 					$args = array('column_name' => $column, 'value' => $this->row[$column]);
 					if(isset($arguments[1]) && !empty($arguments[1])) {
 						$args = array_merge($args, $arguments[1]);

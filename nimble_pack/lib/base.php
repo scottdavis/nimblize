@@ -72,7 +72,7 @@ class Nimble
             $rule .= '\.(?P<format>[a-zA-Z0-9]+)';
             $has_format = true;
         }
-        $rule = preg_replace('/:([a-zA-Z0-9_]+)(?!:)/', '(?P<\1>[a-zA-Z0-9_-]+)', $rule);
+        $rule = preg_replace('/:([a-zA-Z0-9_]+)(?!:)/', '(?P<\1>[\sa-zA-Z0-9_-]+)', $rule);
         $this->routes[] = array('/^' . str_replace('/','\/',$rule) . '$/', $klass, $klass_method, $http_method, $has_format);
     }
 

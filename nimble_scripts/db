@@ -1,6 +1,7 @@
 #! /usr/bin/env php
 <?php
 	define("CLI_RUNNER", true);
+	require_once('nimblize/nimble_support/lib/command_line_colors.php');
 	require_once('nimblize/nimble_record/migrations/lib/migration_runner.php');
 	require_once('nimblize/nimble_record/migrations/migration.php');
 	$nimble_root = dirname(__FILE__) . DIRECTORY_SEPARATOR . '..';
@@ -36,9 +37,14 @@
 		$c = MigrationRunner::current_version();
 		$v = MigrationRunner::migrate($direction);
 		if($c == $v) {
-			print('Nothing was done database is at max version' . "\n");
+			print(CommandLineColor::red('Nothing was done database is at max version') . "\n");
 		}else{
-			print('Migrated ' . $direction . ' to ' . $v . "\n");
+			if($direction == 'down') {
+				$color = 'red';
+			}else{
+				$color = 'green';
+			}
+			print(call_user_func_array(array('CommandLineColor', $color), array('Migrated ' . $direction . ' to ' . $v . "\n")));
 		}
 	}
 	
@@ -59,17 +65,17 @@
 		case 'stories':
 			switch($argv[2]) {
 				case 'load':
-					print('Loading stories' . "\n");
+					print(CommandLineColor::underline_white('Loading stories') . "\n");
 					$s = new StoryHelper();
 					$s->up();
 				break;
 				case 'clear':
-					print('Clearing stories' . "\n");
+					print(CommandLineColor::underline_red('Clearing stories') . "\n");
 					$s = new StoryHelper();
 					$s->down();
 				break;
 				case 'reload':
-					print('Clearing database and reloading stories' . "\n");
+					print(CommandLineColor::underline_red('Clearing database and reloading stories') . "\n");
 					_reset();
 					$s = new StoryHelper();
 					$s->up();

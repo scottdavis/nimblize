@@ -28,6 +28,7 @@
 		foreach($array as $value) {
 			array_push($out, $func($value));
 		}
+		unset($func);
 		return $out;
 	}
 	/**

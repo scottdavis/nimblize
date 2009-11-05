@@ -75,12 +75,13 @@
 			foreach($data as $version => $class) {
 				if((int) $current >= (int) $version) {continue;}
 				if((!is_null($to_version) &&  !empty($to_version)) && (int) $version > (int) $to_version) {continue;}
-				print('Running ' . $class . " - $version\n");
+				print(CommandLineColor::underline('Running') . " " . CommandLineColor::underline_blue($class) . " - " . CommandLineColor::yellow($version) . "\n");
 				$klass = new $class();
 				$klass->up();
 				self::create_version($version);
 			}
 		}
+		
 		
 	public static function down($to_version) {
 		$current = self::current_version();
@@ -90,7 +91,7 @@
 		foreach($data as $version => $class) {
 			if((int) $version < (int) $to_version) {continue;}
 			if((int) $current < (int) $version) {continue;}
-			print('Running ' . $class . " - $version\n");
+			print(CommandLineColor::underline('Running') . " " . CommandLineColor::underline_blue($class) . " - " . CommandLineColor::yellow($version) . "\n");
 			$klass = new $class();
 			$klass->down();
 			self::delete_version($version);
