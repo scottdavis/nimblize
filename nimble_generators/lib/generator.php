@@ -104,15 +104,15 @@
 			* @todo need to add name space support
 			* @param string $name - suffix you want the name the controller
 			*/
-		public static function controller($name, $views=true) {
+		public static function generate_controller($name, $views = true) {
 			$class_name = Inflector::classify($name);
 			$path_name = FileUtils::join(static::$nimble_root, 'app', 'controller', Inflector::underscore($class_name) . '_controller.php');
 			$view_path = FileUtils::join(static::$nimble_root, 'app', 'view', strtolower(Inflector::underscore($class_name)));
-			if($views) {
+			if ($views) {
 				FileUtils::mkdir_p($view_path);
 				$methods = static::create_view_functions($view_path);
 				$type = "ApplicationController";
-			}else{
+			} else {
 				$methods = '';
 				$type = "Controller";
 			}
@@ -123,11 +123,11 @@
 		}
 
 		/**
-		* @access private
-		* @return string
-		* @see function controller
-		* @param string $view_path - folder in which to create files
-		*/
+		 * @access private
+ 		 * @return string The methods for the view.
+		 * @see function controller
+		 * @param string $view_path - folder in which to create files
+		 */
 		private static function create_view_functions($view_path) {
 			$out = '';
 			foreach(array('index', 'add') as $view) {
@@ -153,28 +153,32 @@
 		}
 	
 		/**
-		* @access private
-		* @param string $action - name of the action
-		* @param boolean $id - wither created function takes an id or not
-		* @see function create_view_functions
-		* @return string 
-		*/
-		private static function view_function($action, $id=false) {
-			$out = "	/**\n";
-			$out .= "	* " . $action . "\n";
-			if($id) {
-				$out .= "	* @param " . '$id' . " string\n";
-				$out .= "	*/\n";
-				$out .= "    public function " . $action . '($id)' . " {\n";
-			}else{
-				$out .= "	*/\n";
-				$out .= "    public function " . $action . "() {\n";
-			}
-			$out .= "    }\n";
-			$out .= "\n";
-			return $out;
-		}
-	
+		 * @param string $action - name of the action
+		 * @param boolean $id - wither created function takes an id or not
+		 * @see function create_view_functions
+		 * @return string 
+		 */
+		public static function view_function($action, $id = false) {
+      $out = array();
+
+      $out[] = '  /**';
+      $out[] = "   * ${action}";
+      if ($id) {
+        $out[] = "   * @param \$id string The unique identifier for this object.";
+      }
+      $out[] = "   */";
+      if ($id) {
+        $out[] = "  public function {$action}(\$id) {";
+      } else {
+        $out[] = "  public function {$action}() {";
+      }
+      $out[] = '';
+      $out[] = '}';
+      $out[] = '';
+
+      return implode("\n", $out);
+    }
+
 		/**
 		* Creates a view template file
 		* @see function create_view_functions

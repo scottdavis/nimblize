@@ -92,6 +92,27 @@ class GeneratorTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('Test', file_get_contents(vfsStream::url('root/app/model/test.php')));
 		$this->assertFileExists(vfsStream::url('root/test/unit/TestTest.php'));	 	
 	}
+
+	function providerTestGenerateController() {
+		return array(
+			array(true), array(false)
+		);	
+	}
+
+  function providerTestViewFunction() {
+    return array(
+      array(false, true)
+    ); 
+  }
+
+  /**
+   * @dataProvider providerTestViewFunction
+   * @covers Generator::view_function
+   */
+  function testViewFunction($id) {
+    $result = Generator::view_function('index', $id);
+    $this->assertEquals(($id ? 1 : 0), preg_match('#\($id\)#', $result));
+  }
 }
 
 ?>
