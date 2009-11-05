@@ -237,11 +237,18 @@
 			}
 		}
 		
-		public static function migration($name, $table='') {
+		/**
+		 * Generate a migration.
+		 * @param string $name The name of the migration.
+		 * @param string $table The table to create a migration for.
+		 */
+		public static function generate_migration($name, $table = '') {
 			$path = FileUtils::join(static::$nimble_root, 'db', 'migrations');
 			FileUtils::mkdir_p($path);
+			
 			$file_name = time() . '_' . $name . '_migration.php';
 			$class_name = Inflector::classify($name . 'Migration');
+									
 			$out = file_get_contents(FileUtils::join(static::$template_path, 'migration.tmpl'));
 			$up = '';
 			$down = '';
@@ -251,14 +258,25 @@
 				$up .= "\n" . '			$t->go();';
 				$down .= '	$this->drop_table("' . $table . '");';				
 			}
-			$out = str_replace(array('{name}', '{up_code}', '{down_code}'), array($class_name, $up, $down), $out);
+			$out = str_replace(
+			  array('{class_name}', '{up_code}', '{down_code}'), 
+			  array($class_name, $up, $down), 
+			  $out
+			);
+			
 			static::write_file(FileUtils::join($path, $file_name), $out);
 		}
 		
+		/**
+		 * Write a file to the filesystem.
+		 */
 		private static function write_file($path, $string) {
 		  file_put_contents($path, $string);
 		}
 
+    /**
+     * Retrieve the help documentation.
+     */
 		public static function help() {
 			return file_get_contents(FileUtils::join(static::$template_path, 'help.tmpl'));
 		}

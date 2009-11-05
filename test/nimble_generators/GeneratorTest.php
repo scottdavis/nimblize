@@ -148,6 +148,20 @@ class GeneratorTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals('Test', file_get_contents(vfsStream::url('root/app/model/Test.php')));
     $this->assertFileExists(vfsStream::url('root/app/view/test'));
   }
+  
+  function testGenerateMigration() {
+		file_put_contents(vfsStream::url('root/template/migration.tmpl'), "{class_name}");
+
+    Generator::generate_migration('Test', 'test');
+    
+    $this->assertFileExists(vfsStream::url('root/db/migrations'));
+    $dh = opendir(vfsStream::url('root/db/migrations'));
+    while (($result = readdir($dh)) !== false) {
+      $this->assertTrue(strpos($result, 'Test_migration.php') !== false);
+      $this->assertEquals('TestMigration', file_get_contents(vfsStream::url('root/db/migrations/') . $result));
+    }
+    closedir($dh);
+  }
 }
 
 ?>
