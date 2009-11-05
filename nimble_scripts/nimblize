@@ -45,14 +45,14 @@
 	foreach(array('production', 'test', 'development', 'staging') as $env) {
 		mkdir(FileUtils::join($app, 'config', $env));
 		/** insert database config files */
-		Generator::database_config(FileUtils::join($app, 'config', $env, 'database.json'), $env);
+		Generator::generate_database_config(FileUtils::join($app, 'config', $env, 'database.json'), $env);
 		Generator::generate_empty_php(FileUtils::join($app, 'config', $env , 'config.php'));
 	}
 	/** create base folders */
 	foreach(array('lib', 'public', 'test', 'plugin', 'script') as $folder) {
 		mkdir(FileUtils::join($app, $folder));
 		if ($folder == 'script') {
-			Generator::scripts(FileUtils::join($app, $folder));
+			Generator::generate_scripts(FileUtils::join($app, $folder));
 		}
 		if ($folder == 'public') {
 			foreach(array('image', 'javascript', 'style') as $sub){
