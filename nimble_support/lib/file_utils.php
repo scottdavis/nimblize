@@ -5,12 +5,15 @@
 	class FileUtils {
 		
 		/**
-		* Creates paths to a file that is OS generic
-		* @uses FileUtils::join('root', 'sub', 'nimble.txt')
-		*/
+		 * Creates paths to a file that is OS generic.
+		 * @uses FileUtils::join('root', 'sub', 'nimble.txt')
+		 * @param string,...|array $args The path to create. If the first parameter is an array, use that array's elements to create the path.
+		 * @return string The joined directory string.
+		 */
 		public static function join() {
 			$args = func_get_args();
-			return join(DIRECTORY_SEPARATOR, $args);
+			if (is_array($args[0])) { $args = $args[0]; }
+			return implode(DIRECTORY_SEPARATOR, $args);
 		}
 	  
 		/**
