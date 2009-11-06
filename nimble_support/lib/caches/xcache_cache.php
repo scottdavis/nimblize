@@ -1,6 +1,6 @@
 <?php
 
-require_once('nimble_support/lib/caches/cache_interface.php');
+require_once(dirname(__FILE__) . '/cache_interface.php');
 
 class XcacheCache implements CacheInterface {
   static private $instance;

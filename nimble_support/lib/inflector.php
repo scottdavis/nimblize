@@ -4,7 +4,7 @@
 * @package NimbleSupport
 */
 
-require_once('nimble_support/lib/cache.php');
+require_once(dirname(__FILE__) . '/cache.php');
 
 class Inflector {
   
