@@ -3,7 +3,7 @@
 interface CacheInterface {
   public static function get_instance();  
   
-  public function set($key, $value);  
+  public function set($key, $value, $ttl = 0);  
   public function get($key);  
   public function exists($key);  
   public function remove($key);  

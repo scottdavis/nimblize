@@ -17,7 +17,7 @@ class GlobalsCache implements CacheInterface {
     $this->cache = array(); 
   }
   
-  public function set($key, $value) {
+  public function set($key, $value, $ttl = 0) {
     $this->cache[$key] = $value;
   }
   
