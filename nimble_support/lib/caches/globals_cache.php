@@ -1,6 +1,6 @@
 <?php
 
-require_once('../cache.php');
+require_once(dirname(__FILE__) . '/../cache.php');
 
 class GlobalsCache extends Cache {
   static private $instance;
