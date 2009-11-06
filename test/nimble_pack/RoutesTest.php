@@ -88,10 +88,38 @@
 				$this->Nimble->dispatch(true);
 				$this->assertTrue(isset($_GET['method']));
 				$this->assertEquals($_GET['method'], '1');
-				
 			}
 			
-			
+      public function testRFunctionSingleParameter() {
+        $result = R('test');
+        $this->assertEquals('test', $result->pattern);
+        $this->assertTrue(empty($result->controller));
+        $this->assertEquals(0, count($this->Nimble->routes));
+      }
+      
+      public function testRFunctionFourParameters() {
+        $result = R('GET', 'GET', 'GET', 'GET');
+        foreach (array('pattern', 'controller', 'action', 'http_method') as $param) {
+          $this->assertEquals('GET', $result->{$param});
+        }
+        $this->assertEquals(1, count($this->Nimble->routes));
+      }
+
+      public function providerTestRFunctionBadParamCounts() {
+        return array(
+          array(array()),
+          array(array('1', '2')),
+          array(array('1', '2', '3')),
+        );
+      }
+      
+      /**
+       * @expectedException NimbleException
+       * @dataProvider providerTestRFunctionBadParamCounts
+       */
+      public function testRFunctionBadParamCounts($params) {
+        call_user_func_array('R', $params); 
+      }
 
 
 	}

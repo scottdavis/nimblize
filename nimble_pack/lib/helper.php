@@ -12,16 +12,24 @@
  *
  * (thanks to:  Rafael S. Souza <rafael.ssouza [__at__] gmail.com>)
  */
-function R($pattern)
-{
-    if (count($args = func_get_args()) == 4)
-    {
-        $r = new Route($args[0]);
-        $r->controller($args[1])->action($args[2])->on($args[3]);
-        return $r;
-    } else {
-        return new Route($pattern);
-    }
+function R() {
+  $args = func_get_args();
+  switch (count($args)) {
+    case 0:
+    case 2:
+    case 3:
+      throw new NimbleException("Incorrect number of parameters for R()");
+    case 1: 
+      return new Route($args[0]);
+    case 4:
+      $r = new Route($args[0]);
+      $r->controller($args[1])->action($args[2])->on($args[3]);
+      return $r;    
+  }
+}
+
+function u() {
+  
 }
 
 ?>
