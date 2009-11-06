@@ -1,5 +1,7 @@
 <?php
 
+require_once('nimble_support/lib/inflector.php');
+
 class Cache {
   static public $caches;
   static public $default_cache = 'globals';
@@ -11,11 +13,12 @@ class Cache {
     if (!isset(self::$caches[$name])) {
       $target = dirname(__FILE__) . "/caches/${name}_cache.php";
       if (file_exists($target)) {
-        $before_load = get_declared_classes();
         require_once($target);
-        if (count($caching_classes = array_diff(get_declared_classes(), $before_load)) == 1) {
-          $cache_class = reset($caching_classes);
-          self::register_cache($name, $cache_class::get_instance());
+        
+        $class_name = Inflector::camelize($name, false) . 'Cache';
+        
+        if (class_exists($class_name)) {
+          self::register_cache($name, $class_name::get_instance());
         }
       }
     }

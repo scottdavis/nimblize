@@ -1,8 +1,8 @@
 <?php
 
-require_once(dirname(__FILE__) . '/../cache.php');
+require_once('nimble_support/lib/caches/cache_interface.php');
 
-class GlobalsCache extends Cache {
+class GlobalsCache implements CacheInterface {
   static private $instance;
   private $cache;
   
@@ -35,6 +35,12 @@ class GlobalsCache extends Cache {
   
   public function clear() {
     $this->cache = array(); 
+  }
+  
+  public function stats() {
+    return array(
+      'count' => count($this->cache)
+    ); 
   }
 }
 

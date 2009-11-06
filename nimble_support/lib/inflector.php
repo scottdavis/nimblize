@@ -3,7 +3,9 @@
 /**
 * @package NimbleSupport
 */
- 
+
+require_once('nimble_support/lib/cache.php');
+
 class Inflector {
   
   /**
@@ -29,7 +31,24 @@ class Inflector {
   public static function __callStatic($method, $arguments) {
     $internal_method = "_${method}";
     if (method_exists("Inflector", $internal_method)) {
-      return call_user_func_array("Inflector::${internal_method}", $arguments);
+      $last_argument = end($arguments);
+      $use_cache = ($last_argument !== false);
+      $cache_key = false;
+
+      if ($use_cache) {
+        $cache = Cache::get_cache();
+        $cache_key = 'inflector-' . $method . '-' . md5(serialize($arguments));
+        if ($cache->exists($cache_key)) {
+          return $cache->get($cache_key);
+        }
+      }
+      
+      $result = call_user_func_array("Inflector::${internal_method}", $arguments);
+      if ($use_cache) {
+        $cache->set($cache_key, $result);        
+      }
+      
+      return $result;
     }
   }
  
