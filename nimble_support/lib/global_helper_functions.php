@@ -41,4 +41,53 @@
 		echo AssetTag::image($file, $alt, $options);
 	}
 
+	/**
+		* Function to create a link
+		* @param string $name Link Name
+		* @param string $url Url for the link
+	**/
+  function link_to($name, $url) {
+    return TagHelper::content_tag('a', $name, array('href' => $url));
+  }
+
+  /**
+		* Function to create a link to a user
+		* @param object $user The user object you wish to create a link from
+	**/
+  function user_link($user) {
+  	return link_to($user->name, url_for('UserController', 'show', $user));
+  }
+
+
+	/**
+	 * Function to create a link that is actualy javascript! for triggering the delete method on controllers
+	 * @param string $name Link name
+	 * @param string $url Url for link
+	 * @param boolean $confirm Adds a javascript confirm box to the link
+	**/
+	function delete_link($name, $url, $confirm = true) {
+		if($confirm) {
+			$confirmtxt = 'confirm(\'Are you sure?\')';
+		}else{
+			$confirmtxt = 'true';
+		}
+		$content = "if ($confirmtxt) { var f = document.createElement('form');
+		       f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;
+		       var m = document.createElement('input'); m.setAttribute('type', 'hidden'); m.setAttribute('name', '_method');
+		       m.setAttribute('value', 'delete'); f.appendChild(m);f.submit(); };return false;";
+		return TagHelper::content_tag('a', $name, array('href' => $url, 'onclick' => $content));
+	}
+	
+	/**
+	 * Function to shorten a string and add an ellipsis 
+	 * @param string $string Origonal string
+	 * @param integer $max Maximum length
+	 * @param string $rep Replace with... (Default = '' - No elipsis -)
+	 * @return string
+	 **/
+	function truncate($string, $max = 25, $rep = '&hellip;') {
+	    $leave = $max - strlen ($rep);
+	    return substr_replace($string, $rep, $leave);
+	}
+
 ?>
