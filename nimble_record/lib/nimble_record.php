@@ -434,7 +434,9 @@ class NimbleRecord {
 	/** Create Callbacks*/
 	public function before_create() {}
 	public function after_create()  {}
-	
+	public function before_save()		{}
+	public function after_save()		{}
+
 	public static function create(array $attributes = array()) {
 		$c = static::class_name();
 		$klass = new $c;
@@ -442,6 +444,7 @@ class NimbleRecord {
 		static::getErrors($klass);
 		if(count($klass->errors) == 0) {
     	call_user_func_array(array($klass, 'before_create'), array());
+			call_user_func_array(array($klass, 'before_save'), array());
 		}
 		/** Update timestamps if the columns exsist */
 		$columns = static::columns();
@@ -469,6 +472,7 @@ class NimbleRecord {
 			$klass->row['id'] = static::insert_id();
 			$klass->saved = true;
 			call_user_func_array(array($klass, 'after_create'), array());
+			call_user_func_array(array($klass, 'after_save'), array());
 			return $klass;
 		}else{	
 			$klass->saved = false;
@@ -525,7 +529,10 @@ class NimbleRecord {
 		$klass->update_mode = true;
     $klass->row = array_merge($klass->row, $attributes);
     static::getErrors($klass);
-    call_user_func_array(array($klass, 'before_update'), array());
+		if(count($klass->errors) == 0) {
+			call_user_func_array(array($klass, 'before_update'), array());
+			call_user_func_array(array($klass, 'before_save'), array());
+		}
 		$sql = 'UPDATE ' . self::table_name() . ' SET ';
 		$updates = array();
 		/** Update timestamp if the column exsists */
@@ -543,7 +550,9 @@ class NimbleRecord {
       $klass->id = $id;
 			$klass->saved = true;
 			$klass->update_mode = false;
+			$klass->new_record = false;
 			call_user_func_array(array($klass, 'after_update'), array());
+			call_user_func_array(array($klass, 'after_save'), array());
 			return $klass;
 		}else{
 			$klass->saved = false;
