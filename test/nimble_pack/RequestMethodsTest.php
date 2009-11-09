@@ -21,13 +21,13 @@
 		public function testDelete() {
 			$_POST['_method'] = 'DELETE';
 			R('test/:id')->controller('Class')->action('method')->on('DELETE');
-			$this->assertEquals($this->Nimble->routes[0][3], $_POST['_method']);
+			$this->assertEquals($this->Nimble->routes[0]->http_method, $_POST['_method']);
 		}
 		
 		public function testPut() {
 			$_POST['_method'] = 'PUT';
 			R('test/:id')->controller('Class')->action('method')->on('PUT');
-			$this->assertEquals($this->Nimble->routes[0][3], $_POST['_method']);
+			$this->assertEquals($this->Nimble->routes[0]->http_method, $_POST['_method']);
 		}
 		/**
 		* @expectedException NimbleException

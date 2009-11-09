@@ -50,7 +50,7 @@
        */
       public static function build_url($route, $params=array()) {
           $route_regex = '/\(\?P<[\w]+>[^\)]+\)/'; // matches (?P<foo>[a-zA-Z0-9]+)
-          $pattern = self::clean_route($route[0]);
+          $pattern = self::clean_route($route->rule);
           if(!empty($params) && preg_match_all($route_regex, $pattern, $matches)){
               // test if we have the right number of params
               if (count($matches[0]) < count($params)) {
@@ -80,7 +80,7 @@
 	  
           $klass = Nimble::getInstance();
           foreach($klass->routes as $route) {
-              if(strtolower($route[1]) == strtolower($controller) && strtolower($route[2]) == strtolower($action)) {
+              if(strtolower($route->controller) == strtolower($controller) && strtolower($route->method) == strtolower($action)) {
                   return self::build_url($route, $params);
               }
           }
