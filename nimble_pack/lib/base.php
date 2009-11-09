@@ -124,6 +124,13 @@ class Nimble
 		return false;
 	}
 
+	public function get_route_info_by_short_name($short_name) {
+		if (!isset($this->routes_by_short_name[$short_name])) {
+			throw new NimbleException(sprintf("Short name %s not defined", $short_name));
+		}
+		return $this->routes[$this->routes_by_short_name[$short_name]];
+	}
+
 	/**
 	 * Match the HTTP request's URL and HTTP method against the stored routes and, if a match is found, call the appropriate controller's method.
 	 * If the client you're using doesn't support sending HTTP requests with methods

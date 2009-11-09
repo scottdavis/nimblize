@@ -32,8 +32,14 @@ function R() {
   }
 }
 
-function u() {
+function u($short_url) {
+	$args = func_get_args();
 
+	$route_info = Nimble::getInstance()->get_route_info_by_short_name($short_url);
+
+	$args = array_merge(array($route_info->controller, $route_info->method), array_slice($args, 1));
+
+	return call_user_func_array('UrlBuilder::url_for', $args);
 }
 
 ?>

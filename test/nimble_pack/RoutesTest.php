@@ -165,6 +165,49 @@ class RoutesTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, count($this->Nimble->routes));
 		$this->assertTrue(isset($this->Nimble->routes[0]->short_url));
 	}
+
+	public function testGetRouteInfoByShortName() {
+		R('test', 'test', 'test', 'GET', 'test');
+
+		$route_info = $this->Nimble->get_route_info_by_short_name('test');
+		$this->assertEquals('test', $route_info->controller);
+	}
+
+	/**
+	 * @expectedException NimbleException
+	 */
+	public function testFailGetRouteInfoByShortName() {
+		$this->Nimble->get_route_info_by_short_name('test');
+	}
+
+	public function providerTestU() {
+		return array(
+			array(
+				array('', 'Test', 'test', 'GET', 'test'),
+				array('test'),
+				''
+			),
+			array(
+				array('/test/:id', 'Test', 'test', 'GET', 'test'),
+				array('test', 1),
+				'/test/1'
+			),
+			array(
+				array('/test/:action/:id', 'Test', 'test', 'GET', 'test'),
+				array('test', 'other', 1),
+				'/test/other/1'
+			),
+			);
+	}
+
+	/**
+	 * @dataProvider providerTestU
+	 */
+	public function testU($route_info, $short_url_call, $expected_url) {
+		call_user_func_array('R', $route_info);
+		$result = call_user_func_array('u', $short_url_call);
+		$this->assertTrue($expected_url === $result);
+	}
 }
 
 class MyTestClass extends Controller {
