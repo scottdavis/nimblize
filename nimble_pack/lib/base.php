@@ -116,6 +116,9 @@ class Nimble
 	public function remove_url_by_id($id) {
 		if (isset($this->routes[$id])) {
 			unset($this->routes[$id]);
+			if (($index = array_search($id, $this->routes_by_short_name)) !== false) {
+				unset($this->routes_by_short_name[$index]);
+			}
 			return true;
 		}
 		return false;

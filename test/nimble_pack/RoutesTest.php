@@ -147,9 +147,12 @@ class RoutesTest extends PHPUnit_Framework_TestCase {
 
 	public function testRemoveURLById(){
 		$this->assertTrue(empty($this->Nimble->routes));
-		$this->assertEquals(0, $id = $this->Nimble->add_url('GET', 'GET', 'GET', 'GET'));
-		$this->assertEquals(1, $id = $this->Nimble->add_url('POST', 'POST', 'POST', 'POST'));
+		$this->assertTrue(empty($this->Nimble->routes_by_short_name));
+		$this->assertEquals(0, $id = $this->Nimble->add_url('GET', 'GET', 'GET', 'GET', 'one'));
+		$this->assertEquals(1, $id = $this->Nimble->add_url('POST', 'POST', 'POST', 'POST', 'two'));
+		$this->assertTrue(isset($this->Nimble->routes_by_short_name['one']));
 		$this->assertTrue($this->Nimble->remove_url_by_id(0));
+		$this->assertFalse(isset($this->Nimble->routes_by_short_name['one']));
 		$this->assertEquals(1, count($this->Nimble->routes));
 		$this->assertFalse($this->Nimble->remove_url_by_id(2));
 	}
