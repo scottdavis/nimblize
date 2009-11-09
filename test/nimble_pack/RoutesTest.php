@@ -13,6 +13,7 @@ class RoutesTest extends PHPUnit_Framework_TestCase {
 		$this->Nimble = Nimble::getInstance();
 		$this->Nimble->test_mode = true;
 		$this->Nimble->routes = array();
+		$this->Nimble->routes_by_short_name = array();
 		$this->Nimble->uri = '';
 		$this->url = '';
 	}
@@ -125,10 +126,13 @@ class RoutesTest extends PHPUnit_Framework_TestCase {
 
 	public function testBindShortRoute() {
 		$this->assertTrue(empty($this->Nimble->routes));
+		$this->assertTrue(empty($this->Nimble->routes_by_short_name));
 		$route = new Route('test');
 		$route->controller('test')->action('test')->on('GET')->short_url('test');
 		$this->assertTrue(count($this->Nimble->routes) == 1);
+		$this->assertTrue(count($this->Nimble->routes_by_short_name) == 1);
 		$this->assertEquals('test', $this->Nimble->routes[0]->short_url);
+		$this->assertTrue($this->Nimble->routes_by_short_name['test'] === 0);
 	}
 
 	public function testRemoveURLById(){

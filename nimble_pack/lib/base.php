@@ -15,6 +15,7 @@ require_once(dirname(__FILE__) . '/route/url_builder.php');
 class Nimble
 {
 	var $routes = array();
+	var $routes_by_short_name = array();
 	var $config = array();
 	var $plugins = array();
 	var $test_mode = false;
@@ -67,13 +68,13 @@ class Nimble
 	public function add_url($rule, $klass, $klass_method, $http_method = 'GET')
 	{
 		$args = func_get_args();
-		 
+
 		if (count($args) >= 4) {
 			foreach (array('rule', 'klass', 'klass_method', 'http_method', 'short_url') as $field) {
 				if (count($args) > 0) {	${$field} = array_shift($args); }
 			}
 		}
-		 
+
 		// parse format
 		$has_format = false;
 		if (preg_match('/\.[a-zA-Z0-9]+$/', $this->url)) {
@@ -90,14 +91,16 @@ class Nimble
 			'has_format' => $has_format,
 			'short_url' => $short_url
 		);
-		
+
 		$id = count($this->routes);
-		
+
 		$this->routes[$id] = (object)$route_info;
-		
+
+		if (!empty($short_url)) {	$this->routes_by_short_name[$short_url] = $id;	}
+
 		return $id;
 	}
-	
+
 	/**
 	 * Remove the specified route by ID.
 	 * @param int $id The route to remove.
