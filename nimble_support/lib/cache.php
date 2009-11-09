@@ -1,6 +1,6 @@
 <?php
 
-require_once('nimble_support/lib/inflector.php');
+require_once(dirname(__FILE__) . '/inflector.php');
 
 class Cache {
   static public $caches;
