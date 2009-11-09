@@ -124,6 +124,16 @@ class RoutesTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('test', $route->short_url);
 	}
 
+	/**
+	 * @expectedException NimbleException
+	 */
+	public function testSetShortRouteTwice() {
+		$this->assertEquals(0, count($this->Nimble->routes));
+		R('GET', 'GET', 'GET', 'GET', 'test');
+		$this->assertEquals(1, count($this->Nimble->routes));
+		R('GET', 'GET', 'GET', 'GET', 'test');
+	}
+
 	public function testBindShortRoute() {
 		$this->assertTrue(empty($this->Nimble->routes));
 		$this->assertTrue(empty($this->Nimble->routes_by_short_name));

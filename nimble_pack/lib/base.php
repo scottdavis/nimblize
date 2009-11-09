@@ -75,6 +75,13 @@ class Nimble
 			}
 		}
 
+		if (!empty($short_url)) {
+			if (isset($this->routes_by_short_name[$short_url])) {
+				$original_route = $this->routes[$this->routes_by_short_name[$short_url]];
+				throw new NimbleException(sprintf("Short URL %s already defined by route %s::%s", $short_url, $original_route->controller, $original_route->method));
+			}
+		}
+
 		// parse format
 		$has_format = false;
 		if (preg_match('/\.[a-zA-Z0-9]+$/', $this->url)) {
