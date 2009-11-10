@@ -68,6 +68,7 @@ class Nimble
 	public function add_url($rule, $klass, $klass_method, $http_method = 'GET')
 	{
 		$args = func_get_args();
+		$rule = $klass = $klass_method = $http_method = $short_url = null;
 
 		if (count($args) >= 4) {
 			foreach (array('rule', 'klass', 'klass_method', 'http_method', 'short_url') as $field) {
