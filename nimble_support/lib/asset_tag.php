@@ -127,12 +127,21 @@
 		* Add an image from the image folder
 		*/
 		public static function image($image, $alt='', $options) {
-			empty($alt) ? $alt = $image : $alt;
 			$nmbl = Nimble::getInstance()->config;
 			$url = $nmbl['image_url'];
 			$image_path = $nmbl['image_path'];
-			$public_path = static::rewrite_asset_path($image, $image_path);
-			$url = $url . '/' . $public_path;
+			$other_path = FileUtils::join(NIMBLE_ROOT, 'public', $image);
+			empty($alt) ? $alt = $image : $alt;
+			if(file_exists(FileUtils::join($image_path, $image))) {
+				$public_path = static::rewrite_asset_path($image, $image_path);
+				$url = $url . '/' . $public_path;
+			}elseif(file_exists($other_path)) {
+				$uri = $nmbl['uri'];
+				$public_path = static::rewrite_asset_path($other_path, '');
+				$url = $uri . '/public/' . $image;
+			}else{
+				throw new NimbleException('No Image Found: ' . $other_path);
+			}
 			return TagHelper::tag('img', array_merge(array('src' => $url, 'alt' => $alt), $options));
 	}
 }

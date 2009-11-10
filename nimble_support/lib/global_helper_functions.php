@@ -50,15 +50,6 @@
     return TagHelper::content_tag('a', $name, array('href' => $url));
   }
 
-  /**
-		* Function to create a link to a user
-		* @param object $user The user object you wish to create a link from
-	**/
-  function user_link($user) {
-  	return link_to($user->name, url_for('UserController', 'show', $user));
-  }
-
-
 	/**
 	 * Function to create a link that is actualy javascript! for triggering the delete method on controllers
 	 * @param string $name Link name
