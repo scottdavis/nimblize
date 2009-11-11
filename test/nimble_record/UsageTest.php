@@ -108,9 +108,8 @@
 		
 		public function testToStringNewRecord() {
 			$user = new User();
-			$this->assertEquals(NULL, (string) $user->name);
+			$this->assertEquals('NULL', (string) $user);
 		}
-		
 		
 	}
 	

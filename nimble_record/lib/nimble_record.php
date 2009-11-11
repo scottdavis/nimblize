@@ -896,7 +896,7 @@ class NimbleRecord {
     if (isset($this->row['id'])){
       return (string) $this->row['id'];
     }else{
-      return NULL;
+      return 'NULL';
     }
   }
 
