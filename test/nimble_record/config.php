@@ -6,8 +6,7 @@
 	require_once(dirname(__FILE__) . '/../../nimble_record/migrations/lib/migration_runner.php');
 	require_once(dirname(__FILE__) . '/model/User.php');
 	require_once(dirname(__FILE__) . '/model/Photo.php');
-	
-	
+
 	if(file_exists(dirname(__FILE__) . '/database.json')) {
 		/**
 		* Example database.json contents
@@ -22,9 +21,6 @@
 											'password'	=> '',
 											'adapter'		=> 'mysql'
 									 		);
-	}					
+	}
 	NimbleRecord::establish_connection($settings);
-	
-		
-	
 ?>
