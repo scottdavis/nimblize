@@ -999,11 +999,15 @@ class NimbleRecord {
 	
 	public function __get($var) {
 		if(isset($this->row[$var])) {
-			if(is_null($this->row[$var]) && in_array($var, static::columns())){
-				return null;
+			return $this->row[$var];
+		}
+		if(array_include($var, static::columns())) {
+			if(is_null($this->row[$var])) {
+				return NULL;
 			}
 			return stripslashes($this->row[$var]);
-		}elseif($this->association_exists('has_many', $var)) {
+		}
+		if($this->association_exists('has_many', $var)) {
 			return $this->association_has_many_find($var);
 		}elseif($this->association_exists('has_many_polymorphic', $var)) {
 			return $this->association_has_many_polymorphic_find($var);

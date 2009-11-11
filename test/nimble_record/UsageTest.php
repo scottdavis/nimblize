@@ -72,6 +72,12 @@
 			$this->assertEquals($obj->new_record, false);
 			$this->assertEquals($obj2->new_record, false);
 		}
+		
+		public function testNullOnNewObjectColumnCall() {
+			$user = new User();
+			$this->assertEquals(NULL, $user->name);
+		}
+		
 	}
 	
 ?>
