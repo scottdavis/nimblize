@@ -1,0 +1,7 @@
+{
+	"host": "localhost",
+	"database: "nimble_record_test",
+	"username" :"root",
+	"password": "",
+	"adapter": "mysql"
+}
