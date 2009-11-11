@@ -4,13 +4,42 @@
 	*/
 	class FileUtils {
 		
+		
+		
+		public static function __callStatic($method, $arguments) {
+	    $internal_method = "_${method}";
+	    if (method_exists("FileUtils", $internal_method)) {
+	      $last_argument = end($arguments);
+	      $use_cache = ($last_argument !== false);
+	      $cache_key = false;
+
+	      if ($use_cache) {
+	        $cache = Cache::get_cache();
+	        $cache_key = 'flieutils-' . $method . '-' . md5(serialize($arguments));
+	        if ($cache->exists($cache_key)) {
+	          return $cache->get($cache_key);
+	        }
+	      }
+
+	      $result = call_user_func_array(array("FileUtils", $internal_method), $arguments);
+	      if ($use_cache) {
+	        $cache->set($cache_key, $result);        
+	      }
+
+	      return $result;
+	    }
+	  }
+		
+		
+		
+		
 		/**
 		 * Creates paths to a file that is OS generic.
 		 * @uses FileUtils::join('root', 'sub', 'nimble.txt')
 		 * @param string,...|array $args The path to create. If the first parameter is an array, use that array's elements to create the path.
 		 * @return string The joined directory string.
 		 */
-		public static function join() {
+		public static function _join() {
 			$args = func_get_args();
 			if (is_array($args[0])) { $args = $args[0]; }
 			return implode(DIRECTORY_SEPARATOR, $args);
