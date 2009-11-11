@@ -3,38 +3,36 @@
 		define("NIMBLE_IS_TESTING", true);
 	}
 	require_once(dirname(__FILE__) . '/config.php');
-	
-	
+
 	class TestMigration extends Migration {
 		public $tables = array("users", "photos");
 
 		public function up() {
-				$table = $this->create_table('users');
-					$table->string('name');
-					$table->string('last_name');
-					$table->string('address');
-					$table->integer('my_int');
-					$table->timestamps();
-				$table->go();
+			$table = $this->create_table('users');
+				$table->string('name');
+				$table->string('last_name');
+				$table->string('address');
+				$table->integer('my_int');
+				$table->timestamps();
+			$table->go();
 
-				$table2 = $this->create_table('photos');
-					$table2->belongs_to('user');
-					$table2->string('title');
-					$table2->string('description');
-				$table2->go();
+			$table2 = $this->create_table('photos');
+				$table2->belongs_to('user');
+				$table2->string('title');
+				$table2->string('description');
+			$table2->go();
+		}
+
+		public function down() {
+			foreach($this->tables as $t) {
+				$this->drop_table($t);
 			}
-
-			public function down() {
-				foreach($this->tables as $t) {
-					$this->drop_table($t);
-				}
-			}
-
-
-
+		}
 	}
 
-
+	/**
+	 * TODO remove the dependency on a constant, if possible
+	 */
 	function reload_database_tables() {
 		Migration::drop_database(MYSQL_DATABASE);
 		Migration::create_database(MYSQL_DATABASE);
@@ -89,5 +87,3 @@
 		create_users();
 		fill_user_photos();
 	}
-
-?>
