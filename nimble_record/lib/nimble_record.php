@@ -707,7 +707,7 @@ class NimbleRecord {
 		$columns = self::load_columns();
 		foreach($columns as $column) {
 			if (strtolower($column['Null']) == 'no' && strtolower($column['Field'] != self::$primary_key_field) && !preg_match('/_id$/', strtolower($column['Field']))){
-					if(empty($klass->row[strtolower($column['Field'])])) {
+					if(is_null($klass->row[strtolower($column['Field'])]) || empty($klass->row[strtolower($column['Field'])])) {
 						$col = ucwords($column['Field']);
 						array_push($klass->errors, array(strtolower($column['Field']) => "{$col} can not be blank"));
 					}
@@ -1035,7 +1035,7 @@ class NimbleRecord {
 	}
 	
 	public function __call($method, $arguments)  {
-		if(in_array($method, static::columns())) {
+		if(array_include($method, static::columns())) {
 			$this->row[$method] = $arguments;
 		}
 		/**This is a special case because we do not want uniqueness_of being called on an update

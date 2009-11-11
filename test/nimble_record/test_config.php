@@ -9,7 +9,7 @@
 
 		public function up() {
 			$table = $this->create_table('users');
-				$table->string('name');
+				$table->string('name', array('null' => false));
 				$table->string('last_name');
 				$table->string('address');
 				$table->integer('my_int');

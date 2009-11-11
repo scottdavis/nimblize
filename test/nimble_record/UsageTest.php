@@ -73,9 +73,14 @@
 			$this->assertEquals($obj2->new_record, false);
 		}
 		
-		public function testNullOnNewObjectColumnCall() {
+		public function testNullOnNewObjectColumnGet() {
 			$user = new User();
 			$this->assertEquals(NULL, $user->name);
+		}
+		
+		public function testNullOnNewObjectColumnCall() {
+			$user = new User();
+			$this->assertEquals(NULL, $user->name());
 		}
 		/**
 		* @expectedException NimbleRecordException
@@ -83,6 +88,23 @@
 		public function testUnknownPropertyFails() {
 			$user = new User();
 			$user->foo;
+		}
+		
+		/**
+		* @expectedException NimbleRecordException
+		*/
+		public function tryToSetaBogusProperty() {
+			$user = new User();
+			$user->foo = 'bar';
+		}
+		
+		public function testToString() {
+			$user = User::find('first');
+			ob_start();
+			echo $user;
+			$out =ob_get_clean();
+			
+			$this->assertEquals($out, (string) $user->id);
 		}
 		
 	}
