@@ -77,6 +77,13 @@
 			$user = new User();
 			$this->assertEquals(NULL, $user->name);
 		}
+		/**
+		* @expectedException NimbleRecordException
+		*/
+		public function testUnknownPropertyFails() {
+			$user = new User();
+			$user->foo;
+		}
 		
 	}
 	
