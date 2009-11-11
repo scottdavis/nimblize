@@ -8,8 +8,8 @@
 	require_once(dirname(__FILE__) . '/model/Photo.php');
 	
 	
-	if(file_exists(dirname(__FILE__) . '/databse.json')) {
-		$json = file_get_contents(dirname(__FILE__) . '/databse.json');
+	if(file_exists(dirname(__FILE__) . '/database.json')) {
+		$json = file_get_contents(dirname(__FILE__) . '/database.json');
 		$settings = json_decode($json, true);
 	}else{
 		$settings = array('host' 			=> 'localhost',
