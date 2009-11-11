@@ -102,10 +102,15 @@
 			$user = User::find('first');
 			ob_start();
 			echo $user;
-			$out =ob_get_clean();
-			
+			$out = ob_get_clean();
 			$this->assertEquals($out, (string) $user->id);
 		}
+		
+		public function testToStringNewRecord() {
+			$user = new User();
+			$this->assertEquals(NULL, (string) $user->name);
+		}
+		
 		
 	}
 	
