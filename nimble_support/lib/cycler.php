@@ -53,7 +53,7 @@
 	function cycle() {
 		$args = func_get_args();
 		$class = Cycler::getInstance();
-		$key = md5(join('', $args));
+		$key = md5(serialize($args));
 		if(!$class->cycler_exsits($key)) {
 			$class->set_cycler($key, $args);
 			return $class->get_cycler($key);
