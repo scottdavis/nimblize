@@ -377,11 +377,7 @@ class NimbleRecord {
 	* START VALIDATION CHECKS
 	*/
 	
-	
-	/** Validation Callbacks */
-	
-	public function before_validation() {}
-	public function after_validation() {}
+
 	
 	public static function run_validations($klass) {	
 		call_user_func_array(array($klass, 'validations'), array());
@@ -430,12 +426,6 @@ class NimbleRecord {
 	/**
 	* START CREATE METHODS
 	*/
-	
-	/** Create Callbacks*/
-	public function before_create() {}
-	public function after_create()  {}
-	public function before_save()		{}
-	public function after_save()		{}
 
 	public static function create(array $attributes = array()) {
 		$c = static::class_name();
@@ -519,10 +509,21 @@ class NimbleRecord {
 	* START UPDATE METHODS
 	*/
 	
-	//Update callbacks
+	/**
+	* Callbacks
+	* @codeCoverageIngoreStart
+	*/ 
 	public function before_update() {}
 	public function after_update() {}
-	
+	public function before_create() {}
+	public function after_create()  {}
+	public function before_save()		{}
+	public function after_save()		{}
+	public function before_validation() {}
+	public function after_validation() {}
+	/**
+	* @codeCoverageIngoreEnd
+	*/
 	public static function update($id, $attributes = array()) {
 		$klass = self::_find($id);
 		$old_row = $klass->row;
