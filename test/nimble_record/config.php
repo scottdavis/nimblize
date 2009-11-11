@@ -9,6 +9,10 @@
 	
 	
 	if(file_exists(dirname(__FILE__) . '/database.json')) {
+		/**
+		* Example database.json contents
+		* {"host":"localhost","database":"nimble_record_test","username":"root","password":"","adapter":"mysql"}
+		*/
 		$json = file_get_contents(dirname(__FILE__) . '/database.json');
 		$settings = json_decode($json, true);
 	}else{
