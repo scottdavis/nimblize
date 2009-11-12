@@ -7,10 +7,15 @@ require_once(dirname(__FILE__) . '/config.php');
 	* @todo add conditions checking
   */
   class MathTest extends PHPUnit_Framework_TestCase {
- 
+		
 		public function setUp() {
-			
+			NimbleRecord::start_transaction();
 		}
+		
+		public function tearDown() {
+			NimbleRecord::rollback_transaction();
+		}
+		
  		/**
 		* @expectedException NimbleRecordException
 		*/
@@ -111,9 +116,6 @@ require_once(dirname(__FILE__) . '/config.php');
 			$this->assertEquals(11, $user->sum());
 		}
 
-		public function tearDown() {
-
-		}
  
 	}
  

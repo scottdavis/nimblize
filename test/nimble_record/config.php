@@ -5,21 +5,26 @@
 	require_once(dirname(__FILE__) . '/../../nimble_record/migrations/lib/migration_runner.php');
 	require_once(dirname(__FILE__) . '/model/User.php');
 	require_once(dirname(__FILE__) . '/model/Photo.php');
+	require_once(dirname(__FILE__) . '/model/Comment.php');
 
-	if(file_exists(dirname(__FILE__) . '/database.json')) {
-		/**
-		* Example database.json contents
-		* {"host":"localhost","database":"nimble_record_test","username":"root","password":"","adapter":"mysql"}
-		*/
-		$json = file_get_contents(dirname(__FILE__) . '/database.json');
-		$settings = json_decode($json, true);
-	}else{
-		$settings = array('host' 			=> 'localhost',
-											'database' 	=> 'nimble_record_test',
-											'username'	=> 'root',
-											'password'	=> '',
-											'adapter'		=> 'mysql'
-									 		);
+
+	if(!defined('CONNECTED')) {
+		if(file_exists(dirname(__FILE__) . '/database.json')) {
+			/**
+			* Example database.json contents
+			* {"host":"localhost","database":"nimble_record_test","username":"root","password":"","adapter":"mysql"}
+			*/
+			$json = file_get_contents(dirname(__FILE__) . '/database.json');
+			$settings = json_decode($json, true);
+		}else{
+			$settings = array('host' 			=> 'localhost',
+												'database' 	=> 'nimble_record_test',
+												'username'	=> 'root',
+												'password'	=> '',
+												'adapter'		=> 'mysql'
+										 		);
+		}
+		NimbleRecord::establish_connection($settings);
+		define('MYSQL_DATABASE', $settings['database']);
+		define('CONNECTED', true);
 	}
-	NimbleRecord::establish_connection($settings);
-	define('MYSQL_DATABASE', $settings['database']);

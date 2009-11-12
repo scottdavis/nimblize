@@ -4,11 +4,11 @@
 	class UsageTest extends PHPUnit_Framework_TestCase {
 		
 		public function setUp() {
-			
+			NimbleRecord::start_transaction();
 		}
 		
-		public function tareDown() {
-			
+		public function tearDown() {
+			NimbleRecord::rollback_transaction();
 		}
 		
 		public function testNewObject() {
@@ -42,22 +42,28 @@
 		}
 		
 		public function testSaveOnNewRecord() {
-			$obj = new User(array('name' => 'bob5000', 'my_int' =>1));
+			$obj = new User(array('name' => 'bob5000', 'my_int' => 1000));
 			$this->assertTrue($obj->save());
 			$this->assertTrue(User::exists('name', 'bob5000'));
 			$this->assertEquals($obj->name, 'bob5000');
-			$this->assertEquals($obj->my_int, 1);
+			$this->assertEquals($obj->my_int, 1000);
 			$obj->destroy();
+		}
+		
+		public function testSaveOnNewRecordFails() {
+			$obj = new User(array('name' => 'bob5000', 'my_int' => 1));
+			$this->assertFalse($obj->save());
+			$this->assertEquals(count($obj->errors), 1);
 		}
 		
 		public function testSaveOnNewRecordusingSetters() {
 			$obj = new User();
 			$obj->name = 'bob5000';
-			$obj->my_int = 1;
+			$obj->my_int = 10000;
 			$this->assertTrue($obj->save());
 			$this->assertTrue(User::exists('name', 'bob5000'));
 			$this->assertEquals($obj->name, 'bob5000');
-			$this->assertEquals($obj->my_int, 1);
+			$this->assertEquals($obj->my_int, 10000);
 			$obj->destroy();
 		}
 		
@@ -72,6 +78,7 @@
 			$this->assertEquals($obj->new_record, false);
 			$this->assertEquals($obj2->new_record, false);
 		}
+
 		
 		public function testNullOnNewObjectColumnGet() {
 			$user = new User();
@@ -178,6 +185,14 @@
 					$this->assertEquals(User::count(array('cache' => false)), $start);
 			}
 		}
+		/**
+		* @expectedException NimbleRecordEXception
+		*/
+		public function testTryToSetVarThatsNotAColumn() {
+			$user = new User();
+			$user->foo = 'bar';
+		}
+		
 		
 	}
 	

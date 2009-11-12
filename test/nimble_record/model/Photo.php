@@ -10,6 +10,7 @@
 		
 		public function associations() {
 			$this->belongs_to('user');
+			$this->has_many_polymorphic('comments');
 		}
 	}
 

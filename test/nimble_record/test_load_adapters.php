@@ -31,7 +31,8 @@
 		
 		public function test_load_sqlite3() {
 			$settings = array('file'			=> dirname(__FILE__) . 'my.db',
-												'adapter'		=> 'sqlite3'
+												'adapter'		=> 'sqlite3',
+												'database' => 'test'
 											 );
 			
 			

@@ -129,7 +129,15 @@
 		public static function presence_of($args = array('column_name', 'value')) {
 			$defaults = array('message' => "can not be blank");
 			$args = array_merge($defaults, $args);
-			if(!isset($args['value']) || empty($args['value'])) {
+			if(!isset($args['value'])) {
+				return self::false_result($args['column_name'], $args['message']);
+			}
+			if(is_numeric($args['value'])) {
+				if($args['value'] === 0 || $args['value'] === '0') {
+					return array(true);
+				}
+			}
+			if(empty($args['value'])) {
 				return self::false_result($args['column_name'], $args['message']);
 			}else{
 				return array(true);

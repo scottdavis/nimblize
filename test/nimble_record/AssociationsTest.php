@@ -91,8 +91,6 @@
 		}
 		
 		public function testAssociationLoadsData() {
-			refresh_user_data();
-			
 			$users = User::find_all(array('include' => 'photos'));
 			foreach($users as $user) {
 				foreach($user->photos as $photo) {
@@ -107,5 +105,12 @@
 			$this->assertEquals($u->my_int, '3');
 		}
 		
+		public function setUp() {
+			NimbleRecord::start_transaction();
+		}
+		
+		public function tearDown() {
+			NimbleRecord::rollback_transaction();
+		}
 	}
 ?>

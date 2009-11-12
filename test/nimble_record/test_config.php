@@ -5,7 +5,7 @@
 	require_once(dirname(__FILE__) . '/config.php');
 
 	class TestMigration extends Migration {
-		public $tables = array("users", "photos");
+		public $tables = array("users", "photos", "comments");
 
 		public function up() {
 			$table = $this->create_table('users');
@@ -21,10 +21,15 @@
 				$table2->string('title');
 				$table2->string('description');
 			$table2->go();
+			
+			$table3 = $this->create_table('comments');
+				$table3->polymorphic('commentable');
+				$table3->string('comment');
+			$table3->go();
 		}
 
 		public function down() {
-			foreach($this->tables as $t) {
+			foreach(array_reverse($this->tables) as $t) {
 				$this->drop_table($t);
 			}
 		}
@@ -54,19 +59,15 @@
 
 	if(!defined('TABLE_CREATED')) {
 		run_migration();
+		user_data();
 		define('TABLE_CREATED', true);
 	}
 
 
 	function create_users() {
-		foreach(range(0,10) as $i) {
-			User::create(array('name' => 'names' . $i, 'my_int' => $i));
+		foreach(range(1,10) as $i) {
+			User::_create(array('name' => 'names' . $i, 'my_int' => $i));
 		}
-	}
-
-	function clear_users() {
-		Photo::truncate();
-		User::truncate();
 	}
 
 	function fill_user_photos() {
@@ -78,12 +79,17 @@
 
 	function create_user_photos($user_id) {
 		foreach(range(0, 10) as $i) {
-			Photo::create(array('user_id' => $user_id, 'title' => 'title' . $i));
+			$p = Photo::_create(array('user_id' => $user_id, 'title' => 'title' . $i));
+			create_comment($p->id);
 		}
 	}
+	
+	
+	function create_comment($photo_id) {
+		Comment::_create(array('comment' => 'this is my comment', 'commentable_type' => 'photo', 'commentable_id' => $photo_id));
+	}
 
-	function refresh_user_data() {
-		clear_users();
+	function user_data() {
 		create_users();
 		fill_user_photos();
 	}

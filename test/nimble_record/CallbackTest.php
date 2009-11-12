@@ -5,12 +5,13 @@
 	class CallbackTest extends PHPUnit_Framework_TestCase {
 	
 		public function setUp() {
-			$this->user_data = array('name' => 'bobby', 'my_int' => 33);
+			NimbleRecord::start_transaction();
+			$this->user_data = array('name' => 'bobby', 'my_int' => 3000);
 		}
 	
 	
 		public function testCreateCallbacksSuccess() {
-			$u = User::create($this->user_data);
+			$u = User::_create($this->user_data);
 			$this->assertTrue($u->test_before_create);
 			$this->assertTrue($u->test_after_create);
 			$this->assertTrue($u->test_before_save);
@@ -22,7 +23,7 @@
 		}
 		
 		public function testUpdateCallbacksSuccess() {
-			$user = User::create($this->user_data);
+			$user = User::_create($this->user_data);
 			$u = User::update($user->id, $this->user_data);
 			$this->assertFalse($u->test_before_create);
 			$this->assertFalse($u->test_after_create);
@@ -47,7 +48,7 @@
 		}
 		
 		public function testUpdateFails() {
-			$user = User::create($this->user_data);
+			$user = User::_create($this->user_data);
 			$u = User::update($user->id, array('name' => NULL));
 			$this->assertFalse($u->test_before_create);
 			$this->assertFalse($u->test_after_create);
@@ -60,11 +61,8 @@
 		}
 		
 		
-		public function tareDown() {
-			if(User::exists('name', $this->user_data['name'])) {
-				$u = User::find_by_name_and_my_int($this->user_data['name'], $this->user_data['my_int']);
-				$u->destroy();
-			}
+		public function tearDown() {
+			NimbleRecord::rollback_transaction();
 		}
 		
 		

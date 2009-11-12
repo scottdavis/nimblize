@@ -757,12 +757,12 @@ class NimbleRecord {
 		static::execute('BEGIN;');
 	}
 	
-	public static function end_transaction() {
+	public static function rollback_transaction() {
 		static::execute('ROLLBACK;');
 	}
 	
 	public static function commit_transaction() {
-		static::execute('COMMIT');
+		static::execute('COMMIT;');
 	}
 	
 	public static function execute_insert_query($sql) {
@@ -1108,33 +1108,27 @@ class NimbleRecord {
 		 * since it already exsists... because we are updating it!
 		 * @todo handel this from the NimbleValidation Class
 		 */
-		if($this->update_mode && preg_match('/uniqueness_of/', $method)) {
-			return;
+		if(preg_match('/uniqueness_of/', $method)) {
+			if(!$this->new_record) {return;}
+			$args[1]['class'] = get_called_class();
 		}
 		if(preg_match('/^validates_([0-9a-z_]+)$/', $method, $matches)) {
 			$klass_method = $matches[1];
-			if(array_include($klass_method, get_class_methods('NimbleValidation'))) {
-				if(is_array($args[0]) && count($args[0]) > 1){
-					foreach($args[0] as $column) {
-            if(!isset($this->row[$column])) {
-              $value = '';
-            }else{
-              $value = $this->row[$column];
-            }
-						$argss = array('column_name' => $column, 'value' => $value);
-						if(isset($args[1]) && !empty($args[1])) {
-							$argss = array_merge($argss, $args[1]);
-						}
-						$return = call_user_func_array(array('NimbleValidation', $klass_method), array($argss));
-						$this->process_error_return($return);
-					}
-				}else{
-					$column = $args[0];
-					$argss = array('column_name' => $column, 'value' => $this->row[$column]);
-					if(isset($arguments[1]) && !empty($arguments[1])) {
+			if(method_exists('NimbleValidation', $klass_method)) {
+				if(!is_array($args[0]) && is_string($args[0])) {
+					$args[0] = array($args[0]);
+				}
+				foreach($args[0] as $column) {
+           if(!isset($this->row[$column])) {
+             $value = '';
+           }else{
+             $value = $this->row[$column];
+           }
+					$argss = array('column_name' => $column, 'value' => $value);
+					if(isset($args[1]) && !empty($args[1])) {
 						$argss = array_merge($argss, $args[1]);
 					}
-					$return = call_user_func_array(array('NimbleValidation', $klass_method), array($args));
+					$return = call_user_func_array(array('NimbleValidation', $klass_method), array($argss));
 					$this->process_error_return($return);
 				}
 			}

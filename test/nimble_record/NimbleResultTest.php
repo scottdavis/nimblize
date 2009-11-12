@@ -3,6 +3,13 @@ require_once(dirname(__FILE__) . '/config.php');
 
 	class NimbleResultTest extends PHPUnit_Framework_TestCase {
 		
+		public function setUp() {
+			NimbleRecord::start_transaction();
+		}
+		
+		public function tareDown() {
+			NimbleRecord::rollback_transaction();
+		}
 		
 		public function testLengthMethod() {
 			$users = User::find('all');

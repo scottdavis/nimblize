@@ -22,14 +22,14 @@
 		public function testAutoRender() {
 			$this->Nimble->url = "";
 			$this->Nimble->add_url('', "MyTestController", "test");	
-			$this->Nimble->dispatch(true);
+			$this->Nimble->dispatch();
 			$this->assertTrue($this->Nimble->klass->has_rendered);
 		}
 		
 		public function testManualRender() {
 			$this->Nimble->url = "";
 			$this->Nimble->add_url('', "MyTestController", "test2");	
-			$this->Nimble->dispatch(true);
+			$this->Nimble->dispatch();
 			$this->assertTrue($this->Nimble->klass->has_rendered);
 		
 		}
@@ -40,7 +40,7 @@
 		public function testDoubleRenderThrowsException() {
 			$this->Nimble->url = "";
 			$this->Nimble->add_url('', "MyTestController", "test3");	
-			$this->Nimble->dispatch(true);
+			$this->Nimble->dispatch();
 		}
 		
 

@@ -3,6 +3,14 @@ require_once(dirname(__FILE__) . '/config.php');
 
 	class SerializationTest extends PHPUnit_Framework_TestCase { 
 		
+		public function setUp() {
+			NimbleRecord::start_transaction();
+		}
+		
+		public function tearDown() {
+			NimbleRecord::rollback_transaction();
+		}
+		
 		public function testToXml() {
 			$user = User::find(1);
 			$xml = $user->to_xml();

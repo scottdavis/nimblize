@@ -5,11 +5,11 @@
 	class FinderTest extends PHPUnit_Framework_TestCase {
 		
 		public function setUp() {
-			refresh_user_data();
-		}	
-	
-		public function tearDown() {
+			NimbleRecord::start_transaction();
+		}
 		
+		public function tearDown() {
+			NimbleRecord::rollback_transaction();
 		}
 		
 		/**
@@ -116,7 +116,7 @@
 		
 		public function testFindFirstLoadPhotos() {
 			$user = User::find('first');
-			$this->assertEquals(0, $user->photos->length);
+			$this->assertEquals(11, $user->photos->length);
 		}
 		
 		

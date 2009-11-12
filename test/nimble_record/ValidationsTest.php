@@ -8,7 +8,7 @@
 		}
 		
 		public function tearDown() {
-			NimbleRecord::end_transaction();
+			NimbleRecord::rollback_transaction();
 		}
 		
 		public function acceptance_false_provider() {

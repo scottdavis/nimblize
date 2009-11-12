@@ -17,6 +17,7 @@
 		
 		public function validations() {
 			$this->validates_presence_of(array('name', 'my_int'));
+			$this->validates_uniqueness_of('my_int');
 		}
 		
 		public function associations() {
