@@ -28,10 +28,7 @@
 
 	      return $result;
 	    }
-	  }
-		
-		
-		
+	  }	
 		
 		/**
 		 * Creates paths to a file that is OS generic.

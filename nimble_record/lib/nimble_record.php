@@ -17,10 +17,10 @@ class NimbleRecord {
 	public static $protected = array();
 	public static $read_only = array();
 	public static $white_list = array();
+	public static $query_cache = array();
 	/** protected vars */
 
 	protected static $connection;
-	protected static $query_cache = array();
 	protected static $columns = array();
 	protected static $validations = array();
 	protected static $my_class;
@@ -515,8 +515,8 @@ class NimbleRecord {
 	
 	/**
 	* Callbacks
-	* @codeCoverageIngoreStart
 	*/ 
+	//@codeCoverageIgnoreStart
 	public function before_update() {}
 	public function after_update() {}
 	public function before_create() {}
@@ -525,9 +525,12 @@ class NimbleRecord {
 	public function after_save()		{}
 	public function before_validation() {}
 	public function after_validation() {}
-	/**
-	* @codeCoverageIngoreEnd
-	*/
+	public function before_destroy() {}
+	public function before_delete()	{}
+	public function after_destroy()	{}
+	public function after_delete() {}
+	//@codeCoverageIgnoreEnd
+	
 	public static function update($id, $attributes = array()) {
 		$klass = self::_find($id);
 		$old_row = $klass->row;
@@ -940,8 +943,10 @@ class NimbleRecord {
       }
     }
   }
-    
+
+  //@codeCoverageIgnoreStart 
 	public function validations() {}
+	//@codeCoverageIgnoreEnd
 	
 	public function process_error_return($return) {
 		if(!$return[0]) {
@@ -988,9 +993,6 @@ class NimbleRecord {
 	
 	private function merge_assocs($key, $value) {
 		$class_name = static::class_name();
-		if(!isset(static::$associations[$class_name])) {
-			static::$associations[$class_name] = array();
-		}
 		if(!isset(static::$associations[$class_name][$key])) {
 			static::$associations[$class_name][$key] = array();
 		}
@@ -1109,8 +1111,8 @@ class NimbleRecord {
 		 * @todo handel this from the NimbleValidation Class
 		 */
 		if(preg_match('/uniqueness_of/', $method)) {
-			if(!$this->new_record) {return;}
-			$args[1]['class'] = get_called_class();
+			$args[1]['class'] = get_class($this);
+			$args[1]['instance'] = $this;
 		}
 		if(preg_match('/^validates_([0-9a-z_]+)$/', $method, $matches)) {
 			$klass_method = $matches[1];
@@ -1188,15 +1190,14 @@ class NimbleRecord {
 	* PROTECTED UTILITY METHODS
 	*
 	*/
-	
+	//@codeCoverageIgnoreStart 
 	public function associations() {}
-	
+	//@codeCoverageIgnoreEnd
 	protected function association_exists($key, $association_name) {
 		if(!isset(static::$associations[static::class_name()])) {return false;}
 		$associations = static::$associations[static::class_name()];
 		if (isset($associations[$key])) {
-			$associations = array_flip($associations[$key]);
-			return isset($associations[$association_name]);
+			return array_include($association_name, $associations[$key]);
 		}else{
 			return false;
 		}

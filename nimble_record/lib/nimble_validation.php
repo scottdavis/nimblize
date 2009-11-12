@@ -145,12 +145,23 @@
 		}
 		
     
-    public static function uniqueness_of($args = array('column_name', 'value', 'class')) {
-      $defaults = array('message' => ": {$args['value']} already exists try something else");
+    public static function uniqueness_of($args = array('column_name', 'value', 'class', 'instance')) {
+	    $defaults = array('message' => ": {$args['value']} already exists try something else");
 			$args = array_merge($defaults, $args);
-      $fail = call_user_func_array(array($args['class'], 'exists'), array($args['column_name'], $args['value']));
+			$value = $args['value'];
+			$class = $args['class'];
+			$column = $args['column_name'];
+			$fail = call_user_func_array(array($class, 'exists'), array($column, $value));
       if($fail) {
-        return self::false_result($args['column_name'], $args['message']);
+				$instance = $args['instance'];
+				if(!$instance->new_record) {
+					$result = call_user_func_array(array($class, '_find'), 
+																				 array('first', array('conditions' => array($column => $value))));
+					if($result->id === $instance->id) {
+						return array(true);
+					}
+				}
+        return self::false_result($column, $args['message']);
       }else{
         return array(true);
       }

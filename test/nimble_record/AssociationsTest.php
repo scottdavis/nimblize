@@ -85,6 +85,11 @@
 			NimbleRecord::$foreign_key_suffix = $old;
 		}
 		
+		public function testBelongsToFindsUser() {
+			$photo = Photo::find(1);
+			$this->assertEquals(1, $photo->user->id);
+		}
+		
 		public function testAssociationModel() {
 			$name = User::association_model('photos');
 			$this->assertEquals('Photo', $name);

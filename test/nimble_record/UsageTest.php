@@ -193,6 +193,42 @@
 			$user->foo = 'bar';
 		}
 		
+		public function testIsset() {
+			$user = User::find(1);
+			$this->assertTrue(isset($user->name));
+		}
+		
+		public function testReloadColumns() {
+			$old_col = User::columns();
+			$new_col = User::columns(true);
+			$this->assertEquals($old_col, $new_col);
+		}
+		
+		public function testResetQueryCache() {
+			$mem = memory_get_usage();
+			$this->assertTrue(!empty(NimbleRecord::$query_cache));
+			Nimblerecord::reset_cache();
+			$this->assertTrue(empty(NimbleRecord::$query_cache));
+			$this->assertTrue($mem > memory_get_usage());
+		}
+		
+		
+		public function testUpdateUsingUnderscore() {
+			$user = User::find(1);
+			User::_update($user->id, array('name' => 'foo'));
+			$user2 = User::_find(1);
+			$this->assertEquals($user2->name, 'foo');
+		}
+		
+		/**
+		* @expectedException NimbleRecordException
+		*/
+		public function testUpdateUsingUnderscoreFails() {
+			$user = User::find(1);
+			User::_update($user->id, array('my_int' => 2));
+			$user2 = User::_find(1);
+			$this->assertEquals($user2->my_int, $user->my_int);
+		}
 		
 	}
 	
