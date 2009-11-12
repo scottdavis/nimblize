@@ -24,9 +24,24 @@ require_once(dirname(__FILE__) . '/config.php');
 			$users = User::find('all');
 			$xml = $users->to_xml();
 			$xml = simplexml_load_string($xml);
-			foreach($xml->users as $user) {
-				var_dump($users);
+			$out = array();
+			foreach($xml->user as $user) {
+				$out[] = $user;
 			}
+			$keys = array_keys($users->first()->row);
+			$i=0;
+			foreach($users as $user) {
+				$obj = $out[$i];
+				foreach($keys as $key) {
+					if(is_a($obj->{$key}, 'SimpleXMLElement')) {
+						$this->assertTrue(is_a($obj->{$key}, 'SimpleXMLElement'));
+						continue;
+					}
+					$this->assertEquals($user->{$key}, $obj->{$key});
+				}
+				$i++;
+			}
+			
 		}
 		
 		
