@@ -32,6 +32,25 @@ require_once(dirname(__FILE__) . '/config.php');
 			
 		}
 		
+		public function testMassToJson() {
+			$users = User::find('all');
+			$json = $users->to_json();
+			
+			
+			$user = $users->first();
+			$keys = array_keys($user->row);
+			$json = json_decode($json);
+			$this->assertEquals(count($json), $users->length);
+			$i=0;
+				foreach($users as $user) {
+					$obj = $json[$i];
+					foreach($keys as $key) {
+						$this->assertEquals($user->{$key}, $obj->{$key});
+					}
+					$i++;
+				}
+		}
+		
 	}
 
 ?>

@@ -34,6 +34,7 @@ class NimbleRecord {
 	var $errors;
 	var $preloaded_associations = array();
 	var $new_record = true;
+	var $row = array();
 	/**
 	* Required
 	* connects to the data base and stores the connection
@@ -852,7 +853,6 @@ class NimbleRecord {
 	}
   
   /* Instance Methods */
-  protected $row;
 
   public function __construct($args = array()) {
 		$this->row = array();

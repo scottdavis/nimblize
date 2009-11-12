@@ -47,6 +47,18 @@
 			$xw->endDtd();
 			return $xw->outputMemory(true);
 		}
+		
+		public function to_json($options = array()) {
+			$out = array();
+			
+			foreach($this->array as $obj) {
+				$out[] = $obj->row;
+			}
+			
+			$json = json_encode($out);
+			return $json;
+		}
+		
 	
 		public function __toString() {
 			return '';
