@@ -102,7 +102,7 @@
 		}
 		
 		public function length() {
-			return $this->count();
+			return $this->length;
 		}
 
 		
