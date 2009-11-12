@@ -28,3 +28,5 @@
 		define('MYSQL_DATABASE', $settings['database']);
 		define('CONNECTED', true);
 	}
+	
+	NimbleRecord::$debug = true;

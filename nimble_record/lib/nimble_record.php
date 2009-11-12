@@ -73,8 +73,8 @@ class NimbleRecord {
   /**
 	* returns the quoted table name
 	*/
-	protected static function table_name() {
-		$class = static::class_name();
+	protected static function table_name($class= '') {
+		$class = empty($class) ? static::class_name() : $class;
 		if(isset(static::$table_names[$class]) && !empty(static::$table_names[$class])) { 
 			$name = static::$table_name_prefix . static::$table_names[$class];
 		}else{
@@ -272,7 +272,6 @@ class NimbleRecord {
 				$where = ' WHERE (id IN (' . join(',', $clean) . '))';
 			break;
 		}
-    
     $sql = 'DELETE FROM ' . self::table_name() . $where;
     return self::execute($sql);
   }
@@ -360,7 +359,10 @@ class NimbleRecord {
 	*/
 	
 	public function destroy() {
+		call_user_func(array($this, 'before_destroy'));
     self::delete($this->id);
+		$this->row = array();
+		call_user_func(array($this, 'after_destroy'));
   }
 	
 	public static function delete_all() {
@@ -483,7 +485,6 @@ class NimbleRecord {
 		if(!$create->saved){
 			throw new NimbleRecordException('Failed to create record');
 		}
-		
 		return $create;
 	}
 	
@@ -907,9 +908,6 @@ class NimbleRecord {
     }
   }
 
-	/**
-	* Work in progress
-	*/
 	public function save() {    
 		/**
 		* CREATE CODE
@@ -993,11 +991,12 @@ class NimbleRecord {
 	
 	private function merge_assocs($key, $value) {
 		$class_name = static::class_name();
-		if(!isset(static::$associations[$class_name][$key])) {
-			static::$associations[$class_name][$key] = array();
+		if(!isset(NimbleAssociation::$associations[$class_name][$key])) {
+			NimbleAssociation::$associations[$class_name][$key] = array();
 		}
-		static::$associations[$class_name][$key] = array_merge(static::$associations[$class_name][$key], $value);
-		static::$associations[$class_name][$key] = array_unique(static::$associations[$class_name][$key]);
+		NimbleAssociation::$associations[$class_name][$key] = array_merge(NimbleAssociation::$associations[$class_name][$key],
+			 																																$value);
+		NimbleAssociation::$associations[$class_name][$key] = array_unique(NimbleAssociation::$associations[$class_name][$key]);
 	}
 	
 	public function __get($var) {
@@ -1007,15 +1006,11 @@ class NimbleRecord {
 		if(array_include($var, static::columns()) && is_null($this->row[$var])) {
 				return NULL;
 		}
-		if($this->association_exists('has_many', $var)) {
-			return $this->association_has_many_find($var);
-		}elseif($this->association_exists('has_many_polymorphic', $var)) {
-			return $this->association_has_many_polymorphic_find($var);
-		} elseif($this->association_exists('belongs_to', $var)) {
-			return $this->association_belongs_to_find($var);
-		} else {
-			throw new NimbleRecordException("Property not found in record.");
+		$type = NimbleAssociation::find_type($this, $var);
+		if($type !== false) {
+			return call_user_func_array(array('NimbleAssociation', 'find_' . $type), array($this, $var));
 		}
+		throw new NimbleRecordException("Property not found in record.");
 	}
 	
 	
@@ -1052,11 +1047,11 @@ class NimbleRecord {
 			if(count($args) == 0) {
 				return call_user_func_array(array($klass, '_count'), array());
 			}else{
-				if(!$this->association_exists('has_many', $args[0])) {
-					throw new nimbleRecordException('Association does not exsist');
+				if(!NimbleAssociation::exists(self::class_name(), 'has_many', $args[0])) {
+					throw new NimbleRecordException('Association does not exsist');
 				}
 				$class = Inflector::classify($args[0]);
-				$key = static::association_foreign_key($args[0]);
+				$key = NimbleAssociation::foreign_key(self::class_name());
 				$conditions = array('conditions' => array($key => $this->id));
 				if(isset($args[1])) {
 					if(isset($args[1]['conditions'])) {
@@ -1076,11 +1071,11 @@ class NimbleRecord {
 			if(empty($args) || count($args) < 2) {
 				throw new NimbleRecordException('You need to pass an association name and column');
 			}
-			if(!$this->association_exists('has_many', $args[0])) {
+			if(!NimbleAssociation::exists(self::class_name(), 'has_many', $args[0])) {
 				throw new nimbleRecordException('Association does not exist');
 			}
 			$class = Inflector::classify($args[0]);
-			$key = static::association_foreign_key($args[0]);
+			$key = NimbleAssociation::foreign_key(self::class_name());
 			$conditions = array('conditions' => array($key => $this->id), 'column' => $args[1]);
 			if(isset($args[2])) {
 				if(isset($args[2]['conditions'])) {
@@ -1193,60 +1188,6 @@ class NimbleRecord {
 	//@codeCoverageIgnoreStart 
 	public function associations() {}
 	//@codeCoverageIgnoreEnd
-	protected function association_exists($key, $association_name) {
-		if(!isset(static::$associations[static::class_name()])) {return false;}
-		$associations = static::$associations[static::class_name()];
-		if (isset($associations[$key])) {
-			return array_include($association_name, $associations[$key]);
-		}else{
-			return false;
-		}
-	}
-	public static function association_foreign_key($association_name) {
-		return Inflector::foreignKey(static::class_name(), static::$foreign_key_suffix);
-	}
-
-	public function association_table_name($association_name) {
-		$name = static::association_model($association_name);
-		return static::$table_name_prefix . strtolower(call_user_func("$name::table_name"));
-	}
-
-	public static function association_model($association_name) {
-		return Inflector::classify($association_name);
-	}
-
-	protected function association_has_many_find($association_name) {
-		if(isset($preloaded_associations[$association_name])) {
-			return $preloaded_associations[$association_name];
-		}
-		$primary_key_field = static::primary_key_field();
-		$primary_key_value = static::$adapter->escape($this->row[$primary_key_field]);
-		$conditions = static::association_table_name($association_name) . '.' . static::association_foreign_key($association_name) . ' = ' . $primary_key_value;
-		$association_model = $this->association_model($association_name);
-		$find_array = call_user_func("$association_model::find_all", 
-		  array('conditions' => $conditions)
-		);
-		return $find_array;
-	}
-	
-	
-	protected function association_has_many_polymorphic_find($association_name) {
-		$association_model = $this->association_model($association_name);
-		$singular = Inflector::singularize($association_name);
-		$polymorphic_column_type = $singular . 'able_type';
-		$polymorphic_column_id =  $singular . 'able_id';
-		$class = strtolower(get_class($this));
-		$conditions = $polymorphic_column_type . " = '$class' AND " . $polymorphic_column_id . " = '{$this->id}'";
-		return call_user_func("$association_model::find_all", array('conditions' => $conditions));
-	}
-
-	protected function association_belongs_to_find($association_name) {
-		$primary_key_value = static::$adapter->escape($this->row[$association_name . '_id']);
-		$association_model = $this->association_model($association_name);
-		return call_user_func("$association_model::find", $primary_key_value);
-	}
-
-
 
 	public function to_xml($include_head = true, $options = array()) {
 		$xw = new xmlWriter();

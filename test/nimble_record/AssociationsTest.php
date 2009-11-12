@@ -6,7 +6,7 @@
 		public function testBelongsTo() {
 			$u = new User();
 			$u->belongs_to('photo', 'cats', 'dogs');
-			$ass = User::$associations;
+			$ass = NimbleAssociation::$associations;
 			$vals = array('photo', 'cats', 'dogs');
 			$this->assertTrue(isset($ass['User']));
 			$this->assertTrue(isset($ass['User']['belongs_to']));
@@ -19,7 +19,7 @@
 			$u = new User();
 			$u->has_many('dogs', 'deer', 'ducks');
 			$vals = array('photos', 'dogs', 'deer', 'ducks');
-			$ass = User::$associations;
+			$ass = NimbleAssociation::$associations;
 			$this->assertTrue(isset($ass['User']));
 			$this->assertTrue(isset($ass['User']['has_many']));
 			for($i=0;$i<count($vals);$i++) {
@@ -31,7 +31,7 @@
 			$u = new User();
 			$u->has_and_belongs_to_many('dogs', 'deer', 'ducks');
 			$vals = array('dogs', 'deer', 'ducks');
-			$ass = User::$associations;
+			$ass = NimbleAssociation::$associations;
 			$this->assertTrue(isset($ass['User']));
 			$this->assertTrue(isset($ass['User']['has_and_belongs_to_many']));
 			for($i=0;$i<count($vals);$i++) {
@@ -43,7 +43,7 @@
 			$u = new User();
 			$u->has_many_polymorphic('dogs', 'deer', 'ducks');
 			$vals = array('dogs', 'deer', 'ducks');
-			$ass = User::$associations;
+			$ass = NimbleAssociation::$associations;
 			$this->assertTrue(isset($ass['User']));
 			$this->assertTrue(isset($ass['User']['has_many_polymorphic']));
 			for($i=0;$i<count($vals);$i++) {
@@ -54,7 +54,7 @@
 			$u = new User();
 			$u->belongs_to_polymorphic('dogs', 'deer', 'ducks');
 			$vals = array('dogs', 'deer', 'ducks');
-			$ass = User::$associations;
+			$ass = NimbleAssociation::$associations;
 			$this->assertTrue(isset($ass['User']));
 			$this->assertTrue(isset($ass['User']['belongs_to_polymorphic']));
 			for($i=0;$i<count($vals);$i++) {
@@ -67,20 +67,20 @@
 			User::create(array('name' => 'bob', 'my_int' => 5));
 			$u = User::find('first');
 			$u->photos;
-			$this->assertTrue(isset(User::$associations['User']['has_many']));
-			$this->assertTrue(in_array('photos', User::$associations['User']['has_many']));
+			$this->assertTrue(isset(NimbleAssociation::$associations['User']['has_many']));
+			$this->assertTrue(array_include('photos', NimbleAssociation::$associations['User']['has_many']));
 		}
 		
 		
 		public function testForeignKeyfunction() {
-			$key = User::association_foreign_key('User');
+			$key = NimbleAssociation::foreign_key('User');
 			$this->assertEquals('user_id', $key);
 		}
 		
 		public function testForeignKeyCustomSuffix() {
-			$old = NimbleRecord::$foreign_key_suffix;
+			$old = 'id';
 			NimbleRecord::$foreign_key_suffix = 'foo';
-			$key = User::association_foreign_key('User');
+			$key = NimbleAssociation::foreign_key('User');
 			$this->assertEquals('user_foo', $key);
 			NimbleRecord::$foreign_key_suffix = $old;
 		}
@@ -91,11 +91,11 @@
 		}
 		
 		public function testAssociationModel() {
-			$name = User::association_model('photos');
+			$name = NimbleAssociation::model('photos');
 			$this->assertEquals('Photo', $name);
 		}
 		
-		public function testAssociationLoadsData() {
+		public function testAssociationLoadsData() {		
 			$users = User::find_all(array('include' => 'photos'));
 			foreach($users as $user) {
 				foreach($user->photos as $photo) {
