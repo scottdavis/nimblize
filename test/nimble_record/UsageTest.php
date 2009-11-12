@@ -238,10 +238,11 @@
 			$this->assertEquals($u->errors['my_int'], "My int : 2 already exists try something else");
 		}
 		
-		public function testUpdateUsingFailsSameInt() {
+		public function testUpdateUsingSameInt() {
 			$user = User::find(1);
 			$u = User::update($user->id, array('my_int' => $user->my_int));
 			$user2 = User::_find(1);
+			$this->assertFalse($user2->updated_at === $user->updated_at);
 			$this->assertEquals($user2->my_int, $user->my_int);
 		}
 	}

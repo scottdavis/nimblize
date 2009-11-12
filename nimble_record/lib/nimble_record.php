@@ -545,8 +545,8 @@ class NimbleRecord {
 		$updates = array();
 		/** Update timestamp if the column exsists */
 		$columns = static::columns();
-		if(isset($columns['updated_at'])) {
-			$attributes = self::update_timestamps(array('updated_at'), $attributes);
+		if(array_include('updated_at', $columns)) {
+			$klass->row = self::update_timestamps(array('updated_at'), $klass->row);
 		}
 		unset($columns);
 		foreach ($klass->row as $key => $value) {
