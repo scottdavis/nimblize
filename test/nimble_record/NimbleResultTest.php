@@ -33,6 +33,24 @@ require_once(dirname(__FILE__) . '/config.php');
 			$s = (string) $users;
 			$this->assertTrue(empty($s));
 		}
+		
+		
+		public function testClear() {
+			$users = User::find('all');
+			$mem = memory_get_usage();
+			$users->clear();
+			$this->assertTrue(memory_get_usage() < $mem);
+		}
+		
+		public function testKeyMethod() {
+			$users = User::find('all');
+			$i = 0;
+			foreach($users as $user) {
+				$this->assertEquals($i, $users->key());
+				$i++;
+			}
+			
+		}
 
 	}
 ?>
