@@ -28,6 +28,17 @@ require_once(dirname(__FILE__) . '/config.php');
 			}
 		}
 		
+		public function testColumnsReturnsEmptyArrayOnNothing() {
+			/**
+			* It should never get here but just incase
+			*/
+			$users = User::find('all');
+			$users->length = 0;
+			$val = $users->columns();
+			$this->assertTrue(empty($val));
+			
+		}
+		
 		public function testToString() {
 			$users = User::find('all');
 			$s = (string) $users;
