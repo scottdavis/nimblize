@@ -140,11 +140,6 @@ class NimbleRecord {
 	* MATH METHODS
 	*/
 	
-	private static function is_integer($input){
-		return is_numeric($input);
-	}
-	
-	
 	/**
 	* @see self::check_args_for_math_functions($options)
 	* @param $options array('column' => 'name', 'conditions' => array('id' => 1))  
@@ -160,12 +155,14 @@ class NimbleRecord {
 	* use Class::count(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function count(array $options = array('column' => '*', 'conditions' => NULL)) {
+	public static function count(array $options = array()) {
+		$defaults = array('column' => '*', 'conditions' => NULL, 'cache' => true);
+		$options = array_merge($defaults, $options);
 		static::check_args_for_math_functions($options);
 		$sql = 'SELECT count(' . $options['column'] . ') AS count_all FROM ' . self::table_name();
 		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
 		$sql .= ';';
-		return self::execute_query($sql, false)->count_all;
+		return self::execute_query($sql, false, $options['cache'])->count_all;
 	}
 	/**
 	* Method sum
@@ -214,28 +211,6 @@ class NimbleRecord {
 			}
 			return $sql;
 	}
-	
-	
-	private static function build_join($join) {
-		
-	}
-	
-	private static function build_include($include) {
-		
-	}
-	
-	private static function build_group_by($group_by) {
-		
-	}
-	
-	private static function build_order($order) {
-		
-	}
-	
-	private static function build_limit($limit) {
-		
-	}
-	
 	
 	/**
 	* END MATH METHODS

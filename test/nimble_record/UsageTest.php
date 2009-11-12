@@ -111,6 +111,25 @@
 			$this->assertEquals('NULL', (string) $user);
 		}
 		
+		
+		public function testDelete() {
+			$start = User::count(array('cache' => false));
+			$user = User::_create(array('name' => 'test_user', 'my_int' => 1500));
+			$this->assertTrue($user->saved);
+			$this->assertEquals(User::count(array('cache' => false)), $start + 1);
+			User::delete($user->id);
+			try {
+				User::find($user->id);
+			} catch(NimbleRecordNotFound $e) {
+				$this->assertTrue(is_a($e, 'NimbleRecordNotFound'));
+				$this->assertEquals(User::count(array('cache' => false)), $start);
+			}
+		}
+		
+		public function testMassdelete() {
+			
+		}
+		
 	}
 	
 ?>
