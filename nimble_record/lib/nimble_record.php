@@ -1172,7 +1172,7 @@ class NimbleRecord {
 
 
 
-	public function to_xml($include_head = true) {
+	public function to_xml($include_head = true, $options = array()) {
 		$xw = new xmlWriter();
 		$xw->openMemory();
 
@@ -1187,6 +1187,10 @@ class NimbleRecord {
 			$xw->endElement(); 
 		}
 		return $xw->outputMemory(true);
+	}
+	
+	public function to_json($options = array()) {
+		return json_encode($this->row);
 	}
 	
 	

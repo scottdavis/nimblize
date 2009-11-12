@@ -4,7 +4,7 @@ require_once(dirname(__FILE__) . '/config.php');
 	class SerializationTest extends PHPUnit_Framework_TestCase { 
 		
 		public function testToXml() {
-			$user = User::find('first');
+			$user = User::find(1);
 			$xml = $user->to_xml();
 			
 			$simple_xml = simplexml_load_string($xml);
@@ -17,8 +17,18 @@ require_once(dirname(__FILE__) . '/config.php');
 				}
 				$this->assertEquals($xml_as_array[$key], $user->{$key});
 			}
-
-
+		}
+		
+		
+		public function testToJson() {
+			$user = User::find(1);
+			$json = $user->to_json();
+			
+			$decoded = json_decode($json);
+			
+			foreach($decoded as $key => $val) {
+				$this->assertEquals($user->{$key}, $val);
+			}
 			
 		}
 		
