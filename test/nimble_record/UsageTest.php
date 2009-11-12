@@ -230,6 +230,20 @@
 			$this->assertEquals($user2->my_int, $user->my_int);
 		}
 		
+		public function testUpdateUsingFails() {
+			$user = User::find(1);
+			$u = User::update($user->id, array('my_int' => 2));
+			$user2 = User::_find(1);
+			$this->assertEquals($user2->my_int, $user->my_int);
+			$this->assertEquals($u->errors['my_int'], "My int : 2 already exists try something else");
+		}
+		
+		public function testUpdateUsingFailsSameInt() {
+			$user = User::find(1);
+			$u = User::update($user->id, array('my_int' => $user->my_int));
+			$user2 = User::_find(1);
+			$this->assertEquals($user2->my_int, $user->my_int);
+		}
 	}
 	
 ?>
