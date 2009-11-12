@@ -904,9 +904,6 @@ class NimbleRecord {
 	* Work in progress
 	*/
 	public function save() {    
-	if(!isset($this->row) || 0 == count($this->row)) {
-	  throw new NimbleRecordException("Can't an save empty record.");
-    }
 		/**
 		* CREATE CODE
 		*/
@@ -999,13 +996,10 @@ class NimbleRecord {
 	
 	public function __get($var) {
 		if(isset($this->row[$var])) {
-			return $this->row[$var];
-		}
-		if(array_include($var, static::columns())) {
-			if(is_null($this->row[$var])) {
-				return NULL;
-			}
 			return stripslashes($this->row[$var]);
+		}
+		if(array_include($var, static::columns()) && is_null($this->row[$var])) {
+				return NULL;
 		}
 		if($this->association_exists('has_many', $var)) {
 			return $this->association_has_many_find($var);
@@ -1180,7 +1174,7 @@ class NimbleRecord {
 
 	public function to_xml($include_head = true) {
 		$xw = new xmlWriter();
-	$xw->openMemory();
+		$xw->openMemory();
 
 		if ($include_head){
 			$xw->startDocument('1.0','UTF-8');

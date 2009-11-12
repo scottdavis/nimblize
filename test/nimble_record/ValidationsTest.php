@@ -1,5 +1,5 @@
 <?php
-	require_once(dirname(__FILE__) . '/test_config.php');
+	require_once(dirname(__FILE__) . '/config.php');
 
 	class ValidationsTest extends PHPUnit_Framework_TestCase {
 		
