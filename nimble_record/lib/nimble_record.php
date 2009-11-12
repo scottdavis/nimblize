@@ -1101,11 +1101,7 @@ class NimbleRecord {
 		if(array_include($method, static::columns())) {
 			$this->row[$method] = $args;
 		}
-		/**This is a special case because we do not want uniqueness_of being called on an update
-		 * since it already exsists... because we are updating it!
-		 * @todo handel this from the NimbleValidation Class
-		 */
-		if(preg_match('/uniqueness_of/', $method)) {
+		if(strpos($method, 'uniqueness_of') !==false) {
 			$args[1]['class'] = get_class($this);
 			$args[1]['instance'] = $this;
 		}
