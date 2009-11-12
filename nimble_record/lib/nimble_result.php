@@ -70,7 +70,10 @@
 		}
 	
 		public function columns(){
-			return $this->keys();
+			if($this->length > 0) {
+				return array_keys($this->first()->row);
+			}
+			return array();
 		}
 
     public function rewind() {

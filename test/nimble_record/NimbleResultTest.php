@@ -20,6 +20,14 @@ require_once(dirname(__FILE__) . '/config.php');
 			}
 		}
 		
+		public function testColumns() {
+			$users = User::find('all');
+			$cols = User::columns();
+			foreach($cols as $col) {
+				$this->assertTrue(array_include($col, $users->columns()));
+			}
+		}
+		
 		public function testToString() {
 			$users = User::find('all');
 			$s = (string) $users;

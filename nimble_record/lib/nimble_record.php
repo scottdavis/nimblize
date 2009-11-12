@@ -691,7 +691,7 @@ class NimbleRecord {
 	* Sets the static variable self::$columns with the results from self::column_array()
 	* @param $override Boolean - will reload the columns
 	*/
-	private static function columns($override = false) {
+	public static function columns($override = false) {
 		$class = self::class_name();
 		if($override || empty(self::$columns[$class])) {
 			self::$columns[$class] = self::column_array();
