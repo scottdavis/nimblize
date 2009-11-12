@@ -126,8 +126,57 @@
 			}
 		}
 		
+		public function testDeleteOnInstance() {
+			$start = User::count(array('cache' => false));
+			$user = User::_create(array('name' => 'test_user', 'my_int' => 1500));
+			$this->assertTrue($user->saved);
+			$this->assertEquals(User::count(array('cache' => false)), $start + 1);
+			$id = $user->id;
+			$user->delete();
+			try {
+				User::find($id);
+			} catch(NimbleRecordNotFound $e) {
+				$this->assertTrue(is_a($e, 'NimbleRecordNotFound'));
+				$this->assertEquals(User::count(array('cache' => false)), $start);
+			}
+		}
+		
 		public function testMassdelete() {
-			
+			$start = User::count(array('cache' => false));
+			$users = array();
+			foreach(range(0,3) as $i) {
+				$users[] = $u = User::_create(array('name' => 'test_name' . $i, 'my_int' => 12 + $i));
+				$this->assertTrue($u->saved);
+				unset($u);
+			}
+			$this->assertEquals(User::count(array('cache' => false)), $start + 4);
+			$ids = collect(function($u) {return $u->id;}, $users);
+			User::delete($ids);
+			try {
+				User::find($ids);
+			} catch (NimbleRecordNotFound $e) {
+					$this->assertTrue(is_a($e, 'NimbleRecordNotFound'));
+					$this->assertEquals(User::count(array('cache' => false)), $start);
+			}
+		}
+		
+		public function testMassDeleteManyArgs() {
+			$start = User::count(array('cache' => false));
+			$users = array();
+			foreach(range(0,3) as $i) {
+				$users[] = $u = User::_create(array('name' => 'test_name' . $i, 'my_int' => 12 + $i));
+				$this->assertTrue($u->saved);
+				unset($u);
+			}
+			$this->assertEquals(User::count(array('cache' => false)), $start + 4);
+			$ids = collect(function($u) {return $u->id;}, $users);
+			call_user_func_array(array('User', 'delete'), $ids);
+			try {
+				User::find($ids);
+			} catch (NimbleRecordNotFound $e) {
+					$this->assertTrue(is_a($e, 'NimbleRecordNotFound'));
+					$this->assertEquals(User::count(array('cache' => false)), $start);
+			}
 		}
 		
 	}

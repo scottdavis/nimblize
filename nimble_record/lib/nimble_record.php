@@ -26,8 +26,9 @@ class NimbleRecord {
 	protected static $my_class;
 	protected static $table_names = array();
 	protected static $temp = array();
-	
-	
+	/** Method Maps */
+	protected static $magic_method_map = array('delete' => '_delete');
+	protected static $math_method_map = array('max' => '_max', 'sum' => '_sum', 'min' => '_min');
 	
 	var $update_mode = false;
 	var $saved;
@@ -138,6 +139,21 @@ class NimbleRecord {
 	
 	/**
 	* MATH METHODS
+	*
+	* Math methods are completely magic
+	* Sum, Max, Min 
+	* -- Staticly called --
+	* ex User::(sum|max|min)('price', array('conditions' => array('id' => 5));
+	* Instance called follows has_many associations 
+	* ex $user->sum('cars', 'price');
+	* -- Count --
+	* NOTE: count is special
+	* Staticly called
+	* ex User::count()
+	* ex User::count(array('conditions' => array('price' => '5.00')));
+	* Instance called follows has_hany association
+	* $user->count('photos');
+	* $user->count('photos', array('conditions' => array('price' => '10.00')));
 	*/
 	
 	/**
@@ -155,7 +171,7 @@ class NimbleRecord {
 	* use Class::count(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function count(array $options = array()) {
+	public static function _count(array $options = array()) {
 		$defaults = array('column' => '*', 'conditions' => NULL, 'cache' => true);
 		$options = array_merge($defaults, $options);
 		static::check_args_for_math_functions($options);
@@ -169,7 +185,7 @@ class NimbleRecord {
 	* use Class::sum(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function sum(array $options = array('column' => NULL, 'conditions' => NULL)) {
+	public static function _sum(array $options = array('column' => NULL, 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
 		$sql = 'SELECT sum('. self::table_name() . '.' . $options['column'] . ') as sum_all FROM ' . self::table_name();
 		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
@@ -180,7 +196,7 @@ class NimbleRecord {
 	* @uses Class::max(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function max(array $options = array('column' => NULL, 'conditions' => NULL)) {
+	public static function _max(array $options = array('column' => NULL, 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
 		$sql = 'SELECT max('. self::table_name() . '.' . $options['column'] . ') as max_all FROM ' . self::table_name();
 		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
@@ -191,7 +207,7 @@ class NimbleRecord {
 	* @uses Class::min(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function min(array $options = array('column' => NULL, 'conditions' => NULL)) {
+	public static function _min(array $options = array('column' => NULL, 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
 		$sql = 'SELECT min('. self::table_name() . '.' . $options['column'] . ') as min_all FROM ' . self::table_name();
 		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
@@ -202,12 +218,14 @@ class NimbleRecord {
 	* use self::build_conditions(array('name' => 'bob')) or self::build_conditions('id = 3')
 	* @param $conditions Array || String
 	*/
-	private static function build_conditions($conditions) {
+	private static function build_conditions($conditions, $add_where = true) {
 			$sql = '';
 			if(is_array($conditions)){
-				$sql .= ' ' . self::build_where_from_array($conditions);
+				$sql .= ' ' . self::build_where_from_array($conditions, $add_where);
 			}else if(is_string($conditions)){
-				$sql .= ' WHERE(' . $conditions . ')';
+				$sql .= ($add_where) ? ' WHERE(' : '';
+				$sql .= ' ' . $conditions;
+				$sql .= ($add_where) ? ')' : '';
 			}
 			return $sql;
 	}
@@ -238,13 +256,23 @@ class NimbleRecord {
 		return self::execute_query($return[0], $return[1], false);
 	}
   
-  public static function delete($id) {
-    $clean = self::sanatize_input_array($id);
-    if(is_array($id)) {
-      $where = ' WHERE (id IN (' . join(',', $clean) . '))';
-    }else{
-      $where = ' WHERE (id = ' . $clean . ')';
-    }
+  public static function _delete() {
+		$args = func_get_args();
+		switch(count($args)) {
+			case 1:
+				$clean = self::sanatize_input_array($args[0]);
+		    if(is_array($args[0])) {
+		      $where = ' WHERE (id IN (' . join(',', $clean) . '))';
+		    }else{
+		      $where = ' WHERE (id = ' . $clean . ')';
+		    }
+			break;
+			default:
+				$clean = self::sanatize_input_array($args);
+				$where = ' WHERE (id IN (' . join(',', $clean) . '))';
+			break;
+		}
+    
     $sql = 'DELETE FROM ' . self::table_name() . $where;
     return self::execute($sql);
   }
@@ -818,12 +846,13 @@ class NimbleRecord {
 	*	use self::build_where_from_array(array())
 	* @param $conditions Array - array('id' => 3, 'name' => 'bob')
 	*/
-	private static function build_where_from_array($conditions){
-		$sql = 'WHERE(';
+	private static function build_where_from_array($conditions, $add_where = true){
+		$sql = '';
+		$sql .=  ($add_where) ? 'WHERE(' : '';
 		foreach($conditions as $condition => $value){
-			$sql .= self::table_name() . '.' . $condition. " = '" . static::$adapter->escape($value) ."'";
+			$sql .= $condition. " = '" . static::$adapter->escape($value) ."'";
 		}
-		$sql .= ')';
+		$sql .= ($add_where) ? ')' : '';
 		return $sql;
 	}
   
@@ -1003,9 +1032,77 @@ class NimbleRecord {
 		}
 	}
 	
-	public function __call($method, $arguments)  {
+	
+	private static function process_magic_condition_merge($c1, $c2) {
+		$c1 = self::build_conditions($c1, false);
+		$c2 = self::build_conditions($c2, false);
+		$out = array($c1, $c2);
+		return implode(' AND', $out);
+	}
+	
+	public function __call($method, $args)  {
+		/** 
+		* count magic 
+		* Its special
+		*/
+		if(strtolower($method) == 'count') {
+			$klass = get_called_class();
+			if(count($args) == 0) {
+				return call_user_func_array(array($klass, '_count'), array());
+			}else{
+				if(!$this->association_exists('has_many', $args[0])) {
+					throw new nimbleRecordException('Association does not exsist');
+				}
+				$class = Inflector::classify($args[0]);
+				$key = static::association_foreign_key($args[0]);
+				$conditions = array('conditions' => array($key => $this->id));
+				if(isset($args[1])) {
+					if(isset($args[1]['conditions'])) {
+						$conditions['conditions'] = static::process_magic_condition_merge($conditions['conditions'], $args[1]['conditions']) ;
+						unset($args[1]['conditions']);
+					}
+					$conditions = array_merge($conditions, $args[1]);
+				}
+				return call_user_func_array(array($class, '_count'), array($conditions));
+			}
+		}
+		/**
+		* See static::$math_method_map for included methods
+		*/
+		if(isset(static::$math_method_map[$method])) {
+			$klass = get_called_class();
+			if(empty($args) || count($args) < 2) {
+				throw new NimbleRecordException('You need to pass an association name and column');
+			}
+			if(!$this->association_exists('has_many', $args[0])) {
+				throw new nimbleRecordException('Association does not exist');
+			}
+			$class = Inflector::classify($args[0]);
+			$key = static::association_foreign_key($args[0]);
+			$conditions = array('conditions' => array($key => $this->id), 'column' => $args[1]);
+			if(isset($args[2])) {
+				if(isset($args[2]['conditions'])) {
+					$conditions['conditions'] = static::process_magic_condition_merge($conditions['conditions'], $args[2]['conditions']);
+					unset($args[2]['conditions']);
+				}
+				$conditions = array_merge($conditions, $args[2]);
+			}
+			return call_user_func_array(array($class, static::$math_method_map[$method]), array($conditions));
+		}
+		
+		/**
+		* See static::$magic_method_map for included methods
+		*/
+		if(isset(static::$magic_method_map[$method])) {
+			$klass = get_called_class();
+			if(empty($args)) {
+				$args = array($this->id);
+			}
+			call_user_func_array(array($klass, static::$magic_method_map[$method]), $args);
+		}
+		
 		if(array_include($method, static::columns())) {
-			$this->row[$method] = $arguments;
+			$this->row[$method] = $args;
 		}
 		/**This is a special case because we do not want uniqueness_of being called on an update
 		 * since it already exsists... because we are updating it!
@@ -1017,25 +1114,25 @@ class NimbleRecord {
 		if(preg_match('/^validates_([0-9a-z_]+)$/', $method, $matches)) {
 			$klass_method = $matches[1];
 			if(array_include($klass_method, get_class_methods('NimbleValidation'))) {
-				if(is_array($arguments[0]) && count($arguments[0]) > 1){
-					foreach($arguments[0] as $column) {
+				if(is_array($args[0]) && count($args[0]) > 1){
+					foreach($args[0] as $column) {
             if(!isset($this->row[$column])) {
               $value = '';
             }else{
               $value = $this->row[$column];
             }
-						$args = array('column_name' => $column, 'value' => $value);
-						if(isset($arguments[1]) && !empty($arguments[1])) {
-							$args = array_merge($args, $arguments[1]);
+						$argss = array('column_name' => $column, 'value' => $value);
+						if(isset($args[1]) && !empty($args[1])) {
+							$argss = array_merge($argss, $args[1]);
 						}
-						$return = call_user_func_array(array('NimbleValidation', $klass_method), array($args));
+						$return = call_user_func_array(array('NimbleValidation', $klass_method), array($argss));
 						$this->process_error_return($return);
 					}
 				}else{
-					$column = $arguments[0];
-					$args = array('column_name' => $column, 'value' => $this->row[$column]);
+					$column = $args[0];
+					$argss = array('column_name' => $column, 'value' => $this->row[$column]);
 					if(isset($arguments[1]) && !empty($arguments[1])) {
-						$args = array_merge($args, $arguments[1]);
+						$argss = array_merge($argss, $args[1]);
 					}
 					$return = call_user_func_array(array('NimbleValidation', $klass_method), array($args));
 					$this->process_error_return($return);
@@ -1047,6 +1144,15 @@ class NimbleRecord {
 	public static function __callStatic($method, $args) {
 		$matches = array();
 		$klass = get_called_class();
+		if(strtolower($method) == 'count') {
+			return call_user_func_array(array($klass, '_count'), $args);
+		}
+		if(isset(static::$magic_method_map[$method])) {
+			return call_user_func_array(array($klass, static::$magic_method_map[$method]), $args);
+		}
+		if(isset(static::$math_method_map[$method])) {
+			return call_user_func_array(array($klass, static::$math_method_map[$method]), $args);
+		}
 		if(preg_match('/^find_by_([a-z0-9_]+)$/', $method, $matches)) {
 			$where = static::build_where_for_magic_find($matches, $args);
 			return call_user_func_array(array($klass, 'find'), array('first', array('conditions' => $where)));
