@@ -20,6 +20,16 @@ require_once(dirname(__FILE__) . '/config.php');
 		}
 		
 		
+		public function testMassToXml() {
+			$users = User::find('all');
+			$xml = $users->to_xml();
+			$xml = simplexml_load_string($xml);
+			foreach($xml->users as $user) {
+				var_dump($users);
+			}
+		}
+		
+		
 		public function testToJson() {
 			$user = User::find(1);
 			$json = $user->to_json();
@@ -35,8 +45,6 @@ require_once(dirname(__FILE__) . '/config.php');
 		public function testMassToJson() {
 			$users = User::find('all');
 			$json = $users->to_json();
-			
-			
 			$user = $users->first();
 			$keys = array_keys($user->row);
 			$json = json_decode($json);
