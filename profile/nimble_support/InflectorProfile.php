@@ -35,7 +35,7 @@ $t2 = time();
 
 echo "Inflector profile test, ${number_of_iterations} iterations:\n\n";
 printf("No caching: %d sec.\n", $t1 - $start);
-printf("Caching: %d sec.\n", $t2 - $t2);
+printf("Caching: %d sec.\n", $t2 - $t1);
 echo "\n";
 
 ?>
