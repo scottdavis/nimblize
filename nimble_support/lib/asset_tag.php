@@ -24,7 +24,7 @@
 			
 			(string) $out = '';
 			foreach($args as $css) {
-					if(!preg_match("/\.css$/" , $css)) {
+					if(strpos($css, ".css") === false) {
 						$css = $css . '.css';
 					}
 					$url = self::compute_public_path($css, $style_sheet_path, $style_sheet_base_url);
@@ -50,7 +50,7 @@
 			
 			(string) $out = '';
 			foreach($args as $js) {
-					if(!preg_match("/\.js$/" , $js)) {
+					if(strpos($js, ".js") === false) {
 						$js = $js . '.js';
 					}
 					$url = self::compute_public_path($js, $javascript_path, $javascript_base_url);
@@ -85,11 +85,7 @@
 		*/
 		private static function asset_id($source, $dir) {
 			$key = $source . '-mtime';
-			if(StringCacher::isCached($key)) {
-				return StringCacher::fetch($key);
-			}else{
-				return StringCacher::set($key, filemtime(FileUtils::join($dir, $source)));
-			}
+			return filemtime(FileUtils::join($dir, $source));
 		}
 		/**
 		* Creates a timestamped URL
