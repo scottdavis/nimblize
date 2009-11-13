@@ -4,7 +4,7 @@
 	* @param string $text
 	*/
 	function h($text) {
-		echo htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+		return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 	}
 	
 	/**
@@ -38,7 +38,7 @@
 	* @param array $options
 	*/
 	function image_tag($file, $alt = '', $options = array()) {
-		echo AssetTag::image($file, $alt, $options);
+		return AssetTag::image($file, $alt, $options);
 	}
 
 	/**
@@ -81,7 +81,7 @@
 	    return substr_replace($string, $rep, $leave);
 	}
 	
-	class BuildNColumnTable {
+	class SmartTable {
 		public function __construct($collection, $cols=2, $tr_class_name='', $table_options = array()) {
 			$this->collection = $collection;
 			$this->cols = $cols;
@@ -89,6 +89,7 @@
 			$this->td = '';
 			$this->table_options = $table_options;
 			$this->content = '';
+			$this->callback = NULL;
 		}
 		
 		
@@ -109,8 +110,8 @@
 		}
 		
 		public function build() {
-			if(empty($this->td)) {
-				throw new NimbleException('You must set the td variable');
+			if(empty($this->callback) && empty($this->td)) {
+				throw new NimbleException('You must set the td or callback variable');
 			}
 			if(empty($this->collection) || count($this->collection) == 0) {
 				return "";
@@ -123,15 +124,22 @@
 					}
 					$this->content .= "<tr class=\"{$this->tr_class_name}\">";
 				}
-				$this->content .= $this->process_td($obj);
+				if(!empty($this->callback)) {
+					$var = $this->callback;
+					$this->content .= $var($obj);
+				}else{
+					$this->content .= $this->process_td($obj);
+				}
 				$i++;
 			}
 			$remainder = count($this->collection) & $this->cols;
 			for($i=0;$i<$remainder;$i++) {
-				$this->content = "<td>&nbsp;</td>";
+				$this->content .= "<td>&nbsp;</td>";
 			}
 			$this->content = TagHelper::content_tag('tbody', $this->content);
 			$this->content = TagHelper::content_tag('table', $this->content, $this->table_options);
+			unset($this->callback);
+			unset($var);
 			return $this->content;
 		}
 	}
