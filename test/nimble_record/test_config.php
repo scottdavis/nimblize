@@ -87,6 +87,7 @@
 	
 	function create_comment($photo_id) {
 		Comment::_create(array('comment' => 'this is my comment', 'commentable_type' => 'photo', 'commentable_id' => $photo_id));
+		Comment::_create(array('comment' => 'this is my comment 2', 'commentable_type' => 'photo', 'commentable_id' => $photo_id));
 	}
 
 	function user_data() {

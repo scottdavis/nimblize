@@ -94,7 +94,7 @@
 		
 		public function testPolymorphicHasManyLoad() {
 			$photo = Photo::find(1);
-			$this->assertEquals(1, $photo->comments->length);
+			$this->assertEquals(2, $photo->comments->length);
 		}
 		
 		public function testPolymorphicBelongsToLoad() {
@@ -107,6 +107,9 @@
 			$p = $comment->parent;
 			$this->assertEquals(1, $p->id);
 			$this->assertTrue(is_a($p, 'Photo'));
+			$p2 = $comment->commentable;
+			$this->assertEquals(1, $p2->id);
+			$this->assertTrue(is_a($p2, 'Photo'));
 		}
 		
 		public function testTest() {

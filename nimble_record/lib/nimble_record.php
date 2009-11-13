@@ -977,6 +977,7 @@ class NimbleRecord {
 	}
 	
 	public function belongs_to_polymorphic($type) {
+		$old_type = $type;
 		$type = str_replace('able', '', $type);
 		$type = Inflector::pluralize($type);
 		$associations = NimbleAssociation::$associations;
@@ -987,6 +988,7 @@ class NimbleRecord {
 			}
 		}
 		$poly[] = 'parent';
+		$poly[] = $old_type;
 		$this->merge_assocs('belongs_to_polymorphic', $poly);
 	}
 	
