@@ -73,13 +73,23 @@
 
 
 		protected static function has_many_polymorphic_find($class, $name) {
+			$id = $class->row[NimbleRecord::$primary_key_field];
 			$model = static::model($name);
 			$singular = Inflector::singularize($name);
 			$polymorphic_column_type = $singular . 'able_type';
 			$polymorphic_column_id =  $singular . 'able_id';
-			$class = strtolower($class);
-			$conditions = $polymorphic_column_type . " = '$class' AND " . $polymorphic_column_id . " = '{static::id}'";
+			$class = strtolower(get_class($class));
+			$conditions = $polymorphic_column_type . " = '$class' AND " . $polymorphic_column_id . " = '" . $id . "'";
 			return call_user_func("$model::find_all", array('conditions' => $conditions));
+		}
+		
+		
+		protected static function belongs_to_polymorphic_find($class, $name) {
+			$model = static::model($name);
+			$singular = Inflector::singularize(get_class($class));
+			$polymorphic_column_id =  strtolower($singular) . 'able_id';
+			$id = $class->row[$polymorphic_column_id];
+			return call_user_func_array(array($model, 'find'), array($id));
 		}
 
 		protected static function belongs_to_find($class, $name) {

@@ -50,18 +50,6 @@
 				$this->assertTrue($vals[$i] == $ass['User']['has_many_polymorphic'][$i]);
 			}
 		}
-		public function testBelongsToPolyMorhic() {
-			$u = new User();
-			$u->belongs_to_polymorphic('dogs', 'deer', 'ducks');
-			$vals = array('dogs', 'deer', 'ducks');
-			$ass = NimbleAssociation::$associations;
-			$this->assertTrue(isset($ass['User']));
-			$this->assertTrue(isset($ass['User']['belongs_to_polymorphic']));
-			for($i=0;$i<count($vals);$i++) {
-				$this->assertTrue($vals[$i] == $ass['User']['belongs_to_polymorphic'][$i]);
-			}
-		}
-		
 		
 		public function testAssociationAutoLoad() {
 			User::create(array('name' => 'bob', 'my_int' => 5));
@@ -104,6 +92,15 @@
 			}
 		}
 		
+		public function testPolymorphicHasManyLoad() {
+			$photo = Photo::find(1);
+			$this->assertEquals(1, $photo->comments->length);
+		}
+		
+		public function testPolymorphicBelongsToLoad() {
+			$comment = Comment::find(1);
+			$this->assertEquals(1, $comment->photo->id);
+		}
 		
 		public function testTest() {
 			$u = User::find('first', array('conditions' => 'my_int = 3'));

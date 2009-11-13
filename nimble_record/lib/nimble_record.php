@@ -976,9 +976,17 @@ class NimbleRecord {
 		$this->merge_assocs('has_many_polymorphic', $args);
 	}
 	
-	public function belongs_to_polymorphic() {
-		$args = func_get_args();
-		$this->merge_assocs('belongs_to_polymorphic', $args);
+	public function belongs_to_polymorphic($type) {
+		$type = str_replace('able', '', $type);
+		$type = Inflector::pluralize($type);
+		$associations = NimbleAssociation::$associations;
+		$poly = array();
+		foreach($associations as $class => $assoc) {
+			if(isset($assoc['has_many_polymorphic']) && array_include($type, $assoc['has_many_polymorphic'])) {
+				$poly[] = Inflector::singularize(strtolower($class));
+			}
+		}
+		$this->merge_assocs('belongs_to_polymorphic', $poly);
 	}
 	
 	public function has_and_belongs_to_many() {
