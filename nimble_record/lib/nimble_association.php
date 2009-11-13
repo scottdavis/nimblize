@@ -1,7 +1,9 @@
-	<?php
+<?php
 
 	class NimbleAssociation {
-		public static $types = array('has_many', 'has_many_polymorphic', 'belongs_to', 'has_and_belongs_to_many', 'belongs_to_polymorphic');	
+		public static $types = array('has_many', 'has_many_polymorphic', 
+																 'belongs_to', 'has_and_belongs_to_many', 
+																 'belongs_to_polymorphic');	
 		public static $associations = array();
 
 		

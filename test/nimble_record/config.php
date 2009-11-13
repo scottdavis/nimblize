@@ -6,8 +6,6 @@
 	require_once(dirname(__FILE__) . '/model/User.php');
 	require_once(dirname(__FILE__) . '/model/Photo.php');
 	require_once(dirname(__FILE__) . '/model/Comment.php');
-
-
 	if(!defined('CONNECTED')) {
 		if(file_exists(dirname(__FILE__) . '/database.json')) {
 			/**
