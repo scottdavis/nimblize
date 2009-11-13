@@ -986,6 +986,7 @@ class NimbleRecord {
 				$poly[] = Inflector::singularize(strtolower($class));
 			}
 		}
+		$poly[] = 'parent';
 		$this->merge_assocs('belongs_to_polymorphic', $poly);
 	}
 	

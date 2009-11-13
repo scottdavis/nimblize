@@ -85,8 +85,9 @@
 		
 		
 		protected static function belongs_to_polymorphic_find($class, $name) {
-			$model = static::model($name);
 			$singular = Inflector::singularize(get_class($class));
+			$polymorphic_column_type = strtolower($singular) . 'able_type';
+			$model = static::model($class->row[$polymorphic_column_type]);
 			$polymorphic_column_id =  strtolower($singular) . 'able_id';
 			$id = $class->row[$polymorphic_column_id];
 			return call_user_func_array(array($model, 'find'), array($id));

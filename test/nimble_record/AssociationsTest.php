@@ -102,6 +102,13 @@
 			$this->assertEquals(1, $comment->photo->id);
 		}
 		
+		public function testPolymorphicBelongsToLoadGeneric() {
+			$comment = Comment::find(1);
+			$p = $comment->parent;
+			$this->assertEquals(1, $p->id);
+			$this->assertTrue(is_a($p, 'Photo'));
+		}
+		
 		public function testTest() {
 			$u = User::find('first', array('conditions' => 'my_int = 3'));
 			$this->assertEquals($u->my_int, '3');
