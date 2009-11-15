@@ -53,7 +53,7 @@ class SmartTable {
 		}
 		$remainder = count($this->collection) % $this->cols;
 		for($i=0;$i<($remainder - 1);$i++) {
-			$this->content .= "<td>&nbsp;</td>";
+			$this->content .= "<td class='empty'>&nbsp;</td>";
 		}
 		$this->content .= "</tr>";
 		$this->content = TagHelper::content_tag('tbody', $this->content);
