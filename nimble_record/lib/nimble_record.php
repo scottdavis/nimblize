@@ -239,8 +239,43 @@ class NimbleRecord {
 	*/
 	
 	/**
+	* Paginated Finder
+	* @uses User::paginate(array('conditions' => 'foo = bar', 'page' => $_GET['page], 'per_page' => 25))
+	*/
+	
+	public static function paginate(array $input) {
+		if(!isset($input['per_page']) || !isset($input['page'])) {
+			throw new NimbleRecordEXception('You must supply page and per_page options');
+		}
+		$input['conditions'] = isset($input['conditions']) ? $input['conditions'] : array();
+		$count_conditions = array();
+		if(isset($input['conditions']) && !empty($input['conditions'])) {
+			$count_conditions = array('conditions' => $input['conditions']);
+		}
+		$total_count = self::count($count_conditions);
+		unset($count_conditions);
+		$per_page = $input['per_page'];
+		$page = $input['page'];
+		unset($input['per_page']);
+		unset($input['page']);
+		$limit = (int) $per_page * ((int) $page - 1);
+		$limit = implode(',', array($limit, (int) $per_page));
+		$args[0] = 'all';
+		$args[1] = $input;
+		$args[1]['limit'] = $limit;
+		unset($limit);
+		unset($input);
+		$return = static::build_find_sql($args);
+		$return = self::execute_query($return[0], $return[1]);
+		$return->total_count = $total_count;
+		$return->per_page = $per_page;
+		$return->page = $page;
+		return $return;
+	}
+	
+	/**
 	* Method find
-	* use self::find(1,2,3,4,5) or self::find(3) or self::find('3')
+	* @uses self::find(1,2,3,4,5) or self::find(3) or self::find('3')
 	* @param string|integer|array $args
 	*/
 	public static function find() {
