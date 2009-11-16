@@ -67,6 +67,41 @@
 				return $attrs;
 			}
 		}
+		
+		public static function pagination($collection, $class_name = '', $options = array()) {
+			$pagination_options = array(
+			      'class'          => 'pagination',
+			      'previous_label' => '&laquo; Previous',
+			      'next_label'     => 'Next &raquo;',
+			      'param_name'     => 'page'
+			    );
+			$pagination_options = array_merge($pagination_options, $options);
+			
+			if(!isset($collection->total_count) && isset($collection->page) && isset($collection->per_page)) {
+				throw new NimbleException('You must pass a paginated result set to the pagination helper');
+			}
+			$total_buttons = ceil($collection->total_count / $collection->per_page);
+			if(!isset($_SERVER['QUERY_STRING']) || empty($_SERVER['QUERY_STRING'])) {
+				$url = $_SERVER['QUERY_STRING'] = '?' . $pagination_options['param_name'] . '=';
+			}else{
+				$url = $_SERVER['QUERY_STRING'] . '&' . $pagination_options['param_name'] . '=';
+			}
+			$url = $_SERVER['REQUEST_URI'] . $url;
+			$out = array();
+			$prev_page = ($collection->page <= 1) ? 1 : ($collection->page - 1);
+			$link = TagHelper::content_tag('a', $pagination_options['previous_label'], array('href' => $url . $prev_page));
+			$out[] = TagHelper::content_tag('li', $link);
+			for($i=1; $i < ($total_buttons + 1); $i++) {
+				$myurl = $url . $i;
+				$link = TagHelper::content_tag('a', $i, array('href' => $myurl));
+				$out[] = TagHelper::content_tag('li', $link);
+			}
+			$prev_page = ((int) $collection->page >= (int) $total_buttons) ? $total_buttons : ($collection->page + 1);
+			$link = TagHelper::content_tag('a', $pagination_options['next_label'], array('href' => $url . $prev_page));
+			$out[] = TagHelper::content_tag('li', $link);
+			return TagHelper::content_tag('ul', implode('', $out), array('class' => $pagination_options['class']));
+			
+		}
 	
 	}
 	/**
@@ -182,7 +217,6 @@
 			$options = array_merge($options, array('value' => $value));
 			return self::content_tag('option', $name, $options);
 		}
-		
 		
 	}
 	
