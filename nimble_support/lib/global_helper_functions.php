@@ -18,9 +18,9 @@
 	}
 	
 	/**
-	* Similar to rubys collect method
+	* Iterates and calls the closure on each index
 	* @param function $func
-	* @param array|interator $array
+	* @param array|iterator $array
 	* @uses collect(function($value){return $value+1}, range(1,5));
 	*/
 	function collect($func, $array) {
@@ -81,4 +81,13 @@
 	    return substr_replace($string, $rep, $leave);
 	}
 	
+	/**
+	 * Alias for the TagHelper::pagination method for building pagination views
+	 * @see TagHelper::pagination
+	 * @return string
+	 **/
+	function paginate() {
+		$args = func_get_args();
+		return call_user_func_array(array('TagHelper', 'pagination'), $args);
+	}
 ?>
