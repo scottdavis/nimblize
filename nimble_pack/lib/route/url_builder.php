@@ -97,11 +97,11 @@
           $klass = Nimble::getInstance();
           $out = array();
           foreach($klass->routes as $route) {
-              $pattern = self::clean_route($route[0]);
+              $pattern = self::clean_route($route->rule);
               $pattern = empty($pattern) ? 'root path' : $pattern;
-							$string = CommandLineColor::underline("Controller:") . ' ' . CommandLineColor::yellow($route[1]) . ' ' . 			
-							CommandLineColor::underline('Action:') . ' ' . CommandLineColor::magenta($route[2]) . ' ' . 
-							CommandLineColor::underline('Method:') . ' ' . CommandLineColor::green($route[3]) . ' ' . 
+							$string = CommandLineColor::underline("Controller:") . ' ' . CommandLineColor::yellow($route->controller) . ' ' . 			
+							CommandLineColor::underline('Action:') . ' ' . CommandLineColor::magenta($route->method) . ' ' . 
+							CommandLineColor::underline('Method:') . ' ' . CommandLineColor::green($route->http_method) . ' ' . 
 							CommandLineColor::underline('Pattern:') . ' ' . CommandLineColor::bold_red($pattern);   
 							array_push($out, $string);
           }  

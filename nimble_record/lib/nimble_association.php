@@ -1,9 +1,8 @@
 <?php
 
 	class NimbleAssociation {
-		public static $types = array('has_many', 'has_many_polymorphic', 
-																 'belongs_to', 'has_and_belongs_to_many', 
-																 'belongs_to_polymorphic');	
+		public static $types = array('has_many', 'has_one', 
+																 'belongs_to', 'has_and_belongs_to_many');	
 		public static $associations = array();
 
 		
@@ -12,7 +11,7 @@
 			$matches = array();
 			$regex = '/^find_(' . implode('|', static::$types) . ')$/';
 			if(preg_match($regex, $method, $matches)){
-					return call_user_func_array(array('self', $matches[1] . '_find'), 
+					return call_user_func_array(array('self', '_' . $matches[1]), 
 																			array($args[0], $args[1]));
 																		
 			}else{
@@ -21,11 +20,40 @@
 		}
 		
 		
+		private static function _has_many($class, $name) {
+			$class_name = is_string($class) ? Inflector::Classify($class) : Inflector::Classify(get_class($class));
+			$obj = NimbleAssociation::$associations[$class_name]['has_many'][$name];
+			if(isset($obj->as) && !empty($obj->as)) {
+				return static::has_many_polymorphic_find($class, $name);
+			}
+			if(isset($obj->through) && !empty($obj->through)) {
+				return array();
+			}
+			return static::has_many_find($class, $name);
+		}
+		
+		private static function _has_one() {
+			
+		}
+		
+		private static function _belongs_to($class, $name) {
+			$class_name = is_string($class) ? Inflector::Classify($class) : Inflector::Classify(get_class($class));
+			$obj = NimbleAssociation::$associations[$class_name]['belongs_to'][$name];
+			if(isset($obj->polymorphic) && $obj->polymorphic === true) {
+				return static::belongs_to_polymorphic_find($class, $name);
+			}
+			return static::belongs_to_find($class, $name);
+		}
+		
+		private static function _has_and_belongs_to_many() {
+			
+		}
+		
 		public static function exists($class, $key, $association_name) {
 				if(!isset(static::$associations[$class])) {return false;}
 				$associations = static::$associations[$class];
 				if (isset($associations[$key])) {
-					return array_include($association_name, $associations[$key]);
+					return isset($associations[$key][$association_name]);
 				}else{
 					return false;
 				}
@@ -35,7 +63,7 @@
 			$class = is_string($class) ? $class : get_class($class);
 			if(!isset(static::$associations[$class])) {return false;}
 			foreach(static::$associations[$class] as $assoc => $assocs) {
-				if(array_include($association, $assocs)) {
+				if(isset(static::$associations[$class][$assoc][$association])) {
 					return (string) $assoc;
 				}
 			}
@@ -100,5 +128,48 @@
 		}
 		
 	}
+	
+	
+	class NimbleAssociationBuilder {
+		
+		static $options = 		array('has_many' => 								array('through', 'foreign_key', 'class_name', 
+																																		'conditions', 'order', 'foreign_key', 'include', 'as'),
+																
+																'belongs_to' => 							array('class_name', 'conditions', 'foreign_key', 'include', 
+																																		'polymorphic'),
+																'has_and_belongs_to_many' => array('class_name', 'join_table', 'foreign_key',
+																																		'association_foreign_key', 'conditions', 'order'),
+																'has_one' =>								 array('class_name', 'conditions', 'order', 'foreign_key',
+																 																		'include', 'as', 'through')
+																);
+		
+														
+		public function __construct($class, $type, $arg) {
+			if(!array_include($type, NimbleAssociation::$types)) {
+				throw new NimbleRecordException('Invalid Association Type: ' . $type);
+			}
+			$this->type = $type;
+			$this->class = is_string($class) ? Inflector::classify($class) : Inflector::classify(get_class($class));
+			$this->name = $arg;
+			foreach(static::$options[$this->type] as $var) {
+				$this->{$var} = NULL;
+			}
+			return $this;
+		}
+		
+		public function __call($method, $args) {
+			if(array_include($method, static::$options[$this->type])) {
+				$this->{$method} = reset($args);
+				return $this;
+			}else{
+				throw new NimbleRecordException('Property does not exsist on this association type only: ' 
+																				. implode(', ', static::$options[$this->type]));
+			}
+		}
+	}
+	
+
+
+
 
 ?>

@@ -1,4 +1,11 @@
 <?php
+
+	/**
+	* @package support
+	* This File contains conveniat wrappers for helper functions
+	* For more information on a function see its alias class method
+	*/
+
 	/**
 	* echos out text using htmlspecialchars to help avoid xss attacks
 	* @param string $text
@@ -31,14 +38,17 @@
 		unset($func);
 		return $out;
 	}
+	
+	
 	/**
 	*
 	* @param string $file
 	* @param string $alt
 	* @param array $options
 	*/
-	function image_tag($file, $alt = '', $options = array()) {
-		return AssetTag::image($file, $alt, $options);
+	function image_tag() {
+		$args = func_get_args();
+		return call_user_func_array(array('AssetTag', 'image'), $args);
 	}
 
 	/**
@@ -90,4 +100,31 @@
 		$args = func_get_args();
 		return call_user_func_array(array('TagHelper', 'pagination'), $args);
 	}
+	
+	/**
+	* @see AssetTag::javascript_include_tag()
+	* @return string
+	*/
+	function javascript_include_tag() {
+		$args = func_get_args();
+		return call_user_func_array(array('AssetTag', 'javascript_include_tag'), $args);
+	}
+	
+	/**
+	* @see AssetTag::stylesheet_link_tag()
+	* @return string
+	*/
+	function stylesheet_link_tag() {
+		$args = func_get_args();
+		return call_user_func_array(array('AssetTag', 'stylesheet_link_tag'), $args);
+	}
+	/**
+	* same as calling $_REQUEST['foo'] just a nice helper
+	*/
+	function params($key) {
+		if(isset($_REQUEST[$key])) {
+			return $_REQUEST[$key];
+		}
+	}
+	
 ?>

@@ -3,5 +3,5 @@
     RewriteCond %{REQUEST_URI} !^$ [OR]
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(.*)$ ./config/boot.php?url=$1 [QSA,L]
+    RewriteRule ^(.*)$ ./config/boot.php?__url=$1 [QSA,L]
 </IfModule>

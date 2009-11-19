@@ -80,25 +80,38 @@
 			if(!isset($collection->total_count) && isset($collection->page) && isset($collection->per_page)) {
 				throw new NimbleException('You must pass a paginated result set to the pagination helper');
 			}
-			$total_buttons = ceil($collection->total_count / $collection->per_page);
-			if(!isset($_SERVER['QUERY_STRING']) || empty($_SERVER['QUERY_STRING'])) {
-				$url = $_SERVER['QUERY_STRING'] = '?' . $pagination_options['param_name'] . '=';
+			$url = $_SERVER['REQUEST_URI'];
+
+			$total_buttons = ceil($collection->total_count / $collection->per_page) + 1;
+			if($total_buttons == 1) {return '';}
+			if(isset($_GET[$pagination_options['param_name']]) && !empty($_GET[$pagination_options['param_name']])) {
+				$url = str_replace($pagination_options['param_name'] . '=' . (string) $_GET[$pagination_options['param_name']],
+				 										$pagination_options['param_name'] . '={page}', 
+														$url);		
 			}else{
-				$url = $_SERVER['QUERY_STRING'] . '&' . $pagination_options['param_name'] . '=';
+				$url = $url . '?page={page}';
 			}
-			$url = $_SERVER['REQUEST_URI'] . $url;
+			//Build List
 			$out = array();
-			$prev_page = ($collection->page <= 1) ? 1 : ($collection->page - 1);
-			$link = TagHelper::content_tag('a', $pagination_options['previous_label'], array('href' => $url . $prev_page));
-			$out[] = TagHelper::content_tag('li', $link);
-			for($i=1; $i < ($total_buttons + 1); $i++) {
-				$myurl = $url . $i;
-				$link = TagHelper::content_tag('a', $i, array('href' => $myurl));
+			
+			if((int) $collection->page != 1) {
+				$prev_page = ($collection->page <= 1) ? 1 : ($collection->page - 1);
+				$link = TagHelper::content_tag('a', 
+																			 $pagination_options['previous_label'], 
+																			 array('href' => str_replace('{page}', $prev_page, $url)));
+																			
 				$out[] = TagHelper::content_tag('li', $link);
 			}
-			$prev_page = ((int) $collection->page >= (int) $total_buttons) ? $total_buttons : ($collection->page + 1);
-			$link = TagHelper::content_tag('a', $pagination_options['next_label'], array('href' => $url . $prev_page));
-			$out[] = TagHelper::content_tag('li', $link);
+			for($i=1; $i < $total_buttons; $i++) {		
+				$myurl = str_replace('{page}', $i, $url);
+				$link = ((int) $collection->page == $i) ? $i : TagHelper::content_tag('a', $i, array('href' => $myurl));
+				$out[] = TagHelper::content_tag('li', $link);
+			}
+			if((int) $collection->page != ($total_buttons -1)) {
+				$next_page = ((int) $collection->page >= (int) $total_buttons) ? $total_buttons : ((int) $collection->page + 1);
+				$link = TagHelper::content_tag('a', $pagination_options['next_label'], array('href' => str_replace('{page}', $next_page, $url)));
+				$out[] = TagHelper::content_tag('li', $link);
+			}
 			return TagHelper::content_tag('ul', implode('', $out), array('class' => $pagination_options['class']));
 			
 		}

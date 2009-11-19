@@ -122,7 +122,7 @@
 		/**
 		* Add an image from the image folder
 		*/
-		public static function image($image, $alt='', $options) {
+		public static function image($image, $alt='', $options = array()) {
 			$nmbl = Nimble::getInstance()->config;
 			$url = $nmbl['image_url'];
 			$image_path = $nmbl['image_path'];

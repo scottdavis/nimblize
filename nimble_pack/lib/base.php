@@ -26,7 +26,7 @@ class Nimble
 		if(defined("NIMBLE_IS_TESTING") && NIMBLE_IS_TESTING) {
 			$this->test_mode = true;
 		}
-		$this->url = (isset($_GET['url'])) ? trim($_GET['url'], '/') : '';
+		$this->url = (isset($_GET['__url'])) ? trim($_GET['__url'], '/') : '';
 		/** set default configs */
 		$this->config['title_seperator'] = ':';
 		$this->config['default_layout'] = '';
@@ -139,6 +139,11 @@ class Nimble
 	 */
 	public function dispatch()
 	{
+		if(isset($_SERVER['QUERY_STRING'])) {
+			$string = explode('&', $_SERVER['QUERY_STRING']);
+			unset($string[0]);
+			$_SERVER['QUERY_STRING'] = implode('&', $string);
+		}
 		if($this->test_mode && !isset($_POST['_method'])) {
 			$_POST['_method'] = 'get';
 		}
@@ -152,12 +157,11 @@ class Nimble
 			if (preg_match($conf->rule, $this->url, $matches) && $_SERVER['REQUEST_METHOD'] == $conf->http_method){
 				/** Only declared variables in URL regex */
 				$matches = $this->parse_urls_args($matches);
+				$_GET = array_merge($_GET, $matches);
 				$this->klass = new $conf->controller();
 				/** set the layout tempalte to the default */
 				$this->klass->set_layout_template();
 				$this->klass->format = ($conf->has_format) ? array_pop($matches) : 'html';
-				$_GET = array_merge($_GET, $matches);
-
 				ob_start();
 
 				// call before filters

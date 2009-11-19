@@ -244,9 +244,9 @@ class NimbleRecord {
 	*/
 	
 	public static function paginate(array $input) {
-		if(!isset($input['per_page']) || !isset($input['page'])) {
-			throw new NimbleRecordEXception('You must supply page and per_page options');
-		}
+		$defaults = array('per_page' => 25, 'page' => 1);
+		$input = array_merge($defaults, $input);
+		$input['page'] = is_null($input['page']) ? 1 : $input['page'];
 		$input['conditions'] = isset($input['conditions']) ? $input['conditions'] : array();
 		$count_conditions = array();
 		if(isset($input['conditions']) && !empty($input['conditions'])) {
@@ -259,6 +259,7 @@ class NimbleRecord {
 		unset($input['per_page']);
 		unset($input['page']);
 		$limit = (int) $per_page * ((int) $page - 1);
+		$limit = ($limit > 0) ? $limit : 0;
 		$limit = implode(',', array($limit, (int) $per_page));
 		$args[0] = 'all';
 		$args[1] = $input;
@@ -996,54 +997,11 @@ class NimbleRecord {
 	/**
 	* Start association setters
 	*/ 
-	public function belongs_to() {
-		$args = func_get_args();
-		$this->merge_assocs('belongs_to', $args);
-	}
-	
-	public function has_many() {
-		$args = func_get_args();
-		$this->merge_assocs('has_many', $args);
-	}
-	
-	public function has_many_polymorphic() {
-		$args = func_get_args();
-		$this->merge_assocs('has_many_polymorphic', $args);
-	}
-	
-	public function belongs_to_polymorphic($type) {
-		$old_type = $type;
-		$type = str_replace('able', '', $type);
-		$type = Inflector::pluralize($type);
-		$associations = NimbleAssociation::$associations;
-		$poly = array();
-		foreach($associations as $class => $assoc) {
-			if(isset($assoc['has_many_polymorphic']) && array_include($type, $assoc['has_many_polymorphic'])) {
-				$poly[] = Inflector::singularize(strtolower($class));
-			}
-		}
-		$poly[] = 'parent';
-		$poly[] = $old_type;
-		$this->merge_assocs('belongs_to_polymorphic', $poly);
-	}
-	
-	public function has_and_belongs_to_many() {
-		$args = func_get_args();
-		$this->merge_assocs('has_and_belongs_to_many', $args);
-	}
+
 	/**
 	* End association setters
 	*/
 	
-	private function merge_assocs($key, $value) {
-		$class_name = static::class_name();
-		if(!isset(NimbleAssociation::$associations[$class_name][$key])) {
-			NimbleAssociation::$associations[$class_name][$key] = array();
-		}
-		NimbleAssociation::$associations[$class_name][$key] = array_merge(NimbleAssociation::$associations[$class_name][$key],
-			 																																$value);
-		NimbleAssociation::$associations[$class_name][$key] = array_unique(NimbleAssociation::$associations[$class_name][$key]);
-	}
 	
 	public function __get($var) {
 		if(isset($this->row[$var])) {
@@ -1076,6 +1034,32 @@ class NimbleRecord {
 	}
 	
 	
+	private function set_assoc($method, $args) {
+		$class_name = Inflector::classify(get_class($this));
+		if(!isset(NimbleAssociation::$associations[$class_name])) {
+			NimbleAssociation::$associations[$class_name] = array();
+		}
+		if(!isset(NimbleAssociation::$associations[$class_name][$method])) {
+			NimbleAssociation::$associations[$class_name][$method] = array();
+		}
+		switch(count($args)) {
+			case 1:
+			$var = reset($args);
+			$class = new NimbleAssociationBuilder($class_name, $method, $var);
+			NimbleAssociation::$associations[$class_name][$method][$var] = $class;
+			return $class; 
+			break;
+			default:
+				foreach($args as $var) {
+					$class = new NimbleAssociationBuilder($class_name, $method, $var);
+					NimbleAssociation::$associations[$class_name][$method][$var] = $class;
+					return NULL;
+				}
+			break;
+		}
+	}
+	
+	
 	private static function process_magic_condition_merge($c1, $c2) {
 		$c1 = self::build_conditions($c1, false);
 		$c2 = self::build_conditions($c2, false);
@@ -1084,6 +1068,11 @@ class NimbleRecord {
 	}
 	
 	public function __call($method, $args)  {
+		
+		if(array_include($method, NimbleAssociation::$types)) {
+			return $this->set_assoc($method, $args);
+		}
+		
 		/** 
 		* count magic 
 		* Its special
