@@ -88,7 +88,7 @@
 			return Inflector::classify($name);
 		}
 
-		protected static function has_many_find($class, $name) {
+		protected static function has_many_find($class, $name, $options = array()) {
 			$key = static::foreign_key(get_class($class));
 			$id = $class->row[NimbleRecord::$primary_key_field];
 			$conditions = array($key => $id);
@@ -100,7 +100,7 @@
 		}
 
 
-		protected static function has_many_polymorphic_find($class, $name) {
+		protected static function has_many_polymorphic_find($class, $name, $options = array()) {
 			$id = $class->row[NimbleRecord::$primary_key_field];
 			$model = static::model($name);
 			$singular = Inflector::singularize($name);
@@ -112,7 +112,7 @@
 		}
 		
 		
-		protected static function belongs_to_polymorphic_find($class, $name) {
+		protected static function belongs_to_polymorphic_find($class, $name, $options = array()) {
 			$singular = Inflector::singularize(get_class($class));
 			$polymorphic_column_type = strtolower($singular) . 'able_type';
 			$model = static::model($class->row[$polymorphic_column_type]);
@@ -121,7 +121,7 @@
 			return call_user_func_array(array($model, 'find'), array($id));
 		}
 
-		protected static function belongs_to_find($class, $name) {
+		protected static function belongs_to_find($class, $name, $options = array()) {
 			$primary_key_value = $class->row[$name . '_id'];
 			$model = static::model($name);
 			return call_user_func("$model::find", $primary_key_value);
@@ -162,7 +162,7 @@
 				$this->{$method} = reset($args);
 				return $this;
 			}else{
-				throw new NimbleRecordException('Property does not exsist on this association type only: ' 
+				throw new NimbleRecordException('Property does not exist on this association type only: ' 
 																				. implode(', ', static::$options[$this->type]));
 			}
 		}
