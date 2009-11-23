@@ -73,7 +73,7 @@ class NimbleRecord {
   /**
 	* returns the quoted table name
 	*/
-	protected static function table_name($class= '') {
+	public static function table_name($class= '') {
 		$class = empty($class) ? static::class_name() : $class;
 		if(isset(static::$table_names[$class]) && !empty(static::$table_names[$class])) { 
 			$name = static::$table_name_prefix . static::$table_names[$class];

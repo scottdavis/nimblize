@@ -23,13 +23,14 @@
 		private static function _has_many($class, $name) {
 			$class_name = is_string($class) ? Inflector::Classify($class) : Inflector::Classify(get_class($class));
 			$obj = NimbleAssociation::$associations[$class_name]['has_many'][$name];
+			$options = (array) $obj;
 			if(isset($obj->as) && !empty($obj->as)) {
-				return static::has_many_polymorphic_find($class, $name);
+				return static::has_many_polymorphic_find($class, $name, $options);
 			}
 			if(isset($obj->through) && !empty($obj->through)) {
 				return array();
 			}
-			return static::has_many_find($class, $name);
+			return static::has_many_find($class, $name, $options);
 		}
 		
 		private static function _has_one() {
@@ -39,10 +40,11 @@
 		private static function _belongs_to($class, $name) {
 			$class_name = is_string($class) ? Inflector::Classify($class) : Inflector::Classify(get_class($class));
 			$obj = NimbleAssociation::$associations[$class_name]['belongs_to'][$name];
+			$options = (array) $obj;
 			if(isset($obj->polymorphic) && $obj->polymorphic === true) {
-				return static::belongs_to_polymorphic_find($class, $name);
+				return static::belongs_to_polymorphic_find($class, $name, $options);
 			}
-			return static::belongs_to_find($class, $name);
+			return static::belongs_to_find($class, $name, $options);
 		}
 		
 		private static function _has_and_belongs_to_many() {
@@ -126,6 +128,66 @@
 			$model = static::model($name);
 			return call_user_func("$model::find", $primary_key_value);
 		}
+		
+		
+		
+		//array('join' => array('photos' => 'comments' => 'users'))
+		public static function process_join($class, $input) {
+			$out = array();
+			if(is_string($input) && static::find_type($class, $input) === false) {
+				return $input;
+			}else{
+				$input = is_array($input) ? $input : array($input);
+			}
+			if(is_array($input) && !is_assoc($input)) {
+				foreach($input as $association) {
+					$out[] = static::build_join($class, $association);
+				}
+			}else{
+				//is assoc
+				
+				
+				
+				
+				
+			}
+			return implode(" ", $out);
+			
+		}
+		
+		private static function inner_join_sql() {
+			return "INNER JOIN {join_table_name} ON ({from_table_foreign_key} = {join_table_primary_key})";
+		}
+		
+		private static function outer_join_sql() {
+			return "LEFT OUTER JOIN {join_table_name} ON ({from_table_foreign_key} = {join_table_primary_key})";
+		}
+		
+		private function build_join($class, $association) {
+				$type = static::find_type($class, $association);
+				if($type === false) {
+					throw new NimbleRecordException('Invalid association: ' . $association);
+				}
+				$sql = static::inner_join_sql();
+				$association_model = Inflector::classify(Inflector::singularize($association));
+				$model = get_class($class);
+				$options = array();
+				$options['{join_table_name}'] = NimbleRecord::table_name($association_model);
+				switch($type) {
+					case 'belongs_to':
+						$options['{join_table_primary_key}'] = NimbleRecord::table_name($association_model)
+																									. '.' . $model::$foreign_key_suffix;
+						$options['{from_table_foreign_key}'] =  NimbleRecord::table_name($model) . '.' . static::foreign_key($association) ;
+					break;
+					case 'has_many':
+						$options['{join_table_primary_key}'] = NimbleRecord::table_name($association_model)
+																									. '.' . static::foreign_key($model) ;
+						$options['{from_table_foreign_key}'] =  NimbleRecord::table_name($model) . '.' . $model::$foreign_key_suffix;
+					break;
+				}
+				return str_replace(array_keys($options), $options, $sql);
+		}
+		
 		
 	}
 	
