@@ -74,8 +74,8 @@
 		
 		public static function foreign_key($class) {
 			$class = is_string($class) ? $class : get_class($class);
-			$model = Inflector::classify($class);
-			return Inflector::foreignKey(Inflector::singularize($class), $model::$foreign_key_suffix);
+			$model = Inflector::classify(Inflector::singularize($class));
+			return Inflector::foreignKey($model, $model::$foreign_key_suffix);
 		}
 
 		public static function table_name($name) {
@@ -131,8 +131,8 @@
 		
 		
 		
-		//array('join' => array('photos' => 'comments' => 'users'))
 		public static function process_join($class, $input) {
+			$class = is_string($class) ? Inflector::classify(Inflector::singularize($class)) : get_class($class);
 			$out = array();
 			if(is_string($input) && static::find_type($class, $input) === false) {
 				return $input;
@@ -144,12 +144,7 @@
 					$out[] = static::build_join($class, $association);
 				}
 			}else{
-				//is assoc
-				
-				
-				
-				
-				
+				/** @todo add nested builder for joins */				
 			}
 			return implode(" ", $out);
 			
@@ -163,14 +158,14 @@
 			return "LEFT OUTER JOIN {join_table_name} ON ({from_table_foreign_key} = {join_table_primary_key})";
 		}
 		
-		private function build_join($class, $association) {
+		private static function build_join($class, $association) {
 				$type = static::find_type($class, $association);
 				if($type === false) {
 					throw new NimbleRecordException('Invalid association: ' . $association);
 				}
 				$sql = static::inner_join_sql();
 				$association_model = Inflector::classify(Inflector::singularize($association));
-				$model = get_class($class);
+				$model = $class;
 				$options = array();
 				$options['{join_table_name}'] = NimbleRecord::table_name($association_model);
 				switch($type) {
