@@ -1,5 +1,26 @@
 <?php
-
+/**
+* @package NimbleRecord
+*/
+/**
+* MATH METHODS
+*
+* @package NimbleRecord
+* Math methods are completely magic
+* Sum, Max, Min 
+* -- Staticly called --
+* ex User::(sum|max|min)('price', array('conditions' => array('id' => 5));
+* Instance called follows has_many associations 
+* ex $user->sum('cars', 'price');
+* -- Count --
+* NOTE: count is special
+* Staticly called
+* ex User::count()
+* ex User::count(array('conditions' => array('price' => '5.00')));
+* Instance called follows has_hany association
+* $user->count('photos');
+* $user->count('photos', array('conditions' => array('price' => '10.00')));
+*/
 class NimbleRecord {
 	/** public vars */
 	public static $query_log = array();
@@ -38,8 +59,8 @@ class NimbleRecord {
 	var $row = array();
 	/**
 	* Required
-	* connects to the data base and stores the connection
-	* @param $db_settings_name Array
+	* connects to the database and stores the connection
+	* @param array $db_settings
 	*/
 	public static function establish_connection(array $db_settings) {
 		static::$database = $db_settings['database'];
@@ -50,7 +71,7 @@ class NimbleRecord {
 		*/
 		$_adapters = self::get_available_adapters();
 		if(isset($_adapters[$filename])) {
-			require_once(dirname(__FILE__) . '/../adapters/' . $filename);
+			require_once(__DIR__ . '/../adapters/' . $filename);
 		}
 		$class = Inflector::classify($file);
 		$klass = new $class($db_settings);
@@ -59,7 +80,7 @@ class NimbleRecord {
 	
 	private static function get_available_adapters() {
 		$_adapters = array();
-		if ($dh = opendir(dirname(__FILE__) . '/../adapters')) {
+		if ($dh = opendir(__DIR__ . '/../adapters')) {
 			while (($file = readdir($dh)) !== false) {
 		    	if(strpos($file, '_adapter.php') !== false) {
 						$_adapters[$file] = true;
@@ -71,7 +92,8 @@ class NimbleRecord {
 	}
 	
   /**
-	* returns the quoted table name
+	* @return string the quoted table name
+	* @param string $class
 	*/
 	public static function table_name($class= '') {
 		$class = empty($class) ? static::class_name() : $class;
@@ -83,12 +105,16 @@ class NimbleRecord {
 		}
 		return static::$adapter->quote_table_name($name);
 	}
-	
-	
+	/**
+	* @return AbstractAdapter
+	*/
 	public static function adapter() {
 		return static::$adapter;
 	}
-	
+	/**
+	* Is the class running in test mode?
+	* @return boolean
+	*/
 	public static function test_mode() {
 		return static::$test_mode;
 	}
@@ -98,23 +124,34 @@ class NimbleRecord {
 	protected static function primary_key_field() {
 		return static::$primary_key_field;
 	}
-
+	/**
+	* @return resource Raw database connection
+	*/
 	protected static function connection() {
 		return static::$connection;
 	}
-	
+	/**
+	* Sets the connection
+	* @param resource $conn
+	*/
 	public static function set_connection($conn) {
 		static::$connection = $conn;
 	}
-
+	/**
+	* @return string Current Databse
+	*/
 	public static function database() {
 		return static::$database;
 	}
-	
+	/**
+	* @return string Current Class Name
+	*/
 	public static function class_name() {
 		return get_called_class();
 	}
-	
+	/**
+	* @return string Class Name
+	*/
 	public static function get_class() {
 		if(!isset(static::$my_class) && empty(static::$my_class)) {
 			$class =  static::class_name();
@@ -123,7 +160,10 @@ class NimbleRecord {
 		return static::$my_class;
 	}
 	
-
+	/**
+	* @return mixed Returns cleaned values from adapaters excape method
+	* @param mixed $input
+	*/
 	private static function sanatize_input_array($input) {
 		if(is_array($input)) {
 			$clean_values = array();
@@ -135,27 +175,7 @@ class NimbleRecord {
 			return static::$adapter->escape((string) $input);
 		}
 	}
-	
-	
-	/**
-	* MATH METHODS
-	*
-	* Math methods are completely magic
-	* Sum, Max, Min 
-	* -- Staticly called --
-	* ex User::(sum|max|min)('price', array('conditions' => array('id' => 5));
-	* Instance called follows has_many associations 
-	* ex $user->sum('cars', 'price');
-	* -- Count --
-	* NOTE: count is special
-	* Staticly called
-	* ex User::count()
-	* ex User::count(array('conditions' => array('price' => '5.00')));
-	* Instance called follows has_hany association
-	* $user->count('photos');
-	* $user->count('photos', array('conditions' => array('price' => '10.00')));
-	*/
-	
+		
 	/**
 	* @see self::check_args_for_math_functions($options)
 	* @param $options array('column' => 'name', 'conditions' => array('id' => 1))  
@@ -246,14 +266,6 @@ class NimbleRecord {
 			}
 			return $sql;
 	}
-	
-	/**
-	* END MATH METHODS
-	*/
-	
-	/**
-	*	START FIND METHODS
-	*/
 	
 	/**
 	* Paginated Finder
@@ -397,15 +409,6 @@ class NimbleRecord {
 		return self::find('all', $options);
 	}
 	
-	
-	/**
-	* END FIND METHODS
-	*/
-	
-	/**
-	* START DELETE METHODS
-	*/
-	
 	public function destroy() {
 		call_user_func(array($this, 'before_destroy'));
     self::delete($this->id);
@@ -427,16 +430,6 @@ class NimbleRecord {
 		$sql = $query->build();
 		return self::execute($sql);
 	}
-  
-	/**
-	* END DELETE METHODS
-	*/
-	
-	/**
-	* START VALIDATION CHECKS
-	*/
-	
-
 	
 	public static function run_validations($klass) {	
 		call_user_func_array(array($klass, 'validations'), array());
@@ -456,11 +449,6 @@ class NimbleRecord {
 		static::getErrors($this);
 		return count($this->errors) == 0 ? true : false; 
 	}
-	
-	
-	/**
-	* END VALIDATION CHECKS
-	*/
 	
 	/**
   * Checks weither a record exists or not
@@ -554,19 +542,6 @@ class NimbleRecord {
 		}
 		return $attributes;
 	}
-	
-	/**
-	* END CREATE METODS
-	*/
-	
-	
-	/**
-	* START UPDATE METHODS
-	*/
-	
-	/**
-	* Callbacks
-	*/ 
 	//@codeCoverageIgnoreStart
 	public function before_update() {}
 	public function after_update() {}
@@ -654,23 +629,10 @@ class NimbleRecord {
 		return $array;
 	}	
 		
-		
-	/**
-	* END UPDATE METODS
-	*/
-
-	/**
-	* START PRIVATE UTILITY METHODS
-	*/
-	
-	/**
-	*
-	* CACHEING FUNCTIONS
-	*
-	*/
 	
 	/** 
 	* Checks if the current query is cached
+	* @return boolean
 	*/
 	
 	private static function is_query_cached($sql) {
@@ -1002,22 +964,11 @@ class NimbleRecord {
 			$this->errors[$return[1]] = $return[2];
 		}
 	}
-	/**
-	* MAGIC METHODS
-	*/
 	
 	private static function process_associations($class) {
 		call_user_func_array(array($class, 'associations'), array());
 	}
-	/**
-	* Start association setters
-	*/ 
 
-	/**
-	* End association setters
-	*/
-	
-	
 	public function __get($var) {
 		if(isset($this->row[$var])) {
 			return stripslashes($this->row[$var]);
@@ -1218,19 +1169,12 @@ class NimbleRecord {
 		}
 	}
 
-	/**
-	* END MAGIC METHODS
-	*/
 	
 	public function __isset($name) {
 		return isset($this->row) && isset($this->row[$name]);
 	}
 	
-	
-	/**
-	* PROTECTED UTILITY METHODS
-	*
-	*/
+
 	//@codeCoverageIgnoreStart 
 	public function associations() {}
 	//@codeCoverageIgnoreEnd

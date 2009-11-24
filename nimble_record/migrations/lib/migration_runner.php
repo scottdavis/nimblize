@@ -9,21 +9,27 @@
 		}
 		
 		public static function get_all_versions() {
-			$table = NimbleRecord::$adapter->quote_table_name(self::migration_table_name());
-			$results = NimbleRecord::$adapter->query('SELECT version FROM ' . $table . ' ORDER BY version ASC');
+			$table = NimbleRecord::$adapter->quote_table_name(static::migration_table_name());
+			$query = new NimbleQuery();
+			$query->select = 'version';
+			$query->from = $table;
+			$query->order_by = 'version ASC';
+			$sql = $query->build();
+			$results = NimbleRecord::$adapter->query($sql);
 			$versions = array();
 			while($row = $results->fetch_assoc()) {
 				$versions[$row['version']] = $row['version'];
 			}
+			$results->free();
 			ksort($versions);
 			return $versions;
 		}
 		
 		public static function current_version() {
-			$table = self::migration_table_name();
+			$table = static::migration_table_name();
 			if(NimbleRecord::$adapter->table_exists($table)) {
-				$versions = self::get_all_versions();
-				$version = self::get_max_version($versions);
+				$versions = static::get_all_versions();
+				$version = static::get_max_version($versions);
 			}else{
 				$version = 0;
 			}
@@ -31,14 +37,21 @@
 		}
 		
 		public static function create_version($version) {
-			$table = NimbleRecord::$adapter->quote_table_name(self::migration_table_name());
-			$sql = "INSERT INTO $table (version) VALUES ('$version')";
+			$table = NimbleRecord::$adapter->quote_table_name(static::migration_table_name());
+			$query = new NimbleQuery(NimbleQuery::INSERT);
+			$query->insert_into = $table;
+			$query->columns = array('version');
+			$query->values = array($version);
+			$sql = $query->build();
 			Migration::execute($sql);
 		}
 		
 		public static function delete_version($version) {
-			$table = NimbleRecord::$adapter->quote_table_name(self::migration_table_name());
-			$sql = "DELETE FROM $table WHERE version = '$version'";
+			$table = NimbleRecord::$adapter->quote_table_name(static::migration_table_name());
+			$query = new NimbleQuery(NimbleQuery::DELETE);
+			$query->from = $table;
+			$query->where = NimbleQuery::condition('version', $version);
+			$sql = $query->build();
 			Migration::execute($sql);
 		}
 		
@@ -46,47 +59,47 @@
 		public static function migrate($target_version = null) {
 			if(is_string($target_version) && !is_numeric($target_version)) {
 				if($target_version == 'down') {
-					self::down(-1);
+					static::down(-1);
 				}else{
-					self::up();
+					static::up();
 				}
-				return self::current_version();
+				return static::current_version();
 			}
 			if(is_null($target_version)) {
-				self::up($target_version);
-			}elseif((int) self::current_version() > (int) $target_version) {
-				self::down($target_version);
+				static::up($target_version);
+			}elseif((int) static::current_version() > (int) $target_version) {
+				static::down($target_version);
 			}else{
-				self::up($target_version);
+				static::up($target_version);
 			}
-			return self::current_version();
+			return static::current_version();
 		}
 		
 		public static function setup_table() {
-			if(!NimbleRecord::$adapter->table_exists(self::migration_table_name())) {
-				self::create_migration_table();
+			if(!NimbleRecord::$adapter->table_exists(static::migration_table_name())) {
+				static::create_migration_table();
 			}
 		}
 		
 		public static function up($to_version = NULL) {
-			$table = self::migration_table_name();
-			$data = self::load_files(self::$dir);
-			$current = self::current_version();
+			$table = static::migration_table_name();
+			$data = static::load_files(static::$dir);
+			$current = static::current_version();
 			foreach($data as $version => $class) {
 				if((int) $current >= (int) $version) {continue;}
 				if((!is_null($to_version) &&  !empty($to_version)) && (int) $version > (int) $to_version) {continue;}
 				print(CommandLineColor::underline('Running') . " " . CommandLineColor::underline_blue($class) . " - " . CommandLineColor::yellow($version) . "\n");
 				$klass = new $class();
 				$klass->up();
-				self::create_version($version);
+				static::create_version($version);
 			}
 		}
 		
 		
 	public static function down($to_version) {
-		$current = self::current_version();
-		$table = self::migration_table_name();
-		$data = self::load_files(self::$dir);
+		$current = static::current_version();
+		$table = static::migration_table_name();
+		$data = static::load_files(static::$dir);
 		$data = array_reverse($data, true);
 		foreach($data as $version => $class) {
 			if((int) $version < (int) $to_version) {continue;}
@@ -94,20 +107,20 @@
 			print(CommandLineColor::underline('Running') . " " . CommandLineColor::underline_blue($class) . " - " . CommandLineColor::yellow($version) . "\n");
 			$klass = new $class();
 			$klass->down();
-			self::delete_version($version);
+			static::delete_version($version);
 		}
 	}
 	
 	public static function drop_migration_table() {
 		Migration::$show_sql = false;
 		$mig = new Migration();
-		$mig->drop_table(self::migration_table_name());
+		$mig->drop_table(static::migration_table_name());
 	}
 	
 	public static function create_migration_table() {
 		Migration::$show_sql = false;
 		$exists = static::migration_table_exists();
-		$table = self::migration_table_name();
+		$table = static::migration_table_name();
 		$mig = new Migration();
 		$t = $mig->create_table($table);
 			$t->string('version');
@@ -117,7 +130,7 @@
 	}
 	
 	public static function load_files() {
-		$dir = self::$dir;
+		$dir = static::$dir;
 		$classes = array();
 		if ($dh = opendir($dir)) {
 			while (($file = readdir($dh)) !== false) {
@@ -136,7 +149,7 @@
 	
 	
 	public static function migration_table_exists() {
-		$table = self::migration_table_name();
+		$table = static::migration_table_name();
 		return NimbleRecord::$adapter->table_exists($table);
 	}
 	
