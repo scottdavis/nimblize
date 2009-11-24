@@ -8,8 +8,7 @@
 		* function opens a new SMTP socket for each call of mail() this script 
 		* will break down and become slow around 5-10 emails depending on server load
 		* @todo queue support
-		* @package Nimble
-		* @version php 5.3 only
+		* @package NimbleMailer
 		* @uses Test::deliver_foo() will send the email for you public instance method foo in the subclass
 		* @uses Test::create_foo() will create the email for you public instance method foo in the subclass and return the object it --Note-- this does not send the email
 		*/

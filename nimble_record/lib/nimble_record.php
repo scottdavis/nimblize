@@ -95,13 +95,13 @@ class NimbleRecord {
 	* @return string the quoted table name
 	* @param string $class
 	*/
-	public static function table_name($class= '') {
-		$class = empty($class) ? static::class_name() : $class;
-		if(isset(static::$table_names[$class]) && !empty(static::$table_names[$class])) { 
-			$name = static::$table_name_prefix . static::$table_names[$class];
+	public static function table_name($klass= '') {
+		$klass = empty($klass) ? static::class_name() : $klass;
+		if(isset(static::$table_names[$klass]) && !empty(static::$table_names[$klass])) { 
+			$name = static::$table_name_prefix . static::$table_names[$klass];
 		}else{
-			static::$table_names[$class] = strtolower(Inflector::pluralize($class));
-			$name = static::$table_name_prefix . static::$table_names[$class];
+			static::$table_names[$klass] = strtolower(Inflector::pluralize($klass));
+			$name = static::$table_name_prefix . static::$table_names[$klass];
 		}
 		return static::$adapter->quote_table_name($name);
 	}
@@ -168,7 +168,7 @@ class NimbleRecord {
 		if(is_array($input)) {
 			$clean_values = array();
 			foreach($input as $value) {
-				array_push($clean_values, static::$adapter->escape($value));
+				$clean_values[]= static::$adapter->escape($value);
 			}
 			return $clean_values;
 		}else{
@@ -497,8 +497,10 @@ class NimbleRecord {
 		unset($columns);
 		$query = new NimbleQuery(NimbleQuery::INSERT);
 		$query->insert_into = self::table_name() ;
+		unset($klass->row['id']);
+		$values = static::prepair_nulls(array_values($klass->row));
 		$query->columns = static::sanatize_input_array(array_keys($klass->row));
-		$query->values = static::sanatize_input_array(array_values($klass->row));
+		$query->values = static::sanatize_input_array($values);
 		$sql = $query->build();
 		unset($query);
 		if(count($klass->errors) == 0 && self::execute_insert_query($sql)) {
@@ -613,9 +615,6 @@ class NimbleRecord {
 			foreach(array_keys($array) as $key) {
 				if(is_null($array[$key]) || $array[$key] == null) {
 					$array[$key] = 'NULL';
-				}else{
-					$v = $array[$key];
-					$array[$key] = "'{$v}'";
 				}
 			}
 		}else{
@@ -910,7 +909,6 @@ class NimbleRecord {
 
   /**
   * Method __toString
-  * @access public
   * returns NULL or record id
   */
   public function __toString(){

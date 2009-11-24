@@ -62,7 +62,7 @@
 				$var = Inflector::underscore(strtolower($part));
 				if(!empty($this->{$var})) {
 					if($part === 'VALUES') {
-						$cols = '(' . implode(", ", $this->columns) . ')';
+						$cols = "(`" . implode("`, `", $this->columns) . "`)";
 						$values = "('" . implode("', '", $this->{$var}) . "')";
 						$this->out[] = implode(" ", array($cols, $part, $values));	
 					}else{
