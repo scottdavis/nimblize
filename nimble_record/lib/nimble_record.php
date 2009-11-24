@@ -175,9 +175,13 @@ class NimbleRecord {
 		$defaults = array('column' => '*', 'conditions' => NULL, 'cache' => true);
 		$options = array_merge($defaults, $options);
 		static::check_args_for_math_functions($options);
-		$sql = 'SELECT count(' . $options['column'] . ') AS count_all FROM ' . self::table_name();
-		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
-		$sql .= ';';
+		$query = new NimbleQuery();
+		$query->select = 'count(' . $options['column'] . ') AS count_all';
+		$query->from = self::table_name();
+		if(isset($options['conditions'])) {
+			$query->where = self::build_conditions($options['conditions']);
+		}
+		$sql = $query->build();
 		return self::execute_query($sql, false, $options['cache'])->count_all;
 	}
 	/**
@@ -187,8 +191,13 @@ class NimbleRecord {
 	*/
 	public static function _sum(array $options = array('column' => NULL, 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
-		$sql = 'SELECT sum('. self::table_name() . '.' . $options['column'] . ') as sum_all FROM ' . self::table_name();
-		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
+		$query = new NimbleQuery();
+		$query->from = self::table_name();
+		$query->select = 'sum(' . self::table_name() . '.' . $options['column'] . ') as sum_all'; 
+		if(isset($options['conditions'])) {
+			$query->where = self::build_conditions($options['conditions']);
+		}
+		$sql = $query->build();
 		return self::execute_query($sql, false)->sum_all;
 	}
 	/**
@@ -198,8 +207,13 @@ class NimbleRecord {
 	*/
 	public static function _max(array $options = array('column' => NULL, 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
-		$sql = 'SELECT max('. self::table_name() . '.' . $options['column'] . ') as max_all FROM ' . self::table_name();
-		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
+		$query = new NimbleQuery();
+		$query->from = self::table_name();
+		$query->select = 'max(' . self::table_name() . '.' . $options['column'] . ') as max_all'; 
+		if(isset($options['conditions'])) {
+			$query->where = self::build_conditions($options['conditions']);
+		}
+		$sql = $query->build();
 		return self::execute_query($sql, false)->max_all;
 	}
 	/**
@@ -209,8 +223,13 @@ class NimbleRecord {
 	*/
 	public static function _min(array $options = array('column' => NULL, 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
-		$sql = 'SELECT min('. self::table_name() . '.' . $options['column'] . ') as min_all FROM ' . self::table_name();
-		$sql .= isset($options['conditions']) ? self::build_conditions($options['conditions']) : '';
+		$query = new NimbleQuery();
+		$query->from = self::table_name();
+		$query->select = 'min(' . self::table_name() . '.' . $options['column'] . ') as min_all'; 
+		if(isset($options['conditions'])) {
+			$query->where = self::build_conditions($options['conditions']);
+		}
+		$sql = $query->build();
 		return self::execute_query($sql, false)->min_all;
 	}
 	/**
@@ -218,14 +237,12 @@ class NimbleRecord {
 	* use self::build_conditions(array('name' => 'bob')) or self::build_conditions('id = 3')
 	* @param $conditions Array || String
 	*/
-	private static function build_conditions($conditions, $add_where = true) {
+	private static function build_conditions($conditions) {
 			$sql = '';
 			if(is_array($conditions)){
-				$sql .= ' ' . self::build_where_from_array($conditions, $add_where);
+				$sql .= ' ' . self::build_where_from_array($conditions);
 			}else if(is_string($conditions)){
-				$sql .= ($add_where) ? ' WHERE(' : '';
 				$sql .= ' ' . $conditions;
-				$sql .= ($add_where) ? ')' : '';
 			}
 			return $sql;
 	}
@@ -293,89 +310,84 @@ class NimbleRecord {
 	}
   
   public static function _delete() {
+		$query = new NimbleQuery(NimbleQuery::DELETE);
+		$query->from = self::table_name();
 		$args = func_get_args();
 		switch(count($args)) {
 			case 1:
 				$clean = self::sanatize_input_array($args[0]);
 		    if(is_array($args[0])) {
-		      $where = ' WHERE (id IN (' . join(',', $clean) . '))';
+		      $query->where = NimbleQuery::in(static::$primary_key_field, $clean);
 		    }else{
-		      $where = ' WHERE (id = ' . $clean . ')';
+		      $query->where = NimbleQuery::condition(static::$primary_key_field, $clean);
 		    }
 			break;
 			default:
 				$clean = self::sanatize_input_array($args);
-				$where = ' WHERE (id IN (' . join(',', $clean) . '))';
+				$query->where = NimbleQuery::in(static::$primary_key_field, $clean);
 			break;
 		}
-    $sql = 'DELETE FROM ' . self::table_name() . $where;
+    $sql = $query->build();
     return self::execute($sql);
   }
 	
 	private static function build_conditions_from_array($array) {
 		$out = array();
 		foreach($array as $key => $value) {
-			$out[] =  "$key = '$value'";
+			$out[] = NimbleQuery::condition($key, $value);
 		}
 		return $out;
 	}
 	
 	
-	private static function build_find_sql($array_or_id) {
-		$temp = array_pop($array_or_id);
-		(is_array($temp)) ? $options = $temp : $array_or_id[] = $temp;
-		unset($temp);
+	private static function build_find_sql($input) {
+		$query = new NimbleQuery();
+		$query->from = self::table_name();
+		$temp = array_pop($input);
+		(is_array($temp)) ? $options = $temp : $input[] = $temp;
 		$all = false;
-		$final_options = array();
-		$final_options['conditions'] = array();
-		$clean = self::sanatize_input_array($array_or_id);
-		$num_args = count($array_or_id);
+		$conditions = array();
+		$input = static::sanatize_input_array($input);
+		$num_args = count($input);
 		if($num_args > 1) {
 			$all = true;
-			$final_options['conditions'][] = "id IN (" . join(',', $clean) . ")";
-		}elseif($num_args == 1 && $array_or_id[0] != 'first' && $array_or_id[0] != 'all'){
-			$final_options['conditions'][] = "id = " . $clean[0];
-		}
-		if($num_args == 1) {
-			switch($array_or_id[0]) {
+			$conditions[] = NimbleQuery::in(static::$primary_key_field, $input);
+		}elseif($num_args == 1){
+			if(!array_include((string) $temp, array('first', 'all')) && is_numeric($temp)){
+				$conditions[] = NimbleQuery::condition(static::$primary_key_field, $temp);
+			}
+			switch($input[0]) {
 				case 'first':
-					$final_options['limit'] = '0,1';
+					$query->limit = '0,1';
 				break;
 				case 'all':
 					$all = true;
 				break;
-			}
+			}	
 		}
-	
 		if(isset($options)) {
 			if(isset($options['conditions'])) {
 				if(is_array($options['conditions'])) {
-					$final_options['conditions'] = array_merge($final_options['conditions'], static::build_conditions_from_array($options['conditions']));
+					$conditions = array_merge($conditions, static::build_conditions_from_array($options['conditions']));
 				}else{
-					$final_options['conditions'][] = $options['conditions'];
+					$conditions[] = $options['conditions'];
 				}
 			}
 			if(isset($options['limit'])) {
-				$final_options['limit'] = $options['limit'];
+				$query->limit = $options['limit'];
 			}
 			if(isset($options['order'])) {
-				$final_options['order'] = $options['order'];
+				$query->order_by = $options['order'];
 			}
 		}
-		$sql = "SELECT * FROM " . self::table_name();
-		$conditions = join(' AND ', $final_options['conditions']);
 		if(!empty($conditions)) {
-			$sql .= ' WHERE(' . $conditions . ')';
+			$query->where = implode(' AND ', $conditions);
 		}
-		if(!empty($final_options['order']))	{
-			$sql .= ' ORDER BY ' . $final_options['order'];
-		}
-		if(!empty($final_options['limit'])) {
-			$sql .= ' LIMIT ' . $final_options['limit'];
-		}
+		$sql = $query->build();
+		unset($query);
 		return array($sql, $all);
 	}
-
+	
   /**
 	* Method find_all
 	* use self::find_all(array('condtions' => 'name = bob')) or self::find_all()
@@ -402,12 +414,17 @@ class NimbleRecord {
   }
 	
 	public static function delete_all() {
-		$sql = 'DELETE FROM ' . self::table_name() . ';';
+		$query = new NimbleQuery(NimbleQuery::DELETE);
+		$query->from = self::table_name();
+		$sql = $query->build();
+		unset($query);
 		return self::execute($sql);
 	}
 	
 	public static function truncate() {
-		$sql = 'TRUNCATE ' . self::table_name() . ';';
+		$query = new NimbleQuery(NimbleQuery::TRUNCATE);
+		$query->truncate = self::table_name();
+		$sql = $query->build();
 		return self::execute($sql);
 	}
   
@@ -452,8 +469,13 @@ class NimbleRecord {
   * @todo add multi conditional support
   */
   public static function exists($col, $value) {
-    $sql = 'SELECT 1 from ' . static::table_name() . ' WHERE (`' . static::sanatize_input_array($col) . '`= ' . 
-		"'" . static::sanatize_input_array($value) . "') LIMIT 0,1";
+		$query = new NimbleQuery();
+		$query->select = '1';
+		$query->from = static::table_name();
+		$query->where = '(`' . static::sanatize_input_array($col) . '`= ' . "'" . static::sanatize_input_array($value) . "')";
+		$query->limit = '0,1';
+		$sql = $query->build();
+		unset($query);
     $result = static::execute($sql);
     $return = $result->fetch_assoc();
     if(isset($return['1'])) {
@@ -485,20 +507,12 @@ class NimbleRecord {
 			$klass->row = self::update_timestamps(array('created_at', 'updated_at'), $klass->row);
 		}
 		unset($columns);
-		
-		$sql = 'INSERT INTO ' . self::table_name() ;
-		$keys = array_keys($klass->row);
-		$values = array_values($klass->row);
-		$clean = static::sanatize_input_array($values);
-		$keys = static::sanatize_input_array($keys);
-		$clean = static::prepair_nulls($clean);
-		
-		
-		
-		$sql .= " (`" . join("`, `", $keys) . "`) VALUES (" .  join(", ", $clean) . ");";
-		
-		
-		
+		$query = new NimbleQuery(NimbleQuery::INSERT);
+		$query->insert_into = self::table_name() ;
+		$query->columns = static::sanatize_input_array(array_keys($klass->row));
+		$query->values = static::sanatize_input_array(array_values($klass->row));
+		$sql = $query->build();
+		unset($query);
 		if(count($klass->errors) == 0 && self::execute_insert_query($sql)) {
 			array_push(static::$query_log, "CREATE: $sql");
 			$klass->row['id'] = static::insert_id();
@@ -578,7 +592,6 @@ class NimbleRecord {
 			call_user_func_array(array($klass, 'before_update'), array());
 			call_user_func_array(array($klass, 'before_save'), array());
 		}
-		$sql = 'UPDATE ' . self::table_name() . ' SET ';
 		$updates = array();
 		/** Update timestamp if the column exsists */
 		$columns = static::columns();
@@ -586,10 +599,14 @@ class NimbleRecord {
 			$klass->row = self::update_timestamps(array('updated_at'), $klass->row);
 		}
 		unset($columns);
-		foreach ($klass->row as $key => $value) {
-	  		array_push($updates, '`' . self::sanatize_input_array($key) . "` = " . $clean = static::prepair_nulls(self::sanatize_input_array($value)) . "");
-		}
-		$sql .= join(", ", $updates) . ' WHERE `id` = ' . self::sanatize_input_array($id);
+		// Build query
+		$query = new NimbleQuery(NimbleQuery::UPDATE);
+		$query->update = self::table_name();
+		$query->columns = self::sanatize_input_array(array_keys($klass->row));
+		$query->values = self::sanatize_input_array(array_values($klass->row));
+		$query->where = "`id` = " . self::sanatize_input_array($id);
+		$sql = $query->build();
+		unset($query);
 		if(count($klass->errors) == 0 && self::execute_insert_query($sql)) {
 			array_push(self::$query_log, "UPDATE: $sql");
       $klass->id = $id;
@@ -886,13 +903,11 @@ class NimbleRecord {
 	*	use self::build_where_from_array(array())
 	* @param $conditions Array - array('id' => 3, 'name' => 'bob')
 	*/
-	private static function build_where_from_array($conditions, $add_where = true){
+	private static function build_where_from_array($conditions){
 		$sql = '';
-		$sql .=  ($add_where) ? 'WHERE(' : '';
 		foreach($conditions as $condition => $value){
 			$sql .= $condition. " = '" . static::$adapter->escape($value) ."'";
 		}
-		$sql .= ($add_where) ? ')' : '';
 		return $sql;
 	}
   

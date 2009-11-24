@@ -5,20 +5,23 @@
 		const INSERT = 'INSERT';
 		const UPDATE = 'UPDATE';
 		const DELETE = 'DELETE';
+		const TRUNCATE = 'TRUNCATE';
 		
 		var $select = '*';
 		var $type = self::SELECT;
 		var $out = array();
-		static $map = array(self::SELECT => array('SELECT', 'FROM', 'JOIN', 'WHERE', 'GROUP BY', 'ORDER', 'LIMIT'), 
+		static $map = array(self::SELECT => array('SELECT', 'FROM', 'JOIN', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT'), 
 												self::INSERT => array('INSERT INTO', 'VALUES'), 
 												self::UPDATE => array('UPDATE', 'SET', 'WHERE'), 
-												self::DELETE => array('DELETE', 'FROM', 'WHERE')
+												self::DELETE => array('DELETE', 'FROM', 'WHERE'),
+												self::TRUNCATE => array('TRUNCATE')
 											);
 		
 		static $required = array(self::SELECT => array('from'),
 														 self::INSERT => array('insert_into', 'columns', 'values'),
 														 self::UPDATE => array('update', 'columns', 'values'),
-														 self::DELETE => array('from')
+														 self::DELETE => array('from'),
+														 self::TRUNCATE => array('truncate')
 														);
 		
 		
@@ -103,6 +106,17 @@
 				}
 			}
 		}
+		
+		private function build_truncate() {
+			$this->check_vars();
+			$this->out[] = self::TRUNCATE;
+			foreach(static::$map[self::TRUNCATE] as $part) {
+				$var = Inflector::underscore(strtolower($part));
+				if(!empty($this->{$var})) {
+						$this->out[] = implode(" ", array($part, $this->{$var}));	
+				}
+			}
+		}
 
 		public function build() {
 			$method = 'build_' . strtolower($this->type);
@@ -120,6 +134,9 @@
 			return $column . ' IN(' . implode(',', $ids) . ')';
 		}
 		
+		public static function condition($column, $value) {
+			return "`$column` = '$value'";
+		}
 		
 	}
 	
