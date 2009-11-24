@@ -87,6 +87,22 @@
 			$this->assertEquals($match, $query->build());
 		}
 		
+		
+		public function testBuildDelete() {
+			$query = new NimbleQuery(NimbleQuery::DELETE);
+			$query->from = NimbleRecord::table_name('User');
+			$match = "DELETE FROM `users`";
+			$this->assertEquals($match, $query->build());
+		}
+		
+		public function testBuildDeleteConditions() {
+			$query = new NimbleQuery(NimbleQuery::DELETE);
+			$query->from = NimbleRecord::table_name('User');
+			$query->where = "`id` = 5";
+			$match = "DELETE FROM `users` WHERE `id` = 5";
+			$this->assertEquals($match, $query->build());
+		}
+		
 		public function testIn() {
 			$in = NimbleQuery::in('`id`', range(1,10));
 			$this->assertEquals('`id` IN(1,2,3,4,5,6,7,8,9,10)', $in);

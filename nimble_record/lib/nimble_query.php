@@ -39,7 +39,7 @@
 		}
 		
 		
-		public function build_select() {
+		private function build_select() {
 			$this->check_vars();
 			foreach(static::$map[self::SELECT] as $part) {
 				$var = Inflector::underscore(strtolower($part));
@@ -53,7 +53,7 @@
 			}
 		}
 		
-		public function build_insert() {
+		private function build_insert() {
 			$this->check_vars();
 			foreach(static::$map[self::INSERT] as $part) {
 				$var = Inflector::underscore(strtolower($part));
@@ -69,7 +69,7 @@
 			}
 		}
 		
-		public function build_update() {
+		private function build_update() {
 			$this->check_vars();
 			foreach(static::$map[self::UPDATE] as $part) {
 				$var = Inflector::underscore(strtolower($part));
@@ -89,6 +89,17 @@
 					if(!empty($this->{$var})) {{
 							$this->out[] = implode(" ", array($part, $this->{$var}));	
 					}
+				}
+			}
+		}
+		
+		private function build_delete() {
+			$this->check_vars();
+			$this->out[] = self::DELETE;
+			foreach(static::$map[self::DELETE] as $part) {
+				$var = Inflector::underscore(strtolower($part));
+				if(!empty($this->{$var})) {
+						$this->out[] = implode(" ", array($part, $this->{$var}));	
 				}
 			}
 		}
