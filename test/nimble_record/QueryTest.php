@@ -54,7 +54,7 @@
 			$query->insert_into = NimbleRecord::table_name('User');
 			$query->columns = array('name', 'my_int');
 			$query->values = array('bob', 5);
-			$match = "INSERT INTO `users` (name, my_int) VALUES ('bob', '5')";
+			$match = "INSERT INTO `users` (`name`, `my_int`) VALUES ('bob', '5')";
 			$this->assertEquals($match, $query->build());
 		}
 		/**

@@ -1,25 +1,55 @@
 <?php
 /**
-* @package NimbleRecord
+* @package nimble_record
+* @method sum
+* @method max
+* @method min
+* @method count
 */
 /**
+* Main Database Class
+*
+* Create
+* <code>User::create(array('name' => 'bob'));</code>
+*
+* Update
+* <code>User::update(1, array('name' => 'tony'));</code>
+*
+* Delete
+* <code>User::delete(1);</code>
+* <code>User::delete(1,3,5,7,9);</code>
+*
+* Pagination
+* <code>User::paginate(array('page' => 1, 'per_page' => 25));</code>
+*
+* FINDER METHODS
+* <code>User::find(1);</code>
+* <code>User::find(1,3,5,7,9);</code>
+* <code>User::find('all');</code>
+* <code>User::find_by_name('bob');</code>
+* <code>User::find('first');</code>
+* <code>User::find('all', array('conditions' => array('name' => 'bob'))); </code>
+* <code>User::find('all', array('conditions' => "`name` = 'bob'")); </code>
+*
+* Associations
+* A user has_many photos
+* <code>User::find(1)->photos;</code>
+* <code>Photot::find(1)->user</code>
+*
 * MATH METHODS
 *
-* @package NimbleRecord
 * Math methods are completely magic
-* Sum, Max, Min 
-* -- Staticly called --
-* ex User::(sum|max|min)('price', array('conditions' => array('id' => 5));
+
+* <code>User::(sum|max|min)('price', array('conditions' => array('id' => 5));</code>
 * Instance called follows has_many associations 
-* ex $user->sum('cars', 'price');
-* -- Count --
-* NOTE: count is special
-* Staticly called
-* ex User::count()
-* ex User::count(array('conditions' => array('price' => '5.00')));
+* <code>$user->sum('cars', 'price');</code>
+* Count
+* <i>NOTE: count is special</i>
+* <code>User::count();</code>
+* <code>User::count(array('conditions' => array('price' => '5.00')));</code>
 * Instance called follows has_hany association
-* $user->count('photos');
-* $user->count('photos', array('conditions' => array('price' => '10.00')));
+* <code>$user->count('photos');</code>
+* <code>$user->count('photos', array('conditions' => array('price' => '10.00')));</code>
 */
 class NimbleRecord {
 	/** public vars */
@@ -57,130 +87,11 @@ class NimbleRecord {
 	var $preloaded_associations = array();
 	var $new_record = true;
 	var $row = array();
-	/**
-	* Required
-	* connects to the database and stores the connection
-	* @param array $db_settings
-	*/
-	public static function establish_connection(array $db_settings) {
-		static::$database = $db_settings['database'];
-		$file = strtolower($db_settings['adapter']) . '_adapter';
-		$filename = $file . '.php';
-		/**
-		* lazy loading of the adapter
-		*/
-		$_adapters = self::get_available_adapters();
-		if(isset($_adapters[$filename])) {
-			require_once(__DIR__ . '/../adapters/' . $filename);
-		}
-		$class = Inflector::classify($file);
-		$klass = new $class($db_settings);
-		static::$adapter = $klass;
-	}
-	
-	private static function get_available_adapters() {
-		$_adapters = array();
-		if ($dh = opendir(__DIR__ . '/../adapters')) {
-			while (($file = readdir($dh)) !== false) {
-		    	if(strpos($file, '_adapter.php') !== false) {
-						$_adapters[$file] = true;
-					}
-		  }
-		 	closedir($dh);
-		}
-		return $_adapters;
-	}
-	
-  /**
-	* @return string the quoted table name
-	* @param string $class
-	*/
-	public static function table_name($klass= '') {
-		$klass = empty($klass) ? static::class_name() : $klass;
-		if(isset(static::$table_names[$klass]) && !empty(static::$table_names[$klass])) { 
-			$name = static::$table_name_prefix . static::$table_names[$klass];
-		}else{
-			static::$table_names[$klass] = strtolower(Inflector::pluralize($klass));
-			$name = static::$table_name_prefix . static::$table_names[$klass];
-		}
-		return static::$adapter->quote_table_name($name);
-	}
-	/**
-	* @return AbstractAdapter
-	*/
-	public static function adapter() {
-		return static::$adapter;
-	}
-	/**
-	* Is the class running in test mode?
-	* @return boolean
-	*/
-	public static function test_mode() {
-		return static::$test_mode;
-	}
-	/**
-	* returns name of the primary key field
-	*/
-	protected static function primary_key_field() {
-		return static::$primary_key_field;
-	}
-	/**
-	* @return resource Raw database connection
-	*/
-	protected static function connection() {
-		return static::$connection;
-	}
-	/**
-	* Sets the connection
-	* @param resource $conn
-	*/
-	public static function set_connection($conn) {
-		static::$connection = $conn;
-	}
-	/**
-	* @return string Current Databse
-	*/
-	public static function database() {
-		return static::$database;
-	}
-	/**
-	* @return string Current Class Name
-	*/
-	public static function class_name() {
-		return get_called_class();
-	}
-	/**
-	* @return string Class Name
-	*/
-	public static function get_class() {
-		if(!isset(static::$my_class) && empty(static::$my_class)) {
-			$class =  static::class_name();
-			static::$my_class = new $class;
-		}
-		return static::$my_class;
-	}
-	
-	/**
-	* @return mixed Returns cleaned values from adapaters excape method
-	* @param mixed $input
-	*/
-	private static function sanatize_input_array($input) {
-		if(is_array($input)) {
-			$clean_values = array();
-			foreach($input as $value) {
-				$clean_values[]= static::$adapter->escape($value);
-			}
-			return $clean_values;
-		}else{
-			return static::$adapter->escape((string) $input);
-		}
-	}
 		
 	/**
-	* @see self::check_args_for_math_functions($options)
 	* @param $options array('column' => 'name', 'conditions' => array('id' => 1))  
 	*/
-	protected static function check_args_for_math_functions(array $options){
+	private static function check_args_for_math_functions(array $options){
 		//verify options contains a column value
 		if(!is_array($options) || !isset($options['column'])){
 			throw new NimbleRecordException('InvalidArguments - please include a column ex. array(\'column\' => \'id\')');
@@ -188,10 +99,10 @@ class NimbleRecord {
 	}
 	/**
 	* Method count
-	* use Class::count(array('column' => 'name', 'conditions' => array('id' => 1)))
+	* @uses Class::count(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function _count(array $options = array()) {
+	private static function _count(array $options = array()) {
 		$defaults = array('column' => '*', 'conditions' => NULL, 'cache' => true);
 		$options = array_merge($defaults, $options);
 		static::check_args_for_math_functions($options);
@@ -209,7 +120,7 @@ class NimbleRecord {
 	* use Class::sum(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function _sum(array $options = array('column' => NULL, 'conditions' => NULL)) {
+	private static function _sum(array $options = array('column' => NULL, 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
 		$query = new NimbleQuery();
 		$query->from = self::table_name();
@@ -225,7 +136,7 @@ class NimbleRecord {
 	* @uses Class::max(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function _max(array $options = array('column' => NULL, 'conditions' => NULL)) {
+	private static function _max(array $options = array('column' => NULL, 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
 		$query = new NimbleQuery();
 		$query->from = self::table_name();
@@ -241,7 +152,7 @@ class NimbleRecord {
 	* @uses Class::min(array('column' => 'name', 'conditions' => array('id' => 1)))
 	* @param $options Array
 	*/
-	public static function _min(array $options = array('column' => NULL, 'conditions' => NULL)) {
+	private static function _min(array $options = array('column' => NULL, 'conditions' => NULL)) {
 		static::check_args_for_math_functions($options);
 		$query = new NimbleQuery();
 		$query->from = self::table_name();
@@ -321,7 +232,7 @@ class NimbleRecord {
 		return self::execute_query($return[0], $return[1], false);
 	}
   
-  public static function _delete() {
+  private static function _delete() {
 		$query = new NimbleQuery(NimbleQuery::DELETE);
 		$query->from = self::table_name();
 		$args = func_get_args();
@@ -1198,7 +1109,123 @@ class NimbleRecord {
 		return json_encode($this->row);
 	}
 	
+	/**
+	* Required
+	* connects to the database and stores the connection
+	* @param array $db_settings
+	*/
+	public static function establish_connection(array $db_settings) {
+		static::$database = $db_settings['database'];
+		$file = strtolower($db_settings['adapter']) . '_adapter';
+		$filename = $file . '.php';
+		/**
+		* lazy loading of the adapter
+		*/
+		$_adapters = self::get_available_adapters();
+		if(isset($_adapters[$filename])) {
+			require_once(__DIR__ . '/../adapters/' . $filename);
+		}
+		$class = Inflector::classify($file);
+		$klass = new $class($db_settings);
+		static::$adapter = $klass;
+	}
 	
+	private static function get_available_adapters() {
+		$_adapters = array();
+		if ($dh = opendir(__DIR__ . '/../adapters')) {
+			while (($file = readdir($dh)) !== false) {
+		    	if(strpos($file, '_adapter.php') !== false) {
+						$_adapters[$file] = true;
+					}
+		  }
+		 	closedir($dh);
+		}
+		return $_adapters;
+	}
+	
+  /**
+	* @return string the quoted table name
+	* @param string $class
+	*/
+	public static function table_name($klass= '') {
+		$klass = empty($klass) ? static::class_name() : $klass;
+		$name = Inflector::tableize($klass);
+		return static::$adapter->quote_table_name($name);
+	}
+	
+	/**
+	* Fetches a handle to the adapter
+	* @return AbstractAdapter
+	*/
+	public static function adapter() {
+		return static::$adapter;
+	}
+	/**
+	* Is the class running in test mode?
+	* @return boolean
+	*/
+	public static function test_mode() {
+		return static::$test_mode;
+	}
+	/**
+	* returns name of the primary key field
+	* @return string
+	*/
+	protected static function primary_key_field() {
+		return static::$primary_key_field;
+	}
+	/**
+	* Raw database connection
+	* @return resource 
+	*/
+	protected static function connection() {
+		return static::$connection;
+	}
+	/**
+	* Sets the connection
+	* @param resource $conn
+	*/
+	public static function set_connection($conn) {
+		static::$connection = $conn;
+	}
+	/**
+	* @return string Current Databse
+	*/
+	public static function database() {
+		return static::$database;
+	}
+	/**
+	* @return string Current Class Name
+	*/
+	public static function class_name() {
+		return get_called_class();
+	}
+	/**
+	* @return string Class Name
+	*/
+	public static function get_class() {
+		if(!isset(static::$my_class) && empty(static::$my_class)) {
+			$class =  static::class_name();
+			static::$my_class = new $class;
+		}
+		return static::$my_class;
+	}
+	
+	/**
+	* @return mixed Returns cleaned values from adapaters excape method
+	* @param mixed $input
+	*/
+	private static function sanatize_input_array($input) {
+		if(is_array($input)) {
+			$clean_values = array();
+			foreach($input as $value) {
+				$clean_values[]= static::$adapter->escape($value);
+			}
+			return $clean_values;
+		}else{
+			return static::$adapter->escape((string) $input);
+		}
+	}
 }
 
 ?>
