@@ -1,0 +1,44 @@
+#! /usr/bin/env php
+<?php
+
+	$replacements = array('DATE' => date("Y-m-d", time()), 'TIME' => time(), 'VERSION' => $argv[1], 'RELEASE' => $argv[2], 'CLASS_FILES' => build_class_files_text());
+
+	
+	
+	function build_class_files_text() {
+		$exclude = array('.git', 'test', 'scripts', 'profile', 'phpunit.xml', '.DS_Store', 'package.xml');
+		$extension_map = array('php' => 'php', 'data' => 'tmpl');
+		$base_dir = 'nimblize';
+		$path = realpath('../');
+		$out = array();
+		$reg_path = str_replace('/', '\/', $path);
+		$reg = '/^' . $reg_path . '\/(' . implode('|', $exclude) .')/';
+		$reg = str_replace('.', '\.', $reg);
+		$objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path));
+		foreach($objects as $name => $object){
+		  if(preg_match($reg, $name)) {
+				continue;
+			}
+			$type = array_search(pathinfo($name, PATHINFO_EXTENSION), $extension_map);
+			$type = empty($type) ? 'data' : $type;
+			$this_path = substr($name, strlen($path) + 1);
+			$md5 = md5_file($name);
+			$out[] = "	<file baseinstalldir='$base_dir' md5sum='$md5' name='$this_path' role='$type' />";
+		}
+	
+		return implode("\n", $out);
+	}
+	
+	$out = file_get_contents(__DIR__ . '/package.xml.tmpl');
+	$classes = build_class_files_text();
+	foreach($replacements as $replacement => $value) {
+		$out = str_replace("!$replacement!", $value, $out);
+	}
+	$p = realpath('../');
+	$package_file = $p . '/package.xml';
+	@unlink('nimblize-' . $replacements['VERSION'] . '.tgz');
+	@unlink($package_file);
+	file_put_contents($package_file, $out);
+	exec('pear package ' . realpath('../') . '/package.xml');
+	
+?>

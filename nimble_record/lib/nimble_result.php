@@ -1,10 +1,6 @@
 <?php
 
-	class CountableResults implements Countable {
-		public function count() {}
-	}
-
-	class NimbleResult extends CountableResults implements Iterator {
+	class NimbleResult implements Countable, Iterator {
 	 	private $array = array();
 
 		public function __construct($array, $options = array())

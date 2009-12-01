@@ -180,14 +180,18 @@ class Controller {
     public function redirect($url, $now=false)
     {
 			if($now && self::nimble()->test_mode == false){
-				header("Location: {$url}", true, 302);
+				header(static::redirect_header($url), true, 302);
 				exit();
 			}else{
-      	$this->header("Location: {$url}", 302);
+      	$this->header(static::redirect_header($url), 302);
 				$this->has_rendered = true;
 			}
     }
-
+		
+		public static function redirect_header($location) {
+			return "Location: {$location}";
+		}
+		
     /**
      * Redirect to another URL immediately.
      * @param string $url The URL to redirect to.

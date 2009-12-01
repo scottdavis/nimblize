@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.9.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+    http://pear.php.net/dtd/tasks-1.0.xsd
+    http://pear.php.net/dtd/package-2.0
+    http://pear.php.net/dtd/package-2.0.xsd">
+ <name>nimblize</name>
+ <uri>pear.nimblize.com</uri>
+ <summary>1</summary>
+ <description>
+1</description>
+ <lead>
+  <name>scott</name>
+  <user>sdavis</user>
+  <email>jetviper21@gmail.com</email>
+  <active>yes</active>
+ </lead>
+ <date>!DATE!</date>
+ <version>
+  <release>!VERSION!</release>
+  <api>!VERSION!</api>
+ </version>
+ <stability>
+  <release>!RELEASE!</release>
+  <api>!RELEASE!</api>
+ </stability>
+ <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
+ <notes>
+1
+ </notes>
+ <contents>
+	<dir baseinstalldir="." name="/">
+		!CLASS_FILES!
+
+   <file baseinstalldir="/" install-as="nimblize" md5sum="a75b1e7aa28187ad6305dd349f4c2b65" name="nimble_scripts/nimblize" role="script">
+		<tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+		<tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />
+	 	<tasks:replace from="@package_version@" to="version" type="package-info" />
+	</file>
+   <file baseinstalldir="/" install-as="nimblize.bat" md5sum="0e34b7b9a6173f26ce5bd01833b08a5f" name="nimble_scripts/nimblize.bat" role="script">
+		<tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+		<tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />
+	 	<tasks:replace from="@package_version@" to="version" type="package-info" />
+	</file>
+  </dir>
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.3</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+<phprelease>
+  <installconditions>
+   <os>
+    <name>windows</name>
+   </os>
+  </installconditions>
+  <filelist>
+   <install as="nimblize" name="nimble_scripts/nimblize" />
+   <install as="nimblize.bat" name="nimble_scripts/nimblize.bat" />
+  </filelist>
+ </phprelease>
+ <phprelease>
+  <filelist>
+	 <install as="nimblize" name="nimble_scripts/nimblize" />
+   <ignore name="nimble_scripts/nimblize.bat" />
+  </filelist>
+ </phprelease>
+</package>

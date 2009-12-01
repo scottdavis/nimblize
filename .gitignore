@@ -1,4 +1,8 @@
 .project
+.Ds_store
+package.xml
+*/package.xml
 test/nimble_record/database.json
 .buildpath
 .settings/
+*.tgz
