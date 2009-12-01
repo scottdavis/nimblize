@@ -35,6 +35,9 @@
 	$out = file_get_contents(__DIR__ . '/package.xml.tmpl');
 	$classes = build_class_files_text();
 	foreach($replacements as $replacement => $value) {
+		if(preg_match('/\/(\.|\.\.)$/')) {
+			continue;
+		}
 		$out = str_replace("!$replacement!", $value, $out);
 	}
 	$p = realpath(__DIR__ . '/../');
