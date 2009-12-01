@@ -22,6 +22,9 @@
 		  if(preg_match($reg, $name)) {
 				continue;
 			}
+			if(preg_match('/\/(\.|\.\.)$/', $name)) {
+				continue;
+			}
 			$type = array_search(pathinfo($name, PATHINFO_EXTENSION), $extension_map);
 			$type = empty($type) ? 'data' : $type;
 			$this_path = substr($name, strlen($path) + 1);
@@ -35,9 +38,7 @@
 	$out = file_get_contents(__DIR__ . '/package.xml.tmpl');
 	$classes = build_class_files_text();
 	foreach($replacements as $replacement => $value) {
-		if(preg_match('/\/(\.|\.\.)$/', $name)) {
-			continue;
-		}
+
 		$out = str_replace("!$replacement!", $value, $out);
 	}
 	$p = realpath(__DIR__ . '/../');
