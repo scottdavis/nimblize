@@ -1,6 +1,9 @@
 #! /usr/bin/env php
 <?php
-
+	if(count($argv) !== 3) {
+		die(' must pass version (0.0.0) and release type (stable|alpha|beta)'. "\n");
+	}
+	
 	$replacements = array('DATE' => date("Y-m-d", time()), 'TIME' => time(), 'VERSION' => $argv[1], 'RELEASE' => $argv[2], 'CLASS_FILES' => build_class_files_text());
 
 	
@@ -9,7 +12,7 @@
 		$exclude = array('.git', 'test', 'scripts', 'profile', 'phpunit.xml', '.DS_Store', 'package.xml');
 		$extension_map = array('php' => 'php', 'php' => 'tmpl');
 		$base_dir = 'nimblize';
-		$path = realpath('../');
+		$path = realpath(__DIR__ . '/../');
 		$out = array();
 		$reg_path = str_replace('/', '\/', $path);
 		$reg = '/^' . $reg_path . '\/(' . implode('|', $exclude) .')/';
@@ -34,11 +37,11 @@
 	foreach($replacements as $replacement => $value) {
 		$out = str_replace("!$replacement!", $value, $out);
 	}
-	$p = realpath('../');
+	$p = realpath(__DIR__ . '/../');
 	$package_file = $p . '/package.xml';
 	@unlink('nimblize-' . $replacements['VERSION'] . '.tgz');
 	@unlink($package_file);
 	file_put_contents($package_file, $out);
-	print(exec('pear package ' . realpath('../') . '/package.xml') . "\n");
+	print(exec('pear package ' . realpath(__DIR__ . '/../') . '/package.xml') . "\n");
 	
 ?>
