@@ -7,7 +7,7 @@
 	
 	function build_class_files_text() {
 		$exclude = array('.git', 'test', 'scripts', 'profile', 'phpunit.xml', '.DS_Store', 'package.xml');
-		$extension_map = array('php' => 'php', 'data' => 'tmpl');
+		$extension_map = array('php' => 'php', 'php' => 'tmpl');
 		$base_dir = 'nimblize';
 		$path = realpath('../');
 		$out = array();
@@ -39,6 +39,6 @@
 	@unlink('nimblize-' . $replacements['VERSION'] . '.tgz');
 	@unlink($package_file);
 	file_put_contents($package_file, $out);
-	exec('pear package ' . realpath('../') . '/package.xml');
+	print(exec('pear package ' . realpath('../') . '/package.xml') . "\n");
 	
 ?>

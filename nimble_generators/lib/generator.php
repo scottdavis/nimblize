@@ -112,6 +112,7 @@ static::write_file($file_path, $test_case_code);
 			$class_name = Inflector::classify($name);
 			$path_name = FileUtils::join(static::$nimble_root, 'app', 'controller', Inflector::underscore($class_name) . '_controller.php');
 			$view_path = FileUtils::join(static::$nimble_root, 'app', 'view', strtolower(Inflector::underscore($class_name)));
+			var_dump($path_name);
 			if ($views) {
 				FileUtils::mkdir_p($view_path);
 				$methods = static::create_view_functions($view_path);
