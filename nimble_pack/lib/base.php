@@ -203,7 +203,7 @@ class Nimble
 		if(!$this->test_mode){
 			if(NIMBLE_ENV == 'development') {
 				var_dump($this->routes);
-				throw new NimbleException('Path not found: ' . $_GET['url']);
+				throw new NimbleException('Path not found: ' . $_GET['__url']);
 			}
 			call_user_func(array('r404' , $_SERVER['REQUEST_METHOD']));
 		}
