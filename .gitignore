@@ -1,5 +1,5 @@
 .project
-.Ds_store
+.DS_Store
 package.xml
 */package.xml
 test/nimble_record/database.json
