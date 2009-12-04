@@ -60,39 +60,46 @@ require_once(dirname(__FILE__) . '/abstract_adapter.php');
 		public function adapter_name() {return 'Mysql';}
 		
 		public function quote_column_name($name) {
-        	return '`' . $name . '`';
-      	}
+    	return $this->quote_table_name($name);
+    }
  
  		public function quote_table_name($name) {
-        return preg_replace('/\./', '`.`', $this->quote_column_name($name));
+      return preg_replace('/\./', '`.`',"`$name`");
 		}
 		
+		/**
+		* Converts column type input into executable sql
+		* @param string $type
+		* @param string $limit - default NULL
+		* @param string $percision - defualt NULL
+		* @param string $scale - default NULL
+		* @return string
+		*/
 		public function type_to_sql($type, $limit = NULL, $precision = NULL, $scale = NULL) {
-			if(in_array($type, array_keys(static::$NATIVE_DATABASE_TYPES))) {
-			(string) $column_type_sql = static::$NATIVE_DATABASE_TYPES[$type]['name'];
+			if(in_array($type, array_keys(self::$NATIVE_DATABASE_TYPES))) {
+			(string) $column_type_sql = self::$NATIVE_DATABASE_TYPES[$type]['name'];
 				switch($type) {
 					case 'decimal':
 						if(!empty($precision)) {
 							if(!empty($scale)) {
-								$column_type_sql .= '(' . $precision . ',' . $scale . ')';
+								$columns_type_sql .= '(' . $precision . ',' . $scale . ')';
 							}else{
-								$column_type_sql .= '(' . $precision . ')';
+								$columns_type_sql .= '(' . $precision . ')';
 							}
 						}else{
-							if(!empty($scale) && empty($precision)) {
-								throw new Exception("Error adding decimal column: precision cannot be empty if scale if specified");
-							}
+							//@todo: throw new Exception("Error adding decimal column: precision cannot be empty if scale if specified");
 						}
 					break;
 					case 'primary_key':
-						return $column_type_sql = static::$NATIVE_DATABASE_TYPES[$type]['sql'];
+						return $column_type_sql = self::$NATIVE_DATABASE_TYPES[$type]['sql'];
 					break;
 				}
 		
-				if(isset($limit) || isset(static::$NATIVE_DATABASE_TYPES[$type]['limit'])) {
-					$limit = isset($limit) ? $limit : static::$NATIVE_DATABASE_TYPES[$type]['limit'];
+				if(isset($limit) || isset(self::$NATIVE_DATABASE_TYPES[$type]['limit'])) {
+					$limit = isset($limit) ? $limit : self::$NATIVE_DATABASE_TYPES[$type]['limit'];
 					$column_type_sql .= '(' . $limit . ')';
 				}
+				
 				return $column_type_sql;
 			}else{
 				return $type;

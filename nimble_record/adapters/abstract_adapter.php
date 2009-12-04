@@ -83,25 +83,7 @@ abstract class AbstractAdapter {
 		
 		public function add_column_options($sql, $options) {}
 		
-		public function build_conditions() {}
-		
-		public function add_joins($joins) {
-			$values = range('b', 'z');
-			if(is_string($joins)) {
-				$joins = explode(" ", $joins);
-			}
-			$out = array();
-			$i = 0;
-			foreach($joins as $join) {
-				$quoted = $this->quote_table_name($join);
-				$variable = $values[$i];
-				$out[] = "$quoted $variable";
-				$i++;
-			}
-			return ', '. join($out, ', ');
-		}
-		
-		
+	
 		public function construct_finder_sql($options) {
 			$defaults = array('select' => '*', 'joins' => '');
 			$options = array_merge($defaults, $options);

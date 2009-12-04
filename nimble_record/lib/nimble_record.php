@@ -591,8 +591,9 @@ class NimbleRecord {
 	* Method load_columns
 	* Fetches all the columns from this table for validations and packs them into a cached array
 	*/
-	private static function load_columns() {
-		$sql = static::$adapter->load_column_sql(static::table_name());
+	public static function load_columns($table_name = '') {
+		$table = empty($table_name) ? static::table_name() : $table_name;
+		$sql = static::$adapter->load_column_sql($table);
 		if (static::is_query_cached($sql)) {
 			return static::fetch_query_data_from_cache($sql);
 		}else{

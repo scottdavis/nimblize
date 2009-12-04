@@ -6,62 +6,9 @@
 	class Migration {
 	
 		static $show_sql = true;
-	
-		public static function create_database($database_name, $charset = 'utf8') {
-			return static::execute("CREATE DATABASE `" . $database_name . "` DEFAULT CHARACTER SET `" . $charset . "`");
-		}
-		
-		
-		public static function drop_database($database_name) {
-			return static::execute("DROP DATABASE IF EXISTS `" . $database_name . "`");
-		}
-		
-		
-		public function create_table($table_name, $options = array()) {
-			return new CreateTable($table_name, $options, $this);
-		}
-		
-		public function alter_table($table_name, $options = array()) {
-			return new AlterTable($table_name, $options, $this);
-		}
-		
-		public function drop_table($table_name) {
-			return static::execute('DROP TABLE IF EXISTS ' . self::quote_table_name($table_name));
-		}
-		
-		public function remove_column($table_name, $column) {
-			
-		}
-		
-		public function rename_column($table_name, $column_name, $new_column_name) {
-			$column_data = NimbleRecord::select_one("SHOW COLUMNS FROM " . self::quote_table_name($table_name) . " LIKE '" . $column_name . "'", false);
-			$current_type = $column_data['Type'];
-			$rename_column_sql = "ALTER TABLE " . self::quote_table_name($table_name) . " CHANGE " . self::quote_column_name($column_name) ." " . self::quote_column_name($new_column_name) . ' ' . $current_type;
-			static::execute($rename_column_sql);
-		}
-	
-		
-		public function run($down = false) {
-			if($down) {
-				$this->down();
-			}else{
-				$this->up();
-			}
-		}
-		
-		
-		public static function execute($sql) {
-			if(static::$show_sql) {
-				echo $sql . "\n\n";
-			}
-			$query = NimbleRecord::execute($sql, true);
-			return $query;
-		}
-		
-		
-		
-		//static vars
-		
+		/**
+		* Mysql types
+		*/
 		public static $NATIVE_DATABASE_TYPES = array(
         	'primary_key' => array('name' => NULL, 'sql' => "int(11) DEFAULT NULL auto_increment PRIMARY KEY"),
         	'string'      => array('name' => "varchar", 'limit' => 255),
@@ -76,70 +23,109 @@
         	'binary'      => array('name' => "blob"),
         	'boolean'     => array('name' => "tinyint", 'limit' => 1 )
 			);
+		/**
+		* Creates a database
+		* @param string $database_name
+		* @param string $charset - default utf8
+		*/
+		public static function create_database($database_name, $charset = 'utf8') {
+			return static::execute("CREATE DATABASE `" . $database_name . "` DEFAULT CHARACTER SET `" . $charset . "`");
+		}
 		
+		/**
+		* Drops a database
+		* @param string $database_name
+		*/
+		public static function drop_database($database_name) {
+			return static::execute("DROP DATABASE IF EXISTS `" . $database_name . "`");
+		}
+		/**
+		* Creates a create_table object for creating a table
+		* @param string $table_name
+		* @param array $options
+		*/
+		public function create_table($table_name, $options = array()) {
+			return new CreateTable($table_name, $options, $this);
+		}
+		/**
+		* Creates a alter_table object for altering a table
+		* @param string $table_name
+		* @param array $options
+		*/
+		public function alter_table($table_name, $options = array()) {
+			return new AlterTable($table_name, $options, $this);
+		}
+		/**
+		* Drops a table from the database
+		* @param string $table_name
+		*/
+		public function drop_table($table_name) {
+			return static::execute('DROP TABLE IF EXISTS ' . self::quote_table_name($table_name));
+		}
 		
-		
-		
-		
-		//static methods
-		public static function type_to_sql($type, $limit = NULL, $precision = NULL, $scale = NULL) {
-			if(in_array($type, array_keys(self::$NATIVE_DATABASE_TYPES))) {
-			(string) $column_type_sql = self::$NATIVE_DATABASE_TYPES[$type]['name'];
-				switch($type) {
-					case 'decimal':
-						if(!empty($precision)) {
-							if(!empty($scale)) {
-								$columns_type_sql .= '(' . $precision . ',' . $scale . ')';
-							}else{
-								$columns_type_sql .= '(' . $precision . ')';
-							}
-						}else{
-							//todo throw error : "Error adding decimal column: precision cannot be empty if scale if specified"
-						}
-					break;
-					case 'primary_key':
-						return $column_type_sql = self::$NATIVE_DATABASE_TYPES[$type]['sql'];
-					break;
-				}
-		
-				if(isset($limit) || isset(self::$NATIVE_DATABASE_TYPES[$type]['limit'])) {
-					$limit = isset($limit) ? $limit : self::$NATIVE_DATABASE_TYPES[$type]['limit'];
-					$column_type_sql .= '(' . $limit . ')';
-				}
-				
-				return $column_type_sql;
+		/**
+		* Runs the current migration object
+		* @param boolean $down - default false
+		*/
+		public function run($down = false) {
+			if($down) {
+				$this->down();
 			}else{
-				return $type;
+				$this->up();
 			}
 		}
 		
+		/**
+		* Wrapper method to execute sql through the databse adapter
+		* @param string $sql
+		*/
+		public static function execute($sql) {
+			if(static::$show_sql) {
+				echo $sql . "\n\n";
+			}
+			$query = NimbleRecord::execute($sql, true);
+			return $query;
+		}
+		/**
+		* @see AbstractAdapter->type_to_sql
+		*/
+		public static function type_to_sql() {
+			$args = func_get_args();
+			return call_user_func_array(array(NimbleRecord::$adapter, 'type_to_sql'), $args);
+		}
+		/**
+		* Adds column options to sql 
+		* @param string $sql - sql string to addend options
+		* @param array $options
+		* @param boolean $alter - is this an alter table call
+		*/
 		public static function add_column_options($sql, $options = array(), $alter = false) {
 			$sql .= isset($options['default']) ? ' DEFAULT ' . $options['default'] : '';
 			$sql .= (isset($options['null']) && !$options['null']) ? ' NOT NULL' : '';
 			$sql .= ($alter && isset($options['null']) && $options['null']) ? ' NULL' : '';
 			return $sql;
 		}
-		
-		
+		/**
+		* @see AbstractAdapter->quote_column_name
+		*/
 		public static function quote_column_name($name) {
-        	return '`' . $name . '`';
-      	}
- 
+    	return NimbleRecord::$adapter->quote_column_name($name);
+    }
+ 		/**
+		* @see AbstractAdapter->quote_table_name
+		*/
  		public static function quote_table_name($name) {
-        	return preg_replace('/\./', '`.`', self::quote_column_name($name));
+    	return NimbleRecord::$adapter->quote_table_name($name);    	
 		}
-		
+		/**
+		* @see NimbleRecord::columns
+		*/
 		public static function columns($table) {
-			$sql = 'SHOW COLUMNS FROM ' . static::quote_table_name($table);
-			$result = NimbleRecord::execute($sql, true);
-			$output = array();
-			while($row = mysql_fetch_assoc($result)) {
-				array_push($output, $row);
-			}
-			return $output;
+			return NimbleRecord::load_columns($table);
 		}
-		
-		
+		/**
+		* Pulls the current data for a column
+		*/
 		public static function columns_data($table, $column) {
 			$columns = static::columns($table);
 			foreach($columns as $_column) {
