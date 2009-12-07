@@ -15,7 +15,11 @@
 
 	      if ($use_cache) {
 	        $cache = Cache::get_cache();
-	        $cache_key = 'flieutils-' . $method . '-' . md5(serialize($arguments));
+					$args = array();
+					foreach($arguments as $arg) {
+						$args[] = (string) $arg;
+					}
+	        $cache_key = 'flieutils-' . $method . '-' . md5(serialize($args));
 	        if ($cache->exists($cache_key)) {
 	          return $cache->get($cache_key);
 	        }

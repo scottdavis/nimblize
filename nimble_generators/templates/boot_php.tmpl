@@ -42,13 +42,12 @@
 	* loads the controller and model classes
 	*/
 	function __load_files($dir) {
-		if (is_dir($dir) && $dh = opendir($dir)) {
-			while (($file = readdir($dh)) !== false) {
+		if (is_dir($dir)) {
+			foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)) as $file) {
 				if(preg_match('/\.php$/' , $file)) {
-					require_once(FileUtils::join($dir, $file));
+					require_once($file);
 				}
 			}
-			closedir($dh);
 		}
 	}
 	
