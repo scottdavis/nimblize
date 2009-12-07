@@ -14,7 +14,7 @@
 	
 	switch($argv[1]) {	
 		case 'controller':
-			Generator::generate_controller(Inflector::classify($argv[2]));
+			Generator::generate_controller($argv[2]);
 		break;		
 		
 		case 'model':

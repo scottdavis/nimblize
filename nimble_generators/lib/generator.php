@@ -1,6 +1,7 @@
 <?php
 require_once(dirname(__FILE__) . '/../../nimble_support/lib/file_utils.php');
 require_once(dirname(__FILE__) . '/../../nimble_support/lib/inflector.php');
+require_once(dirname(__FILE__) . '/../../nimble_support/lib/command_line_colors.php');
 
 /**
  * Class for generating the components of a Nimble skeleton.
@@ -42,49 +43,49 @@ class Generator {
 			throw new Exception("Target directory does not exist: ${path}");
 	}
 
-	$ignore = array('nimblize');
-	if ($dir = opendir(static::$script_path)){
-		while (($file = readdir($dir)) !== false) {
-			if (in_array($file, $ignore)) { continue; }
-			$source_file = FileUtils::join(static::$script_path, $file);
-			if (is_file($source_file)) {
-				$target_file = FileUtils::join($path, $file);
-				copy($source_file, $target_file);
-				@chmod($target_file, 0775);
+		$ignore = array('nimblize');
+		if ($dir = opendir(static::$script_path)){
+			while (($file = readdir($dir)) !== false) {
+				if (in_array($file, $ignore)) { continue; }
+				$source_file = FileUtils::join(static::$script_path, $file);
+				if (is_file($source_file)) {
+					$target_file = FileUtils::join($path, $file);
+					copy($source_file, $target_file);
+					@chmod($target_file, 0775);
+				}
 			}
-		}
-		closedir($dir);
-	} else {
-		// @codeCoverageIgnoreStart
-		throw new Exception("Source directory cannot be read: " . static::$script_path);
-		// @codeCoverageIgnoreEnd
-	}
-}
-
-/**
- * Generate a test case.
- * @param string $type The type of test to generate.
- * @param string $name The class name for the generated test.
- */
-public static function generate_test($type, $name) {
-	$class_name = Inflector::classify($name);
-	$path = FileUtils::join(static::$nimble_root, 'test', $type);
-
-	if (is_dir($path)) {
-		$test_path = 'nimblize/nimble_test/lib/phpunit_testcase.php';
-		if (($test_case_code = file_get_contents(FileUtils::join(static::$template_path, "${type}_test.tmpl"))) !== false) {
-			$test_case_code = str_replace(
-			array('{class_name}', '{test_path}'),
-			array($class_name, $test_path),
-			$test_case_code
-			);
+			closedir($dir);
 		} else {
-			throw new Exception("Test source file for ${type} not found!");
-}
+			// @codeCoverageIgnoreStart
+			throw new Exception("Source directory cannot be read: " . static::$script_path);
+			// @codeCoverageIgnoreEnd
+		}
+	}
 
-FileUtils::mkdir_p($path);
-$file_path = FileUtils::join($path, $class_name . 'Test.php');
-static::write_file($file_path, $test_case_code);
+		/**
+		 * Generate a test case.
+		 * @param string $type The type of test to generate.
+		 * @param string $name The class name for the generated test.
+		 */
+		public static function generate_test($type, $name) {
+			$class_name = Inflector::classify($name);
+			$path = FileUtils::join(static::$nimble_root, 'test', $type);
+
+			if (is_dir($path)) {
+				$test_path = 'nimblize/nimble_test/lib/phpunit_testcase.php';
+				if (($test_case_code = file_get_contents(FileUtils::join(static::$template_path, "${type}_test.tmpl"))) !== false) {
+					$test_case_code = str_replace(
+					array('{class_name}', '{test_path}'),
+					array($class_name, $test_path),
+					$test_case_code
+					);
+				} else {
+					throw new Exception("Test source file for ${type} not found!");
+				}
+
+				FileUtils::mkdir_p($path);
+				$file_path = FileUtils::join($path, $class_name . 'Test.php');
+				static::write_file($file_path, $test_case_code);
 			} else {
 				throw new Exception("Test directory for ${type} not found!");
 			}
@@ -109,9 +110,33 @@ static::write_file($file_path, $test_case_code);
 			* @param string $name - suffix you want the name the controller
 			*/
 		public static function generate_controller($name, $views = true) {
-			$class_name = Inflector::classify($name);
-			$path_name = FileUtils::join(static::$nimble_root, 'app', 'controller', Inflector::underscore($class_name) . '_controller.php');
-			$view_path = FileUtils::join(static::$nimble_root, 'app', 'view', strtolower(Inflector::underscore($class_name)));
+			$namespace = '';
+			$controller_word = 'controller';
+			static::echo_operation(ucwords($controller_word));
+			//does it already contain controller
+			if(substr(strtolower($name), -1 * strlen($controller_word)) != $controller_word) {
+				$name .= '_' . $controller_word;
+			}
+			$folders = explode('::', $name);
+			if(count($folders) > 1) {
+				$temp = $folders;
+				array_pop($temp);
+				$namespace = strtolower("namespace " . implode('\\', $temp) . ';'); 
+			}
+			$file = end($folders);
+			$path_ext = call_user_func(array('FileUtils', 'join'), $folders);
+			$file = !empty($folders) ? Inflector::underscore(implode('_', $folders)) : $file;
+			$name = Inflector::classify($file);
+
+			$class_name = Inflector::classify(array_pop($folders));
+			$path_name = FileUtils::join(static::$nimble_root, 'app', 'controller', strtolower(dirname($path_ext)));
+			FileUtils::mkdir_p($path_name);
+			$path_name = FileUtils::join(static::$nimble_root, 'app', 'controller', strtolower(Inflector::underscore($path_ext)) . '.php');
+			$path_ext = Inflector::underscore($path_ext);
+			$path_ext = str_replace('_'  . $controller_word, '', $path_ext);
+			$view_path = FileUtils::join(static::$nimble_root, 'app', 'view', strtolower($path_ext));
+			
+			
 			if ($views) {
 				FileUtils::mkdir_p($view_path);
 				$methods = static::create_view_functions($view_path);
@@ -121,7 +146,8 @@ static::write_file($file_path, $test_case_code);
 				$type = "Controller";
 			}
 			$string = file_get_contents(FileUtils::join(static::$template_path, 'controller.tmpl'));
-			$string = str_replace(array('{class_name}', '{template_path}', '{methods}', '{type}'), array($class_name, $view_path, $methods, $type), $string);
+			$string = str_replace(array('{namespace}', '{class_name}', '{template_path}', '{methods}', '{type}'), array($namespace, $class_name, $view_path, $methods, $type), $string);
+			static::echo_path('Controller', $path_name);
 			static::write_file($path_name, $string);
 			static::generate_test('functional', $name);
 		}
@@ -191,6 +217,7 @@ static::write_file($file_path, $test_case_code);
 		 * @param string $path The path to touch the file.
 		 */
 		private static function view($path) {
+			static::echo_path('view', $path);
 			@touch($path);
 		}
 
@@ -292,6 +319,17 @@ static::write_file($file_path, $test_case_code);
 		public static function help() {
 			return file_get_contents(FileUtils::join(static::$template_path, 'help.tmpl'));
 		}
+		
+		public static function echo_path($type, $path) {
+			if(defined("NIMBLE_IS_TESTING")) {return;}
+			echo CommandLineColor::blue($type) . ': ' . CommandLineColor::yellow($path) . "\n";
+		}
+		
+		public static function echo_operation($op) {
+			if(defined("NIMBLE_IS_TESTING")) {return;}
+			echo CommandLineColor::underline_white('Generating:') . ' ' . CommandLineColor::red($op) . "\n";
+		}
+		
 	}
 
 	foreach (array(

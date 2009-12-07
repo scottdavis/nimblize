@@ -2,6 +2,7 @@
 	require_once(dirname(__FILE__) . '/config.php');
 	require_once('PHPUnit/Framework.php');
 	require_once(dirname(__FILE__) . '/../../nimblize.php');
+	require_once(__DIR__ . '/controllers/test_controller.php');
 	/**
 	* @package FrameworkTest
 	*/
@@ -22,6 +23,13 @@
 		public function testAutoRender() {
 			$this->Nimble->url = "";
 			$this->Nimble->add_url('', "MyTestController", "test");	
+			$this->Nimble->dispatch();
+			$this->assertTrue($this->Nimble->klass->has_rendered);
+		}
+		
+		public function testAutoRenderNamespace() {
+			$this->Nimble->url = "";
+			$this->Nimble->add_url('', "\admin\TestController", "test");	
 			$this->Nimble->dispatch();
 			$this->assertTrue($this->Nimble->klass->has_rendered);
 		}
@@ -60,14 +68,13 @@
 		}
 		
 		public function test3() {
-			$this->render(join(DIRECTORY_SEPARATOR, array('my_test', 'test.php')));
-			$this->render(join(DIRECTORY_SEPARATOR, array('my_test', 'test.php')));
+			$this->render(implode(DIRECTORY_SEPARATOR, array('my_test', 'test.php')));
+			$this->render(implode(DIRECTORY_SEPARATOR, array('my_test', 'test.php')));
 		}
 		
 		public function test2() {
-			$this->render(join(DIRECTORY_SEPARATOR, array('my_test', 'test.php')));
+			$this->render(implode(DIRECTORY_SEPARATOR, array('my_test', 'test.php')));
 		}
 	}
-
 
 ?>

@@ -11,7 +11,6 @@ class Controller {
     var $layout = true;
     var $layout_template;
     var $headers = array(array('Content-Type: text/html', 200));
-    var $filters = array('before' => array(), 'after' => array());
 		var $has_rendered = false;
 		var $template = '';
 		var $rendered_partials = array();

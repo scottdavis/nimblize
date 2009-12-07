@@ -175,6 +175,7 @@ class Nimble
 					 * Add inflector for this type of code from now on
 					 */
 					$dir = str_replace('Controller', '', $conf->controller);
+					$dir = str_replace('\\', '/', $dir);
 					$dir = strtolower(Inflector::underscore($dir));
 					$view = FileUtils::join($dir, $conf->method . '.php');
 					$this->klass->render($view);
