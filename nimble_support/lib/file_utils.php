@@ -16,6 +16,7 @@
 	      if ($use_cache) {
 	        $cache = Cache::get_cache();
 					$args = array();
+					//this is for the stupid file objects that can't be serialized seriously php needs to add _serialize to it
 					foreach($arguments as $arg) {
 						$args[] = (string) $arg;
 					}
