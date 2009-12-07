@@ -117,7 +117,7 @@ class Generator {
 			if(substr(strtolower($name), -1 * strlen($controller_word)) != $controller_word) {
 				$name .= '_' . $controller_word;
 			}
-			$folders = explode('::', $name);
+			$folders = preg_split('/(::|\x5c)/', $name, 0, PREG_SPLIT_NO_EMPTY);
 			if(count($folders) > 1) {
 				$temp = $folders;
 				array_pop($temp);
