@@ -130,6 +130,7 @@
 			empty($alt) ? $alt = $image : $alt;
 			if(file_exists(FileUtils::join($image_path, $image))) {
 				$public_path = static::rewrite_asset_path($image, $image_path);
+				var_dump($url);
 				$url = $url . '/' . $public_path;
 			}elseif(file_exists($other_path)) {
 				$uri = $nmbl['uri'];

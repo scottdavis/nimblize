@@ -38,7 +38,7 @@
        * @return string The current request's URI.
        */
       public static function uri() {
-          return Nimble::uri();
+          return preg_replace('/\/$/', '', Nimble::uri());
       }
 
       /**
@@ -99,13 +99,17 @@
           foreach($klass->routes as $route) {
               $pattern = self::clean_route($route->rule);
               $pattern = empty($pattern) ? 'root path' : $pattern;
-							$string = CommandLineColor::underline("Controller:") . ' ' . CommandLineColor::yellow($route->controller) . ' ' . 			
+							$string = '';
+							if(!empty($route->short_url)) {
+								$string .= ' ' . CommandLineColor::underline('Short Url:') . ' ' . CommandLineColor::yellow($route->short_url) . ' ';
+							}
+							$string .= CommandLineColor::underline("Controller:") . ' ' . CommandLineColor::yellow($route->controller) . ' ' . 			
 							CommandLineColor::underline('Action:') . ' ' . CommandLineColor::magenta($route->method) . ' ' . 
 							CommandLineColor::underline('Method:') . ' ' . CommandLineColor::green($route->http_method) . ' ' . 
-							CommandLineColor::underline('Pattern:') . ' ' . CommandLineColor::bold_red($pattern);   
+							CommandLineColor::underline('Pattern:') . ' ' . CommandLineColor::bold_red($pattern);
 							array_push($out, $string);
           }  
-     $return = "\n";
+     			$return = "\n";
           $return .= join("\n", $out);
           $return .= "\n";
           return $cli ? $return : htmlspecialchars($return);
@@ -121,7 +125,7 @@
    * @throws NimbleException if neither the controller nor the action match.
    */
   function url_for() {
-      $args = func_get_args(); //php 5.2.9 compat
+      $args = func_get_args(); 
       return call_user_func_array(array('UrlBuilder','url_for'), $args);
   }
   

@@ -8,7 +8,7 @@
  *   R('','TestController','index','GET');
  *
  * or by using the methods of the Route class:
- *   R('')->controller("TestController")->action("index")->on("GET");
+ *   R('')->controller("TestController")->action("index")->on("GET")->short_url('test_index');
  *
  * (thanks to:  Rafael S. Souza <rafael.ssouza [__at__] gmail.com>)
  */
