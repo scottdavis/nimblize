@@ -32,7 +32,18 @@ class Route
      */
     function controller($controller)
     {
-        $this->controller = $controller;
+				$regex = '/(::|\x5c)/';
+				if(preg_match($regex, $controller)) {				
+					$a = preg_split($regex, $controller);				
+					$name = array_pop($a);	
+					$ao = array();
+					foreach($a as $_a) {$ao[] = strtolower($_a);}
+					$string = implode('\\', $ao);
+					$controller = $string .'\\' . $name;
+	        $this->controller = $controller;
+				}else{
+					$this->controller = $controller;
+				}
         return $this;
     }
 
@@ -74,7 +85,7 @@ class Route
      */
     function bind()
     {
-        if (in_array($this->http_method, self::$allowed_methods)){
+        if (array_include($this->http_method, self::$allowed_methods)){
         		$parameters = array();
         		foreach (array('pattern', 'controller', 'action', 'http_method', 'short_url') as $field) {
         			if (isset($this->{$field})) {

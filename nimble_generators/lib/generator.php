@@ -124,7 +124,7 @@ class Generator {
 				$namespace = strtolower("namespace " . implode('\\', $temp) . ';'); 
 			}
 			$file = end($folders);
-			$path_ext = call_user_func(array('FileUtils', 'join'), $folders);
+			$path_ext = call_user_func(array('FileUtils', '_join'), $folders);
 			$file = !empty($folders) ? Inflector::underscore(implode('_', $folders)) : $file;
 			$name = Inflector::classify($file);
 
