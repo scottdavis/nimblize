@@ -153,7 +153,7 @@ class Route
 				$url_prefix = implode('/', $a);
 				$singular = implode('/', array($url_prefix, Inflector::singularize($end)));
 				$plural = implode('/', array($url_prefix, Inflector::pluralize($end))); 				
-        R($singular . '/add')->controller($controller)->action('add')->on('GET')->short_url($method . '_new');
+        R($singular . '/add')->controller($controller)->action('add')->on('GET')->short_url($method . '_add');
         R($singular . '/:id/edit')->controller($controller)->action('edit')->on('GET')->short_url($method . '_edit');
 				
         $actions = array('index' => 'GET', 'create' => 'POST');
