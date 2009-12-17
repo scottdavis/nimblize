@@ -185,7 +185,9 @@
 			* @param array $options
 			*/
 		protected static function belongs_to_find($class, $name, $options = array()) {
-			return call_user_func(array(static::model($name), 'find'), $class->row[static::foreign_key($name)]);
+			$class_name = is_null($options['class_name']) ? static::model($name) : $options['class_name'];
+			$foreign_key = is_null($options['foreign_key']) ? static::foreign_key($name) : $options['foreign_key'];
+			return call_user_func_array(array($class_name, 'find'), array($class->row[$foreign_key], $options));
 		}
 		
 		

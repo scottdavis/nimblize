@@ -266,8 +266,8 @@ class NimbleRecord {
 	private static function build_find_sql($input) {
 		$query = new NimbleQuery();
 		$query->from = self::table_name();
-		$temp = array_pop($input);
-		(is_array($temp)) ? $options = $temp : $input[] = $temp;
+		$options = is_array(end($input)) ? array_pop($input) : NULL;
+		$temp = reset($input);
 		$all = false;
 		$conditions = array();
 		$input = static::sanatize_input_array($input);
@@ -288,7 +288,7 @@ class NimbleRecord {
 				break;
 			}	
 		}
-		if(isset($options)) {
+		if(isset($options) && !empty($options)) {
 			if(isset($options['conditions'])) {
 				if(is_array($options['conditions'])) {
 					$conditions = array_merge($conditions, static::build_conditions_from_array($options['conditions']));
