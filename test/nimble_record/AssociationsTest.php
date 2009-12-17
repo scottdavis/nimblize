@@ -90,9 +90,14 @@
 			$this->assertTrue(is_a($p2, 'Photo'));
 		}
 		
-		public function testTest() {
+		public function testFinder() {
 			$u = User::find('first', array('conditions' => 'my_int = 3'));
 			$this->assertEquals($u->my_int, '3');
+		}
+		
+		public function testMakesCorrectJoinTableName() {
+			$name = NimbleAssociation::generate_join_table_name(array('foo', 'bars'));
+			$this->assertEquals('bar_foos', $name);
 		}
 		
 		public function setUp() {

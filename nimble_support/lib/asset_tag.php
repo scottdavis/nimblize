@@ -120,7 +120,10 @@
 		}
 		
 		/**
-		* Add an image from the image folder
+		* Add an image from the image folder or other path
+		* @param string $image - path to image
+		* @param string $alt
+		* @param array $options - tag options
 		*/
 		public static function image($image, $alt='', $options = array()) {
 			$nmbl = Nimble::getInstance()->config;

@@ -1,56 +1,87 @@
 <?php
 
+	/**
+		* Creates and executes the Association Finders
+		* @package NimbleRecord
+		*/	
 	class NimbleAssociation {
 		public static $types = array('has_many', 'has_one', 
 																 'belongs_to', 'has_and_belongs_to_many');	
 		public static $associations = array();
 
-		
-		//self::find_has_many($class, $association);
+		/**
+			* Verifies association and finder exsist then executes them
+			* @param string $method
+			* @param array $args
+			* @uses NimbelAssociation::find_has_many($class, $association);
+			*/
 		public static function __callStatic($method, $args) {
 			$matches = array();
 			$regex = '/^find_(' . implode('|', static::$types) . ')$/';
 			if(preg_match($regex, $method, $matches)){
 					return call_user_func_array(array('self', '_' . $matches[1]), 
-																			array($args[0], $args[1]));
-																		
+																			array($args[0], $args[1]));														
 			}else{
 				throw new NimbleRecordException('Association type does not exist');
 			}
 		}
 		
-		
+		/**
+			* Has many executing logic is in this function
+			* Determines which type of has_many wither its polymorphic or standard and executes the correct one
+			* @param NimbleRecord $class - instance of the called class
+			* @param string $name - association name
+			*/
 		private static function _has_many($class, $name) {
-			$class_name = is_string($class) ? Inflector::Classify($class) : Inflector::Classify(get_class($class));
-			$obj = NimbleAssociation::$associations[$class_name]['has_many'][$name];
+			$obj = static::get_association_object($class, $name, NimbleAssociationBuilder::HAS_MANY);
 			$options = (array) $obj;
 			if(isset($obj->as) && !empty($obj->as)) {
 				return static::has_many_polymorphic_find($class, $name, $options);
 			}
 			if(isset($obj->through) && !empty($obj->through)) {
-				return array();
+				return static::has_many_through_find($class, $name, $options);
 			}
 			return static::has_many_find($class, $name, $options);
 		}
-		
-		private static function _has_one() {
+		/**
+			* Has one executing logic is in this function
+			* @param NimbleRecord $class - instance of the called class
+			* @param string $name - association name
+			*/
+		private static function _has_one($class, $name) {
 			
 		}
-		
+		/**
+			* Belongs to executing logic is in this function
+			* Determines which type of belongs_to wither its polymorphic or standard and executes the correct one
+			* @param NimbleRecord $class - instance of the called class
+			* @param string $name - association name
+			*/
 		private static function _belongs_to($class, $name) {
-			$class_name = is_string($class) ? Inflector::Classify($class) : Inflector::Classify(get_class($class));
-			$obj = NimbleAssociation::$associations[$class_name]['belongs_to'][$name];
+			$obj = static::get_association_object($class, $name, NimbleAssociationBuilder::BELONGS_TO);
 			$options = (array) $obj;
 			if(isset($obj->polymorphic) && $obj->polymorphic === true) {
 				return static::belongs_to_polymorphic_find($class, $name, $options);
 			}
 			return static::belongs_to_find($class, $name, $options);
 		}
-		
-		private static function _has_and_belongs_to_many() {
-			
+		/**
+			* Has one executing logic is in this function
+			* @param NimbleRecord $class - instance of the called class
+			* @param string $name - association name
+			*/
+		private static function _has_and_belongs_to_many($class, $name) {
+			$obj = static::get_association_object($class, $name, NimbleAssociationBuilder::HAS_AND_BELONGS_TO_MANY);
+			$options = (array) $obj;
+			return static::has_and_belongs_to_many_find($class, $name, $options);
 		}
-		
+		/**
+			* Checks to make sure an association exists
+			* @return boolean
+			* @param string $class
+			* @param string $key
+			* @param string $association_name
+			*/
 		public static function exists($class, $key, $association_name) {
 				if(!isset(static::$associations[$class])) {return false;}
 				$associations = static::$associations[$class];
@@ -60,9 +91,14 @@
 					return false;
 				}
 			}
-		
+		/**
+			* Finds the association type given the name and class
+			* @param mixed $class
+			* @param string $association
+			* @return mixed
+			*/
 		public static function find_type($class, $association) {
-			$class = is_string($class) ? $class : get_class($class);
+			$class = static::class_as_string($class);
 			if(!isset(static::$associations[$class])) {return false;}
 			foreach(static::$associations[$class] as $assoc => $assocs) {
 				if(isset(static::$associations[$class][$assoc][$association])) {
@@ -71,62 +107,85 @@
 			}
 			return false;
 		}
-		
-		public static function foreign_key($class) {
-			$class = is_string($class) ? $class : get_class($class);
-			$model = Inflector::classify(Inflector::singularize($class));
-			return Inflector::foreignKey($model, $model::$foreign_key_suffix);
-		}
-
-		public static function table_name($name) {
-			$name = static::model($name);
-			$table = call_user_func(array('NimbleRecord', 'table_name'), $name);
-			var_dump($table);
-			$table = strtolower($table);
-			return $table;
-		}
-
-		public static function model($name) {
-			return Inflector::classify($name);
-		}
-
+		/**
+			* Performs a find for a has_many relationship
+			* @param NimbleRecord $class
+			* @param string $name - association name
+			* @param array $options
+			*/
 		protected static function has_many_find($class, $name, $options = array()) {
-			$key = static::foreign_key(get_class($class));
+			$key = is_null($options['foreign_key']) ? static::foreign_key($class) : $options['foreign_key'];
+			$model = is_null($options['class_name']) ? static::model($name) : $options['class_name'];
 			$id = $class->row[NimbleRecord::$primary_key_field];
-			$conditions = array($key => $id);
-			$model = static::model($name);
-			$find_array = call_user_func("$model::find_all", 
-			  array('conditions' => $conditions)
-			);
+			$conditions = "$key = '$id'";
+			$options['conditions'] = is_null($options['conditions']) ? $conditions : implode(' AND ', array($conditions, $options['conditions']));
+			$find_array = call_user_func(array($model, 'find_all'), $options);
 			return $find_array;
 		}
-
-
+		/**
+			* Performs a find for has_and_belongs_to_many
+			* @param NimbleRecord $class
+			* @param string $name - association name
+			* @param array $options
+			*/
+		protected static function has_and_belongs_to_many_find($class, $name, $options = array()) {
+			$join_table = static::generate_join_table_name(array(static::class_as_string($class), $name));
+			//$this->has_and_belongs_to_many('foos')
+			//"$model::find_all", array('conditions' => , 'joins' => )
+		}
+		/**
+			* Performs a find for has_many->through
+			* @param NimbleRecord $class
+			* @param string $name - association name
+			* @param array $options
+			* @todo
+			*/
+		protected static function has_many_through_find($class, $name, $options = array()) {
+			return array();
+		}
+		
+		/**
+			* Performs a find for has_many->as (polymorphic)
+			* @param NimbleRecord $class
+			* @param string $name - association name
+			* @param array $options
+			*/
 		protected static function has_many_polymorphic_find($class, $name, $options = array()) {
 			$id = $class->row[NimbleRecord::$primary_key_field];
 			$model = static::model($name);
-			$singular = Inflector::singularize($name);
-			$polymorphic_column_type = $singular . 'able_type';
-			$polymorphic_column_id =  $singular . 'able_id';
-			$class = strtolower(get_class($class));
+			$polymorphic_column_type = $options['as'] . '_type';
+			$polymorphic_column_id =  $options['as'] . '_id';
+			$class = strtolower(static::class_as_string($class));
 			$conditions = $polymorphic_column_type . " = '$class' AND " . $polymorphic_column_id . " = '" . $id . "'";
-			return call_user_func("$model::find_all", array('conditions' => $conditions));
+			$merg_conditions = array($conditions);
+			if(!is_null($options['conditions'])) {
+				$merg_conditions[] = $options['conditions'];
+			}
+			$options['conditions'] = implode(' AND ', $merg_conditions);
+			return call_user_func("$model::find_all", $options);
 		}
-		
-		
+		/**
+			* Performs a find for belongs_to->polymorphic
+			* @param NimbleRecord $class
+			* @param string $name - association name
+			* @param array $options
+			*/
 		protected static function belongs_to_polymorphic_find($class, $name, $options = array()) {
 			$singular = Inflector::singularize(get_class($class));
-			$polymorphic_column_type = strtolower($singular) . 'able_type';
+			$polymorphic_column_type = $name . '_type';
 			$model = static::model($class->row[$polymorphic_column_type]);
-			$polymorphic_column_id =  strtolower($singular) . 'able_id';
+			$polymorphic_column_id =  $name . '_id';
 			$id = $class->row[$polymorphic_column_id];
 			return call_user_func_array(array($model, 'find'), array($id));
 		}
-
+		/**
+			* Performs a find for belongs_to
+			* @param NimbleRecord $class
+			* @param string $name - association name
+			* @param array $options
+			*/
 		protected static function belongs_to_find($class, $name, $options = array()) {
-			$primary_key_value = $class->row[$name . '_id'];
-			$model = static::model($name);
-			return call_user_func("$model::find", $primary_key_value);
+			return call_user_func(array(static::model($name), 'find'), $class->row[static::foreign_key($name)]);
 		}
 		
 		
@@ -180,23 +239,71 @@
 						$options['{from_table_foreign_key}'] =  NimbleRecord::table_name($model) . '.' . $model::$foreign_key_suffix;
 					break;
 				}
-				return str_replace(array_keys($options), $options, $sql);
+				return str_replace(array_keys($options), array_values($options), $sql);
 		}
 		
 		
+		//helper methods
+		
+		/**
+			* Generates a table name for the has_and_belongs_to_many relationships 
+			* @param array $array - array of model names
+			*/
+		public static function generate_join_table_name($array) {
+			sort($array);
+			return NimbleRecord::$table_name_prefix . Inflector::singularize(reset($array)) . '_' . Inflector::pluralize(end($array));
+		}
+		
+		public static function class_as_string($class) {
+			return is_string($class) ? Inflector::classify($class) : Inflector::classify(get_class($class));
+		}
+
+		private static function get_association_object($class, $name, $type) {
+			return NimbleAssociation::$associations[static::class_as_string($class)][$type][$name];
+		}
+		
+		public static function foreign_key($class) {
+			$class = static::class_as_string($class);
+			$model = Inflector::classify(Inflector::singularize($class));
+			return Inflector::foreignKey($model, $model::$foreign_key_suffix);
+		}
+		/**
+			* Returns the table name for a model
+			* @param string $name - Model name
+			* @return string 
+			*/
+		public static function table_name($name) {
+			return NimbleRecord::table_name(static::model($name));
+		}
+		/**
+			* Return model name
+			* @param string $name
+			* @return string
+			*/
+		public static function model($name) {
+			return Inflector::classify($name);
+		}
+		
 	}
 	
-	
+	/**
+		* Builds association object
+		* @package NimbleRecord
+		*/
 	class NimbleAssociationBuilder {
+		const HAS_MANY = 'has_many';
+		const BELONGS_TO = 'belongs_to';
+		const HAS_AND_BELONGS_TO_MANY = 'has_and_belongs_to_many';
+		const HAS_ONE = 'has_one';
 		
-		static $options = 		array('has_many' => 								array('through', 'foreign_key', 'class_name', 
-																																		'conditions', 'order', 'foreign_key', 'include', 'as'),
+		static $options = 		array(self::HAS_MANY => 							 array('through', 'foreign_key', 'class_name', 
+																																		'conditions', 'order', 'include', 'as'),
 																
-																'belongs_to' => 							array('class_name', 'conditions', 'foreign_key', 'include', 
+																self::BELONGS_TO => 						 array('class_name', 'conditions', 'foreign_key', 'include', 
 																																		'polymorphic'),
-																'has_and_belongs_to_many' => array('class_name', 'join_table', 'foreign_key',
+																self::HAS_AND_BELONGS_TO_MANY => array('class_name', 'join_table', 'foreign_key',
 																																		'association_foreign_key', 'conditions', 'order'),
-																'has_one' =>								 array('class_name', 'conditions', 'order', 'foreign_key',
+																self::HAS_ONE =>								 array('class_name', 'conditions', 'order', 'foreign_key',
 																 																		'include', 'as', 'through')
 																);
 		
@@ -206,7 +313,7 @@
 				throw new NimbleRecordException('Invalid Association Type: ' . $type);
 			}
 			$this->type = $type;
-			$this->class = is_string($class) ? Inflector::classify($class) : Inflector::classify(get_class($class));
+			$this->class = NimbleAssociation::class_as_string($class);
 			$this->name = $arg;
 			foreach(static::$options[$this->type] as $var) {
 				$this->{$var} = NULL;

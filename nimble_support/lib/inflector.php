@@ -48,7 +48,9 @@ class Inflector {
       }
       
       return $result;
-    }
+    }else{
+			throw new NimbleException("Method: $method does not exsists on class Infelctor");
+		}
   }
  
   /**
