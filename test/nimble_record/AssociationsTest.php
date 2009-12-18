@@ -121,9 +121,8 @@
 			$user = User::find(1);
 			$user->clubs = array(array('name' => 'my_cool_club'));
 			$user->save();
-			$c = Club::find_by_name('my_cool_club');
 			User::reset_cache();
-			$this->assertTrue($user->clubs->includes($c));
+			$this->assertTrue($user->clubs->includes(Club::find_by_name('my_cool_club')));
 		}
 		
 		

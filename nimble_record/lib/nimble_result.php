@@ -24,7 +24,7 @@
 			* @return boolean
 			*/
 		public function includes($obj) {
-			return (array_search($obj, $this->array) !== false) ? true : false;
+			return (array_search($obj, $this->array) !== false);
 		}
 		
 		
