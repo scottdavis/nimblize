@@ -101,9 +101,15 @@
 			*/
 		public static function find_type($class, $association) {
 			$class = static::class_as_string($class);
+			$cache = Cache::get_cache();
+      $cache_key = 'find_type-' . $class . '-' . $association;
+      if ($cache->exists($cache_key)) {
+        return $cache->get($cache_key);
+      }
 			if(!isset(static::$associations[$class])) {return false;}
 			foreach(static::$associations[$class] as $assoc => $assocs) {
 				if(isset(static::$associations[$class][$assoc][$association])) {
+					$cache->set($cache_key, (string) $assoc);
 					return (string) $assoc;
 				}
 			}
