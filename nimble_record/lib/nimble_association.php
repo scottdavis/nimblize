@@ -8,7 +8,8 @@
 		public static $types = array('has_many', 'has_one', 
 																 'belongs_to', 'has_and_belongs_to_many');	
 		public static $associations = array();
-
+		const INNER_JOIN_SQL = "INNER JOIN {join_table_name} ON ({from_table_foreign_key} = {join_table_primary_key})";
+		const OUTER_JOIN_SQL = "LEFT OUTER JOIN {join_table_name} ON ({from_table_foreign_key} = {join_table_primary_key})";
 		/**
 			* Verifies association and finder exsist then executes them
 			* @param string $method
@@ -73,6 +74,7 @@
 		private static function _has_and_belongs_to_many($class, $name) {
 			$obj = static::get_association_object($class, $name, NimbleAssociationBuilder::HAS_AND_BELONGS_TO_MANY);
 			$options = (array) $obj;
+			//SELECT * FROM *.USERS INNER JOIN USERS.id on foo_users.user_id WHERE foo_users.foo_id = 5
 			return static::has_and_belongs_to_many_find($class, $name, $options);
 		}
 		/**
@@ -114,13 +116,12 @@
 			* @param array $options
 			*/
 		protected static function has_many_find($class, $name, $options = array()) {
-			$key = is_null($options['foreign_key']) ? static::foreign_key($class) : $options['foreign_key'];
-			$model = is_null($options['class_name']) ? static::model($name) : $options['class_name'];
+			$foreign_key = is_null($options['foreign_key']) ? static::foreign_key($class) : $options['foreign_key'];
+			$class_name = is_null($options['class_name']) ? static::model($name) : $options['class_name'];
 			$id = $class->row[NimbleRecord::$primary_key_field];
-			$conditions = "$key = '$id'";
+			$conditions = "$foreign_key = '$id'";
 			$options['conditions'] = is_null($options['conditions']) ? $conditions : implode(' AND ', array($conditions, $options['conditions']));
-			$find_array = call_user_func(array($model, 'find_all'), $options);
-			return $find_array;
+			return call_user_func(array($class_name, 'find_all'), $options);
 		}
 		/**
 			* Performs a find for has_and_belongs_to_many
@@ -193,7 +194,7 @@
 		
 		
 		public static function process_join($class, $input) {
-			$class = is_string($class) ? Inflector::classify(Inflector::singularize($class)) : get_class($class);
+			$class = Inflector::classify(Inflector::singularize(static::class_as_string($class)));
 			$out = array();
 			if(is_string($input) && static::find_type($class, $input) === false) {
 				return $input;
@@ -211,22 +212,12 @@
 			
 		}
 		
-		private static function inner_join_sql() {
-			return "INNER JOIN {join_table_name} ON ({from_table_foreign_key} = {join_table_primary_key})";
-		}
-		
-		private static function outer_join_sql() {
-			return "LEFT OUTER JOIN {join_table_name} ON ({from_table_foreign_key} = {join_table_primary_key})";
-		}
-		
-		private static function build_join($class, $association) {
-				$type = static::find_type($class, $association);
+		private static function build_join($model, $association, $sql = self::INNER_JOIN_SQL) {
+				$type = static::find_type($model, $association);
 				if($type === false) {
 					throw new NimbleRecordException('Invalid association: ' . $association);
 				}
-				$sql = static::inner_join_sql();
 				$association_model = Inflector::classify(Inflector::singularize($association));
-				$model = $class;
 				$options = array();
 				$options['{join_table_name}'] = NimbleRecord::table_name($association_model);
 				switch($type) {
@@ -305,7 +296,7 @@
 																																		'polymorphic'),
 																self::HAS_AND_BELONGS_TO_MANY => array('class_name', 'join_table', 'foreign_key',
 																																		'association_foreign_key', 'conditions', 'order'),
-																self::HAS_ONE =>								 array('class_name', 'conditions', 'order', 'foreign_key',
+																self::HAS_ONE =>								 array('class_name', 'conditions', 'foreign_key',
 																 																		'include', 'as', 'through')
 																);
 		

@@ -56,6 +56,18 @@
 			return new AlterTable($table_name, $options, $this);
 		}
 		/**
+			* Creates a join table for has_and_belongs_to_many relationships
+			* @param string $model_one
+			* @param string $model_two
+			*/
+		public function create_join_table($model_one, $model_tow) {
+			$table_name = NimbleAssociation::generate_join_table_name(array($model_one, $model_two));
+			$table = $this->create_table($table_name, array('id' => false));
+				$table->references($model_one);
+				$table->references($model_two);
+			$table->go();
+		}
+		/**
 		* Drops a table from the database
 		* @param string $table_name
 		*/
