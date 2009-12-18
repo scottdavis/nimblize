@@ -885,14 +885,18 @@ class NimbleRecord {
 					foreach($value as $_v) {
 						$args = array_merge($_v, array(NimbleAssociation::foreign_key($this) => $this->id));
 						$klass = new $class($args);
-						$klass->save();
+						if(!$klass->save()) {
+							throw new NimbleRecordException("Failed to save $assoc record " . implode(", ", $args));
+						}
 					}
 				break;
 				case 'has_and_belongs_to_many':
 					foreach($value as $_v) {
 						if(is_array($_v)) {
 							$klass = new $class($_v);
-							$klass->save();
+							if(!$klass->save()) {
+								throw new NimbleRecordException("Failed to save $assoc record " . implode(", ", $args));
+							}
 							static::insert_joined_record($this, $klass);
 							continue;
 						}
@@ -912,8 +916,8 @@ class NimbleRecord {
 		$obj = NimbleAssociation::get_association_object($class1, $class2_assoc_name, 'has_and_belongs_to_many');
 		$options = (array) $obj;
 		$join_table = is_null($options['join_table']) ? NimbleAssociation::generate_join_table_name(array(strtolower(NimbleAssociation::class_as_string($class1)), strtolower(NimbleAssociation::class_as_string($class2)))) : $options['join_table'];
-		$fk1 = NimbleAssociation::foreign_key($class1);
-		$fk2 = NimbleAssociation::foreign_key($class2);
+		$fk1 = is_null($options['foreign_key']) ? NimbleAssociation::foreign_key($class1) : $options['foreign_key'];
+		$fk2 = is_null($options['association_foreign_key']) ? NimbleAssociation::foreign_key($class2) : $options['association_foreign_key'];
 		static::execute("INSERT INTO $join_table ($fk1, $fk2) VALUES ('{$class1->id}', '{$class2->id}');");
 	}
 

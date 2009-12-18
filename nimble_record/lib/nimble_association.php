@@ -134,12 +134,14 @@
 			$model = static::class_as_string($name);
 			$join_table = is_null($options['join_table']) ? static::generate_join_table_name(array(strtolower($class_name), strtolower($name))) : $options['join_table'];
 			$assoc = Inflector::underscore(Inflector::pluralize($class_name));
+			$fk1 = is_null($options['foreign_key']) ? static::foreign_key($class) : $options['foreign_key'];
+			$fk2 = is_null($options['association_foreign_key']) ? static::foreign_key($model) : $options['association_foreign_key'];
 			$join_options['{join_table_name}'] = $join_table;
-			$join_options['{join_table_primary_key}'] = $join_table	. '.' . static::foreign_key($model) ;
-			$join_options['{from_table_foreign_key}'] =  NimbleRecord::table_name($model) . '.' . $model::$foreign_key_suffix;
+			$join_options['{join_table_primary_key}'] = $join_table	. '.' . $fk2 ;
+			$join_options['{from_table_foreign_key}'] =  NimbleRecord::table_name($model) . '.' . $model::$primary_key_field;
 			$options['joins'] = str_replace(array_keys($join_options), array_values($join_options), self::INNER_JOIN_SQL);
 			$id = $class->row[NimbleRecord::$primary_key_field];
-			$options['conditions'] = "$join_table." . static::foreign_key($class_name) . "='$id'";
+			$options['conditions'] = "$join_table." . $fk1 . "='$id'";
 			$options['select'] = "$name.*";
 			return call_user_func_array(array($model, 'find_all'), array($options));			
 		}
