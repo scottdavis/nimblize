@@ -59,7 +59,6 @@ class NimbleRecord {
 	public static $test_mode = false;
 	public static $adapter = NULL;
 	public static $max_rows_for_cache = 500;
-	public static $associations = array();
 	public static $foreign_key_suffix = 'id';
 	public static $primary_key_field = 'id';
 	public static $table_name_prefix = '';
@@ -87,6 +86,7 @@ class NimbleRecord {
 	var $preloaded_associations = array();
 	var $new_record = true;
 	var $row = array();
+	var $associations = array();
 		
 	/**
 	* @param $options array('column' => 'name', 'conditions' => array('id' => 1))  
@@ -847,6 +847,7 @@ class NimbleRecord {
 			$class = self::create($this->row);
       if($class->saved) {
 				$this->row = $class->row;
+				$this->save_associations();
 				return true;
 			}else{
         $this->errors = $class->errors;
@@ -865,6 +866,7 @@ class NimbleRecord {
 			$class = self::update($primary_key_value, $this->row);
       if($class->saved) {
         $this->row = $class->row;
+				$this->save_associations();
 				return true;
       }else{
         $this->errors = $class->errors;
@@ -872,6 +874,48 @@ class NimbleRecord {
       }
     }
   }
+
+
+	public function save_associations() {
+		foreach($this->associations as $assoc => $value) {
+			$type = NimbleAssociation::find_type($this, $assoc);
+			$class = NimbleAssociation::class_as_string($assoc);
+			switch($type) {
+				case 'has_many':
+					foreach($value as $_v) {
+						$args = array_merge($_v, array(NimbleAssociation::foreign_key($this) => $this->id));
+						$klass = new $class($args);
+						$klass->save();
+					}
+				break;
+				case 'has_and_belongs_to_many':
+					foreach($value as $_v) {
+						if(is_array($_v)) {
+							$klass = new $class($_v);
+							$klass->save();
+							static::insert_joined_record($this, $klass);
+							continue;
+						}
+						if(is_numeric($_v)) {
+							$klass = call_user_func(array($class, 'find'), $_v);
+							static::insert_joined_record($this, $klass);
+							continue;
+						}
+					}
+				break;
+			}
+		}
+	}
+
+	private static function insert_joined_record($class1, $class2) {
+		$class2_assoc_name = Inflector::pluralize(Inflector::underscore(NimbleAssociation::class_as_string($class2)));
+		$obj = NimbleAssociation::get_association_object($class1, $class2_assoc_name, 'has_and_belongs_to_many');
+		$options = (array) $obj;
+		$join_table = is_null($options['join_table']) ? NimbleAssociation::generate_join_table_name(array(strtolower(NimbleAssociation::class_as_string($class1)), strtolower(NimbleAssociation::class_as_string($class2)))) : $options['join_table'];
+		$fk1 = NimbleAssociation::foreign_key($class1);
+		$fk2 = NimbleAssociation::foreign_key($class2);
+		static::execute("INSERT INTO $join_table ($fk1, $fk2) VALUES ('{$class1->id}', '{$class2->id}');");
+	}
 
   //@codeCoverageIgnoreStart 
 	public function validations() {}
@@ -903,6 +947,10 @@ class NimbleRecord {
 	
 	
 	public function __set($var, $value) {
+		$type = NimbleAssociation::find_type($this, $var);
+		if($type !== false) {
+			return $this->associations[$var] = $value;
+		}
 		$this->set_var($var, $value);
 	}
 	

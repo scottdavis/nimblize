@@ -80,14 +80,15 @@
 			* Checks to make sure an association exists
 			* @return boolean
 			* @param string $class
-			* @param string $key
+			* @param string $type
 			* @param string $association_name
 			*/
-		public static function exists($class, $key, $association_name) {
+		public static function exists($class, $type, $association_name) {
+				$class = static::class_as_string($class);
 				if(!isset(static::$associations[$class])) {return false;}
 				$associations = static::$associations[$class];
-				if (isset($associations[$key])) {
-					return isset($associations[$key][$association_name]);
+				if (isset($associations[$type])) {
+					return isset($associations[$type][$association_name]);
 				}else{
 					return false;
 				}
@@ -262,7 +263,7 @@
 			return Inflector::classify(Inflector::singularize(is_string($class) ? $class : get_class($class)));
 		}
 
-		private static function get_association_object($class, $name, $type) {
+		public static function get_association_object($class, $name, $type) {
 			return NimbleAssociation::$associations[static::class_as_string($class)][$type][$name];
 		}
 		
@@ -301,7 +302,7 @@
 		const HAS_ONE = 'has_one';
 		
 		static $options = 		array(self::HAS_MANY => 							 array('through', 'foreign_key', 'class_name', 
-																																		'conditions', 'order', 'include', 'as'),
+																																		'conditions', 'order', 'include', 'as', 'dependent'),
 																
 																self::BELONGS_TO => 						 array('class_name', 'conditions', 'foreign_key', 'include', 
 																																		'polymorphic'),

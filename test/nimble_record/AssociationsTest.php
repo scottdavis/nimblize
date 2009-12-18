@@ -110,6 +110,22 @@
 			$this->assertEquals(10, $club->users->length);
 		}
 		
+		public function testNewPhotoSavesThroughUser() {
+			$user = User::find(1);
+			$user->photos = array(array('title' => 'my_new_user'));
+			$user->save();
+			$this->assertTrue(Photo::exists('title', 'my_new_user'));
+		}
+		
+		public function testNewClubOnUser() {
+			$user = User::find(1);
+			$user->clubs = array(array('name' => 'my_cool_club'));
+			$user->save();
+			$c = Club::find_by_name('my_cool_club');
+			User::reset_cache();
+			$this->assertTrue($user->clubs->includes($c));
+		}
+		
 		
 		public function setUp() {
 			NimbleRecord::start_transaction();

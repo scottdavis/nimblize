@@ -18,6 +18,14 @@
 
     }
 		
+		public function includes($obj) {
+			if(array_search($obj, $this->array) !== false) {
+				return true;
+			}
+			return false;
+		}
+		
+		
 		public function clear() {
 			if(isset($this->key)) {
 				NimbleRecord::remove_from_cache($this->key);
