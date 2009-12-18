@@ -17,7 +17,12 @@
 			}
 
     }
-		
+		/**
+			* Checks to see if an object is in the array
+			* helpful for testing
+			* @param NimbleRecord $obj
+			* @return boolean
+			*/
 		public function includes($obj) {
 			if(array_search($obj, $this->array) !== false) {
 				return true;
