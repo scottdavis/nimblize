@@ -100,6 +100,17 @@
 			$this->assertEquals('bar_foos', $name);
 		}
 		
+		public function testUserHasClubs() {
+			$user = User::find(1);
+			$this->assertEquals(11, $user->clubs->length);
+		}
+		
+		public function testClubHasUsers() {
+			$club = Club::find(1);
+			$this->assertEquals(10, $club->users->length);
+		}
+		
+		
 		public function setUp() {
 			NimbleRecord::start_transaction();
 		}

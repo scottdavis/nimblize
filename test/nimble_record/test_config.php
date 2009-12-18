@@ -26,6 +26,15 @@
 				$table3->polymorphic('commentable');
 				$table3->string('comment');
 			$table3->go();
+			
+			
+			$table4 = $this->create_table('clubs');
+				$table4->string('name');
+			$table4->go();
+			
+			
+			$this->create_join_table('user', 'club');
+			
 		}
 
 		public function down() {
@@ -84,6 +93,19 @@
 		}
 	}
 	
+	function create_clubs() {
+		foreach(range(0,10) as $i) {
+			Club::create(array('name' =>'club' . $i));
+		}
+	}
+	
+	function link_users_to_clubs() {
+		foreach(User::find('all') as $user) {
+			foreach(Club::find('all') as $club) {
+				ClubUser::create(array('user_id' => $user->id, 'club_id' => $club->id));
+			}
+		}
+	}
 	
 	function create_comment($photo_id) {
 		Comment::_create(array('comment' => 'this is my comment', 'commentable_type' => 'photo', 'commentable_id' => $photo_id));
@@ -92,5 +114,7 @@
 
 	function user_data() {
 		create_users();
+		create_clubs();
 		fill_user_photos();
+		link_users_to_clubs();
 	}

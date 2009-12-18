@@ -23,6 +23,7 @@
 		public function associations() {
 			$this->has_many('photos');
 			$this->has_many('comments')->through('photos');
+			$this->has_and_belongs_to_many('clubs');
 		}
 		
 		

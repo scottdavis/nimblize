@@ -60,7 +60,7 @@
 			* @param string $model_one
 			* @param string $model_two
 			*/
-		public function create_join_table($model_one, $model_tow) {
+		public function create_join_table($model_one, $model_two) {
 			$table_name = NimbleAssociation::generate_join_table_name(array($model_one, $model_two));
 			$table = $this->create_table($table_name, array('id' => false));
 				$table->references($model_one);

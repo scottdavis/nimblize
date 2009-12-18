@@ -289,6 +289,13 @@ class NimbleRecord {
 			}	
 		}
 		if(isset($options) && !empty($options)) {
+			
+			if(isset($options['select'])) {
+				$query->select = $options['select'];
+			}
+			if(isset($options['joins'])) {
+				$query->join = $options['joins'];
+			}
 			if(isset($options['conditions'])) {
 				if(is_array($options['conditions'])) {
 					$conditions = array_merge($conditions, static::build_conditions_from_array($options['conditions']));
@@ -308,6 +315,7 @@ class NimbleRecord {
 		}
 		$sql = $query->build();
 		unset($query);
+		unset($options);
 		return array($sql, $all);
 	}
 	

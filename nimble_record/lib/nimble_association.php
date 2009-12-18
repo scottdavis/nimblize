@@ -73,8 +73,7 @@
 			*/
 		private static function _has_and_belongs_to_many($class, $name) {
 			$obj = static::get_association_object($class, $name, NimbleAssociationBuilder::HAS_AND_BELONGS_TO_MANY);
-			$options = (array) $obj;
-			//SELECT * FROM *.USERS INNER JOIN USERS.id on foo_users.user_id WHERE foo_users.foo_id = 5
+			$options = (array) $obj;			
 			return static::has_and_belongs_to_many_find($class, $name, $options);
 		}
 		/**
@@ -130,9 +129,18 @@
 			* @param array $options
 			*/
 		protected static function has_and_belongs_to_many_find($class, $name, $options = array()) {
-			$join_table = static::generate_join_table_name(array(static::class_as_string($class), $name));
-			//$this->has_and_belongs_to_many('foos')
-			//"$model::find_all", array('conditions' => , 'joins' => )
+			$class_name = static::class_as_string($class);
+			$model = static::class_as_string($name);
+			$join_table = is_null($options['join_table']) ? static::generate_join_table_name(array(strtolower($class_name), strtolower($name))) : $options['join_table'];
+			$assoc = Inflector::underscore(Inflector::pluralize($class_name));
+			$join_options['{join_table_name}'] = $join_table;
+			$join_options['{join_table_primary_key}'] = $join_table	. '.' . static::foreign_key($model) ;
+			$join_options['{from_table_foreign_key}'] =  NimbleRecord::table_name($model) . '.' . $model::$foreign_key_suffix;
+			$options['joins'] = str_replace(array_keys($join_options), array_values($join_options), self::INNER_JOIN_SQL);
+			$id = $class->row[NimbleRecord::$primary_key_field];
+			$options['conditions'] = "$join_table." . static::foreign_key($class_name) . "='$id'";
+			$options['select'] = "$name.*";
+			return call_user_func_array(array($model, 'find_all'), array($options));			
 		}
 		/**
 			* Performs a find for has_many->through
@@ -194,7 +202,7 @@
 		
 		
 		public static function process_join($class, $input) {
-			$class = Inflector::classify(Inflector::singularize(static::class_as_string($class)));
+			$class = static::class_as_string($class);
 			$out = array();
 			if(is_string($input) && static::find_type($class, $input) === false) {
 				return $input;
@@ -246,9 +254,12 @@
 			sort($array);
 			return NimbleRecord::$table_name_prefix . Inflector::singularize(reset($array)) . '_' . Inflector::pluralize(end($array));
 		}
-		
+		/**
+			* Returns the class name of a given class
+			* @param string|class $class
+			*/
 		public static function class_as_string($class) {
-			return is_string($class) ? Inflector::classify($class) : Inflector::classify(get_class($class));
+			return Inflector::classify(Inflector::singularize(is_string($class) ? $class : get_class($class)));
 		}
 
 		private static function get_association_object($class, $name, $type) {
