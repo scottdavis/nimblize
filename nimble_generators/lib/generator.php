@@ -144,10 +144,10 @@ class Generator {
 			} else {
 				$methods = '';
 				$type = "Controller";
+				static::echo_path('Controller', $path_name);
 			}
 			$string = file_get_contents(FileUtils::join(static::$template_path, 'controller.tmpl'));
 			$string = str_replace(array('{namespace}', '{class_name}', '{template_path}', '{methods}', '{type}'), array($namespace, $class_name, $view_path, $methods, $type), $string);
-			static::echo_path('Controller', $path_name);
 			static::write_file($path_name, $string);
 			static::generate_test('functional', $name);
 		}
@@ -333,10 +333,10 @@ class Generator {
 	}
 
 	foreach (array(
-		'template_path' => array(dirname(__FILE__), '..', 'templates'),
-		'script_path' => array(dirname(__FILE__), '..', '..', 'nimble_scripts')
+		'template_path' => FileUtils::join(__DIR__, '..', 'templates'),
+		'script_path' => FileUtils::join(__DIR__, '..', '..', 'nimble_scripts')
 	) as $name => $path) {
-		Generator::${$name} = FileUtils::join($path);
+		Generator::${$name} = $path;
 	}
 
 	if (defined('NIMBLE_ROOT')) {
