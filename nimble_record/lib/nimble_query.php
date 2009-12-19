@@ -135,6 +135,7 @@
 		}
 		
 		public static function condition($column, $value) {
+			$column = preg_replace('/\./', '`.`', $column);
 			return "`$column` = '$value'";
 		}
 		

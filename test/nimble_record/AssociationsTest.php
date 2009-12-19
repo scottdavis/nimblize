@@ -125,6 +125,10 @@
 			$this->assertTrue($user->clubs->includes(Club::find_by_name('my_cool_club')));
 		}
 		
+		public function testHasManyThrough() {
+			$user = User::find(1);
+			$this->assertEquals(22, $user->comments->length);
+		}
 		
 		public function setUp() {
 			NimbleRecord::start_transaction();

@@ -50,7 +50,8 @@
 			* @param string $name - association name
 			*/
 		private static function _has_one($class, $name) {
-			
+			$options = (array) static::get_association_object($class, $name, NimbleAssociationBuilder::HAS_ONE);
+			return static::has_one_find($class, $name, $options);
 		}
 		/**
 			* Belongs to executing logic is in this function
@@ -80,7 +81,7 @@
 			* Checks to make sure an association exists
 			* @return boolean
 			* @param string $class
-			* @param string $type
+			* @param string $type   
 			* @param string $association_name
 			*/
 		public static function exists($class, $type, $association_name) {
@@ -116,6 +117,20 @@
 			return false;
 		}
 		/**
+			* Performs a find for a has_one relationship
+			* @param NimbleRecord $class
+			* @param string $name - association name
+			* @param array $options
+			*/		
+		protected static function has_one_find() {
+			$foreign_key = is_null($options['foreign_key']) ? static::foreign_key($class) : $options['foreign_key'];
+			$class_name = is_null($options['class_name']) ? static::model($name) : $options['class_name'];
+			$id = $class->row[NimbleRecord::$primary_key_field];
+			$conditions = "$foreign_key = '$id'";
+			$options['conditions'] = is_null($options['conditions']) ? $conditions : implode(' AND ', array($conditions, $options['conditions']));
+			return call_user_func_array(array($class_name, 'find'), array('first', $options));
+		}		
+		/**
 			* Performs a find for a has_many relationship
 			* @param NimbleRecord $class
 			* @param string $name - association name
@@ -125,7 +140,10 @@
 			$foreign_key = is_null($options['foreign_key']) ? static::foreign_key($class) : $options['foreign_key'];
 			$class_name = is_null($options['class_name']) ? static::model($name) : $options['class_name'];
 			$id = $class->row[NimbleRecord::$primary_key_field];
-			$conditions = "$foreign_key = '$id'";
+			$conditions = NimbleQuery::condition($foreign_key, $id);
+			if(strpos($id, 'IN') !== false) {
+				$conditions = $polymorphic_column_id . $id;
+			}
 			$options['conditions'] = is_null($options['conditions']) ? $conditions : implode(' AND ', array($conditions, $options['conditions']));
 			return call_user_func(array($class_name, 'find_all'), $options);
 		}
@@ -147,7 +165,8 @@
 			$join_options['{from_table_foreign_key}'] =  NimbleRecord::table_name($model) . '.' . $model::$primary_key_field;
 			$options['joins'] = str_replace(array_keys($join_options), array_values($join_options), self::INNER_JOIN_SQL);
 			$id = $class->row[NimbleRecord::$primary_key_field];
-			$options['conditions'] = "$join_table." . $fk1 . "='$id'";
+			$conditions = NimbleQuery::condition($join_table . '.' . $fk1, $id);
+			$options['conditions'] = is_null($options['conditions']) ? $conditions : implode(' AND ', array($conditions, $options['conditions']));
 			$options['select'] = "$name.*";
 			return call_user_func_array(array($model, 'find_all'), array($options));			
 		}
@@ -156,10 +175,18 @@
 			* @param NimbleRecord $class
 			* @param string $name - association name
 			* @param array $options
-			* @todo
 			*/
 		protected static function has_many_through_find($class, $name, $options = array()) {
-			return array();
+			$source_class = static::class_as_string($options['through']);
+			$type = static::find_type($source_class, $name);
+			$fk = static::foreign_key($class);
+			$finder_class = static::class_as_string($name);
+			$_class = static::class_as_string($class);
+			$assoc_class = call_user_func(array($source_class, 'find_all'), array('select' => $source_class::$primary_key_field, 'conditions' => array($fk => $class->row[$_class::$primary_key_field])));
+			$ids = collect(function($a, $id_col){return $a->row[$id_col];}, $assoc_class, array($source_class::$primary_key_field));
+			$_source_class = new $source_class;
+			$_source_class->row[$source_class::$primary_key_field] = ' IN(' . implode(',', $ids) . ')';
+			return call_user_func_array(array('self', '_' . $type), array($_source_class, $name, $options));
 		}
 		
 		/**
@@ -174,7 +201,10 @@
 			$polymorphic_column_type = $options['as'] . '_type';
 			$polymorphic_column_id =  $options['as'] . '_id';
 			$class = strtolower(static::class_as_string($class));
-			$conditions = $polymorphic_column_type . " = '$class' AND " . $polymorphic_column_id . " = '" . $id . "'";
+			$conditions = implode(' AND ', array(NimbleQuery::condition($polymorphic_column_type, $class), NimbleQuery::condition($polymorphic_column_id,$id)));
+			if(strpos($id, 'IN') !== false) {
+				$conditions = implode(' AND ', array(NimbleQuery::condition($polymorphic_column_type, $class), $polymorphic_column_id . $id));
+			}
 			$merg_conditions = array($conditions);
 			if(!is_null($options['conditions'])) {
 				$merg_conditions[] = $options['conditions'];
@@ -207,19 +237,22 @@
 			$foreign_key = is_null($options['foreign_key']) ? static::foreign_key($name) : $options['foreign_key'];
 			return call_user_func_array(array($class_name, 'find'), array($class->row[$foreign_key], $options));
 		}
-		
-		
-		
-		public static function process_join($class, $input) {
+		/**
+			* builds a join based given class and associations
+			* @param NimbleRecord $class
+			* @param mixed $assoc
+			* @return string
+			*/
+		public static function process_join($class, $assoc) {
 			$class = static::class_as_string($class);
 			$out = array();
-			if(is_string($input) && static::find_type($class, $input) === false) {
-				return $input;
+			if(is_string($assoc) && static::find_type($class, $assoc) === false) {
+				return $assoc;
 			}else{
-				$input = is_array($input) ? $input : array($input);
+				$assoc = is_array($assoc) ? $assoc : array($assoc);
 			}
-			if(is_array($input) && !is_assoc($input)) {
-				foreach($input as $association) {
+			if(is_array($assoc) && !is_assoc($assoc)) {
+				foreach($assoc as $association) {
 					$out[] = static::build_join($class, $association);
 				}
 			}else{
