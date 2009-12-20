@@ -120,10 +120,10 @@ class Controller {
 			$this->has_rendered = true;
 			$this->template = FileUtils::join(Nimble::getInstance()->config['view_path'], $file);
       if ($this->layout==false){
-      	echo $this->open_template($this->template); 
+      	echo trim($this->open_template($this->template)); 
       } else {
-      	$this->content = $this->open_template($this->template); 
-  			echo $this->open_template($this->layout_template); 
+      	$this->content = trim($this->open_template($this->template)); 
+  			echo trim($this->open_template($this->layout_template)); 
       }
    }
 
@@ -145,22 +145,18 @@ class Controller {
      */
     private function open_template($name)
     {
-        $vars = get_object_vars($this);
         ob_start();
-        if (file_exists($name)){
-            if (count($vars)>0)
-                foreach($vars as $key => $value){
-                    $$key = $value;
-                }
-            require($name);
+        if(file_exists($name)){
+        	foreach(get_object_vars($this) as $key => $value) {
+          	$$key = $value;
+          }
+					require($name);
 				}else if(empty($name)){
 					return;
         } else {
             throw new NimbleException('View ['.$name.'] Not Found');
         }
-        $out = ob_get_contents();
-        ob_end_clean();
-        return $out;
+        return trim(ob_get_clean());
     }
 
     /**
@@ -200,5 +196,3 @@ class Controller {
        $this->redirect($url, true);
     }
 }
-
-?>

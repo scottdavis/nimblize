@@ -27,12 +27,12 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 		* @param array $session array with key => value pairs to be the session
 		* @uses $this->get('index', array(), array(), array('user_id' => 1));
 		*/
-	public function get($action, $action_params = array(), $params = array(), $session = array()) {
+	public function get($action, $action_params = array(), $params = array(), $session = array(), $format ='html') {
 		global $_SESSION, $_POST, $_GET;
 		$_GET = $params;
 		$_SESSION = $session;
 		$_SERVER['REQUEST_METHOD'] = $_POST['_method'] = 'GET';
-		$this->load_action($action, $action_params);
+		$this->load_action($action, $action_params, $format);
 	}
 
 	/**
@@ -43,12 +43,12 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 		* @param array $session array with key => value pairs to be the session
 		* @uses $this->post('TaskController', 'create', array(), array('name' => 'bob'), array('user_id' => 1));
 		*/		
-	public function post($action, $action_params = array(), $params = array(), $session = array()) {
+	public function post($action, $action_params = array(), $params = array(), $session = array(), $format ='html') {
 		global $_SESSION, $_POST, $_GET, $_SERVER;
 		$_POST = $_GET = $params;
 		$_SESSION = $session;
 		$_SERVER['REQUEST_METHOD'] = $_POST['_method'] = 'POST';
-		$this->load_action($action, $action_params);
+		$this->load_action($action, $action_params, $format);
 	}
 
 	/**
@@ -59,12 +59,12 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 		* @param array $session array with key => value pairs to be the session
 		* @uses $this->put('TaskController', 'update', array(1), array('name' => 'joe'), array('user_id' => 1));
 		*/		
-	public function put($action, $action_params = array(), $params = array(), $session = array()) {
+	public function put($action, $action_params = array(), $params = array(), $session = array(), $format ='html') {
 		global $_SESSION, $_POST, $_GET, $_SERVER;
 		$_POST = $_GET = $params;
 		$_SESSION = $session;
 		$_SERVER['REQUEST_METHOD'] = $_POST['_method'] = 'PUT';
-		$this->load_action($action, $action_params);
+		$this->load_action($action, $action_params, $format);
 	}
 	
 	/**
@@ -75,12 +75,12 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 		* @param array $session array with key => value pairs to be the session
 		* @uses $this->delete('TaskController', 'delete', array(1), array(), array('user_id' => 1));
 		*/		
-	public function delete($action, $action_params = array(), $params = array(), $session = array()) {
+	public function delete($action, $action_params = array(), $params = array(), $session = array(), $format ='html') {
 		global $_SESSION, $_POST, $_GET, $_SERVER;
 		$_POST = $_GET = $params;
 		$_SESSION = $session;
 		$_SERVER['REQUEST_METHOD'] = $_POST['_method'] = 'DELETE';
-		$this->load_action($action, $action_params);
+		$this->load_action($action, $action_params, $format);
 	}
 	
 	
@@ -271,7 +271,7 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 		* @param string $name string to add .php
 		*/		
 	private function add_php_extension($name) {
-		if(strpos($name, '.php') === false) {
+		if(strpos($name, '.') === false) {
 			$name = $name . ".php";
 		}
 		return $name;
@@ -323,12 +323,15 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 		* @param string $action action you wish to call
 		* @param array $action_params array of arguments to pass to the action method
 		*/
-	private function load_action($action, $action_params) {
+	private function load_action($action, $action_params, $format ='html') {
 		global $_SESSION, $_POST, $_GET;
 		$nimble = Nimble::getInstance();
 		ob_start();
 		$controller = new $this->controller_name();
+		$controller->format = $format;
+		call_user_func(array($controller, "run_before_filters"), $action);
 		call_user_func_array(array($controller, $action), $action_params);
+		call_user_func(array($controller, "run_after_filters"), $action);
 		$path = strtolower(Inflector::underscore(str_replace('Controller', '', $this->controller_name)));
 		$template = FileUtils::join($path, $action . '.php');
 		if ($controller->has_rendered === false) {

@@ -192,7 +192,7 @@ class Nimble
 						}
 					}
 				}
-				print $out;
+				echo trim($out);
 				if(!$this->test_mode){
 					exit();
 				}
