@@ -24,5 +24,11 @@ class DateHelper {
 			return date($formats[$format], $timestamp);
 	}
 	
+	
+	public static function from_db($db_time) {
+		$d = date_parse_from_format(static::$formats['db'], $db_time);
+		return mktime($d['hour'], $d['minute'], $d['second'], $d['month'], $d['day'], $d['year']);
+	}
+	
 }
 ?>

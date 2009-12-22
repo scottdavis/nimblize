@@ -43,9 +43,9 @@ function Run($test_mode = false)
         <title>Error!</title>
     </head>
     <body>
-        <h1>Caught exception: <?= $e->getMessage(); ?></h1>
-        <h2>File: <?= $e->getFile()?></h2>
-        <h2>Line: <?= $e->getLine()?></h2>
+        <h1>Caught exception: <?php echo $e->getMessage(); ?></h1>
+        <h2>File: <?php echo $e->getFile()?></h2>
+        <h2>Line: <?php echo $e->getLine()?></h2>
         <h3>Trace</h3>
         <pre>
         <?= $e->getTraceAsString() ?>

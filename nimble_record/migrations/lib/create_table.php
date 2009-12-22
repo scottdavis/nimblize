@@ -104,6 +104,14 @@
 			$this->add_column($column_name, 'text', $options);
 		}
 		/**
+		* Adds a longtext column to the table object
+		* @param string $column_name
+		* @param array $options
+		*/
+		public function longtext($column_name, $options = array()) {
+			$this->add_column($column_name, 'longtext', $options);
+		}
+		/**
 		* Adds a created_at and updated_at column to the table object
 		* This column is then auto updated by the ORM when ever a create or update occures
 		*/
