@@ -85,7 +85,7 @@ class Nimble
 
 		// parse format
 		$has_format = false;
-		if (preg_match('/\.[a-zA-Z0-9]+$/', $this->url)) {
+		if (preg_match('/\.[a-z]+$/', $this->url)) {
 			$rule .= '\.(?P<format>[a-zA-Z0-9]+)';
 			$has_format = true;
 		}
