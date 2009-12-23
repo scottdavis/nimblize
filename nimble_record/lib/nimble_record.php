@@ -375,12 +375,23 @@ class NimbleRecord {
   * @param string $value Value you wish to check aginst
   * @todo add multi conditional support
   */
-  public static function exists($col, $value) {
-		$query = new NimbleQuery();
+  public static function exists() {
+    $args = func_get_args();
+    $query = new NimbleQuery();
 		$query->select = '1';
 		$query->from = static::table_name();
-		$query->where = '(`' . static::sanatize_input_array($col) . '`= ' . "'" . static::sanatize_input_array($value) . "')";
 		$query->limit = '0,1';
+    if(count($args) == 2) {
+      $col = $args[0];
+      $value = $args[1];
+		  $query->where = NimbleQuery::condition(static::sanatize_input_array($col), static::sanatize_input_array($value));
+	  }elseif(is_array($args[0])) {
+	    $conditions = array();
+	    foreach($args[0] as $col => $value) {
+	      $conditions[] = NimbleQuery::condition(static::sanatize_input_array($col), static::sanatize_input_array($value));
+	    }
+	    $query->where = implode(' AND ', $conditions);
+	  }
 		$sql = $query->build();
 		unset($query);
     $result = static::execute($sql);
@@ -847,7 +858,7 @@ class NimbleRecord {
 			$class = self::create($this->row);
       if($class->saved) {
 				$this->row = $class->row;
-				$this->save_associations();
+				$this->save_associations($this);
 				return true;
 			}else{
         $this->errors = $class->errors;
@@ -866,7 +877,7 @@ class NimbleRecord {
 			$class = self::update($primary_key_value, $this->row);
       if($class->saved) {
         $this->row = $class->row;
-				$this->save_associations();
+				$this->save_associations($this);
 				return true;
       }else{
         $this->errors = $class->errors;
@@ -876,7 +887,8 @@ class NimbleRecord {
   }
 
 
-	public function save_associations() {
+	public function save_associations($parent) {
+		$parent->saved = true;
 		foreach($this->associations as $assoc => $value) {
 			$type = NimbleAssociation::find_type($this, $assoc);
 			$class = NimbleAssociation::class_as_string($assoc);
@@ -886,6 +898,7 @@ class NimbleRecord {
 						$args = array_merge($_v, array(NimbleAssociation::foreign_key($this) => $this->id));
 						$klass = new $class($args);
 						if(!$klass->save()) {
+							$parent->saved = false;
 							throw new NimbleRecordException("Failed to save $assoc record " . implode(", ", $args));
 						}
 					}
@@ -895,6 +908,7 @@ class NimbleRecord {
 						if(is_array($_v)) {
 							$klass = new $class($_v);
 							if(!$klass->save()) {
+								$parent->saved = false;
 								throw new NimbleRecordException("Failed to save $assoc record " . implode(", ", $args));
 							}
 							static::insert_joined_record($this, $klass);

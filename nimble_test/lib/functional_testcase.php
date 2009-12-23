@@ -6,7 +6,7 @@
  */
 abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 	
-	private $controller;
+	var $controller;
 	var $controller_name;
 	
 	public function __construct() {
@@ -15,9 +15,13 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 		parent::__construct();
 		$class = get_class($this);
 		$this->controller_name = str_replace('Test', '', $class);
-		$this->controller = '';
+		$this->controller = new $this->controller_name;
 	}
 	
+	public function __destruct() {
+		unset($this->conroller);
+		$this->controller = new $this->controller_name;
+	}
 	
 	/**
 		* Loads a controller and mocks a GET HTTP request
@@ -91,8 +95,7 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 		*/
 	
 	public function assertRedirect($url) {
-		$test = "Location: {$url}";
-		$this->header_test($test);
+		$this->header_test("Location: {$url}");
 	}
 	
 	
@@ -327,21 +330,19 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 		global $_SESSION, $_POST, $_GET;
 		$nimble = Nimble::getInstance();
 		ob_start();
-		$controller = new $this->controller_name();
-		$controller->format = $format;
-		call_user_func(array($controller, "run_before_filters"), $action);
-		call_user_func_array(array($controller, $action), $action_params);
-		call_user_func(array($controller, "run_after_filters"), $action);
+		$this->controller->format = $format;
+		call_user_func(array($this->controller, "run_before_filters"), $action);
+		call_user_func_array(array($this->controller, $action), $action_params);
+		call_user_func(array($this->controller, "run_after_filters"), $action);
 		$path = strtolower(Inflector::underscore(str_replace('Controller', '', $this->controller_name)));
 		$template = FileUtils::join($path, $action . '.php');
-		if ($controller->has_rendered === false) {
-      if (empty($controller->layout_template) && $controller->layout) {
-        $controller->set_layout_template();
+		if ($this->controller->has_rendered === false) {
+      if (empty($this->controller->layout_template) && $this->controller->layout) {
+        $this->controller->set_layout_template();
       }
-      $controller->render($template);
+      $this->controller->render($template);
     }
 		$this->response = ob_get_clean();
-		$this->controller = $controller;
 	}
 
   /**
