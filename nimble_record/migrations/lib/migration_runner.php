@@ -171,6 +171,7 @@
 				}
 				closedir($dh);
 			}
+			ksort($classes);
 			return $classes;
 		}
 	
