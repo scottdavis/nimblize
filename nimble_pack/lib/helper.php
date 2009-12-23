@@ -41,5 +41,3 @@ function u($short_url) {
 
 	return call_user_func_array('UrlBuilder::url_for', $args);
 }
-
-?>

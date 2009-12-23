@@ -10,5 +10,3 @@
 	require_once(dirname(__FILE__) . '/lib/form_helper.php');
 	require_once(dirname(__FILE__) . '/lib/global_helper_functions.php');
 	require_once(dirname(__FILE__) . '/lib/table_helper.php');
-	
-?>

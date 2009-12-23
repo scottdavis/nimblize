@@ -4,4 +4,3 @@
 	* @package Exception
   */
   class NimbleException extends Exception {}
-?>

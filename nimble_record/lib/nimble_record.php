@@ -1288,5 +1288,3 @@ class NimbleRecord {
 		}
 	}
 }
-
-?>

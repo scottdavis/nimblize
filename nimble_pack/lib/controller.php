@@ -14,22 +14,18 @@ class Controller {
 		var $has_rendered = false;
 		var $template = '';
 		var $rendered_partials = array();
-    /**
-     * The expected output format for this controller.
-     * @var string
-     */
     var $http_format = 'html';
 	/**
-	*
-	* @return instance of the Nimble class
-	*/
+	  *
+	  * @return instance of the Nimble class
+	  */
 	public function nimble() {
 		return Nimble::getInstance();
 	}
 	/**
-	* @param string path to template you want to use as layout
-	* @return string path to the application.php template
-	*/
+	  * @param string path to template you want to use as layout
+	  * @return string path to the application.php template
+	  */
 	public function set_layout_template($template ='') {
 		if(!empty($template) && file_exists($template)) {
 			$this->layout_template = $template;
