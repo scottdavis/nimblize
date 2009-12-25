@@ -70,6 +70,7 @@ class NimbleRecord {
 	public static $query_cache = array();
 	/** protected vars */
 
+	protected static $is_useing_save = false;
 	protected static $connection;
 	protected static $columns = array();
 	protected static $validations = array();
@@ -87,7 +88,7 @@ class NimbleRecord {
 	var $new_record = true;
 	var $row = array();
 	var $associations = array();
-		
+
 	/**
 	* @param $options array('column' => 'name', 'conditions' => array('id' => 1))  
 	*/
@@ -413,6 +414,9 @@ class NimbleRecord {
 		$c = static::class_name();
 		$klass = new $c;
 		$klass->row = array_merge($klass->row, $attributes);
+		if(!static::$is_useing_save) {
+			static::verify_input($attributes, $klass);
+		}
 		static::getErrors($klass);
 		if(count($klass->errors) == 0) {
     	call_user_func_array(array($klass, 'before_create'), array());
@@ -439,6 +443,7 @@ class NimbleRecord {
 			$klass->saved = true;
 			call_user_func_array(array($klass, 'after_create'), array());
 			call_user_func_array(array($klass, 'after_save'), array());
+			$klass->new_record = false;
 			return $klass;
 		}else{	
 			$klass->saved = false;
@@ -494,6 +499,9 @@ class NimbleRecord {
 		$old_row = $klass->row;
 		$klass->update_mode = true;
     $klass->row = array_merge($klass->row, $attributes);
+		if(!static::$is_useing_save) {
+			static::verify_input($attributes, $klass);
+		}
     static::getErrors($klass);
 		if(count($klass->errors) == 0) {
 			call_user_func_array(array($klass, 'before_update'), array());
@@ -815,15 +823,25 @@ class NimbleRecord {
 		foreach($all_columns as $col) {
 			$this->set_var($col, NULL, false);
 		}
+		if(count(($cols = array_diff(array_keys($args), $all_columns))) > 0) {
+			throw new NimbleRecordException("Can not set property: " . implode(', ', $cols) . " does not exsit.");
+		}
+		static::verify_input($args, $this);
+		
 		//if no args process return
 		if(empty($args)) {return;}
-		
+
+  }
+
+
+	private static function verify_input($args, $class) {
+		$all_columns = static::columns();
 		//if white listing is turned on only allow mass assignment on vars that are in the white list
 		if(!empty(static::$white_list)) {
 			$all_columns = array_intersect($all_columns, static::$white_list);
-		}
-		if(count($bad_params = array_diff(array_keys($args), $all_columns)) > 0) {
-			throw new NimbleRecordException(implode(',', $bad_params) . ': are a protected attribute(s) and can not be mass assigned');
+			if(count($bad_params = array_diff(array_keys($args), $all_columns)) > 0) {
+				throw new NimbleRecordException(implode(',', $bad_params) . ': are a protected attribute(s) and can not be mass assigned');
+			}
 		}
 		//if mass assigning set vars
 		foreach($all_columns as $var) {
@@ -832,11 +850,10 @@ class NimbleRecord {
 				if(array_include($var, static::$protected)) {
 					throw new NimbleRecordException($var . ': is a protected attribute and can not be mass assigned');
 				}
-	  		$this->set_var($var, $args[$var]);
+	  		$class->set_var($var, $args[$var]);
 			}
 		}
-  }
-
+	}
 
   /**
   * Method __toString
@@ -850,12 +867,14 @@ class NimbleRecord {
     }
   }
 
-	public function save() {    
+	public function save() {
+		static::$is_useing_save = true;
 		/**
 		* CREATE CODE
 		*/
-    if($this->new_record) {
+    if($this->new_record === true) {
 			$class = self::create($this->row);
+			static::$is_useing_save = false;
       if($class->saved) {
 				$this->row = $class->row;
 				$this->save_associations($this);
@@ -875,6 +894,7 @@ class NimbleRecord {
       $primary_key_value = $this->row[$f];
       unset($this->row[$f]);
 			$class = self::update($primary_key_value, $this->row);
+			static::$is_useing_save = false;
       if($class->saved) {
         $this->row = $class->row;
 				$this->save_associations($this);
@@ -973,7 +993,7 @@ class NimbleRecord {
 	}
 	
 	private function set_var($var, $value, $read_only_check = true) {
-		if(array_include($var, static::columns())){
+		if(array_include($var, static::columns())) {
 			if($read_only_check && array_include($var, static::$read_only)) {
 				throw new NimbleRecordException($var . ': is a read only attribute');
 			}
