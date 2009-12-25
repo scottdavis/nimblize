@@ -8,15 +8,24 @@
 * @uses <?= $form->text_field('title') ?>
 */
 
-class Form {
-
+class FormFor {
+	
+	var $tag_options = array();
+	var $config = array();
+	var $obj = NULL;
 	/**
 	* Form
-	* @param array $array array('method' => 'GET', 'path' => '/', 'object' => '{object or string}')
+	* @param array $array array('method' => 'GET', 'path' => '/', 'object' => 'object')
 	*/
 	public function __construct($array) {
-		$defaults = array('method' => 'GET', 'path' => '/');
+		$specials = array('method', 'path', 'object');
+		$defaults = array('method' => 'POST', 'path' => '/');
 		$this->config = array_merge($defaults, $array);
+		foreach($this->config as $key => $value) {
+			if(!in_array($key, $specials)) {
+				$this->tag_options[$key] = $value; 
+			}
+		}
 		$this->obj = $this->config['object'];
 	}
 	
@@ -165,12 +174,11 @@ class Form {
 			//if this has been processed - skip the processing
 			if(!isset($this->errors)) {
 				$this->errors = array();
-				foreach($this->obj->errors as $error) {
-					foreach($error as $col => $value) {
-						$this->errors[$col] = $value;
-					}
+				foreach($this->obj->errors as $col => $error) {
+					$this->errors[$col] = $error;
 				}
 			}
+		}
 
 			if(in_array($name, array_keys($this->errors))) {
 				if(isset($options['class'])) {
@@ -179,9 +187,6 @@ class Form {
 					$options['class'] = 'fieldWithErrors ';
 				}
 			}
-		}
-	
-	
 		return $options;
 	}
 	
@@ -203,7 +208,7 @@ class Form {
     }else{
       $method = $this->config['method'];
     }
-    $form_options = array('name' => strtolower($this->get_form_name()), 'method' => $method, 'action' => $this->config['path']);
+    $form_options = array_merge(array('name' => strtolower($this->get_form_name()), 'method' => $method, 'action' => $this->config['path']), $this->tag_options);;
     if(isset($this->config['type'])) {
       $form_options['enctype'] = $this->config['type'];
     }

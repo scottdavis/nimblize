@@ -17,5 +17,3 @@
 		$message = TagHelper::content_tag('h2' , "Errors occured saving this record", array('class' => 'error_message'));
 		return TagHelper::content_tag('div',  $message . join("\n", $out), array('class' => 'error_container'));
 	}
-
-?>

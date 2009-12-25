@@ -13,6 +13,7 @@
 		* @uses Test::create_foo() will create the email for you public instance method foo in the subclass and return the object it --Note-- this does not send the email
 		*/
 	class NimbleMailer {
+		static $send_mail = true;
 		//configs
 		var $view_path = '';
 		var $nimble = NULL;
@@ -76,7 +77,7 @@
 						}
 						$klass->output_message();
 						$klass->send_mail();
-						return true;
+						return $klass;
 					break;
 					case 'create':
 						$klass->load_method($matches[2], $args);
@@ -216,8 +217,10 @@
 			* Sends the email
 			*/
 		private function send_mail() {
-			foreach($this->recipiants as $to) {
-				mail($to, $this->subject, $this->_prepaired_message, $this->create_headers());
+			if(static::$send_mail) {
+				foreach($this->recipiants as $to) {
+					mail($to, $this->subject, $this->_prepaired_message, $this->create_headers());
+				}
 			}
 		}
 		/**
