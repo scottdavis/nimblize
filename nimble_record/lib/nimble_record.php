@@ -1321,4 +1321,14 @@ class NimbleRecord {
 			return static::$adapter->escape((string) $input);
 		}
 	}
+	//array('foo = "?"', $bar)
+	public static function sanitize($array) {
+		$sql = array_shift($array);
+		$clean = static::sanatize_input_array($array);
+		$clean = array_map(function($c){return "'$c'";}, $clean);
+		$q = array_fill(0, count($clean), '/\?/');
+		$num = (count($clean) > 1) ? 1 : -1;
+		return preg_replace($q, $clean, $sql, $num);
+	}
+	
 }

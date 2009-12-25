@@ -245,6 +245,18 @@
 			$this->assertFalse($user2->updated_at === $user->updated_at);
 			$this->assertEquals($user2->my_int, $user->my_int);
 		}
+		
+		
+		public function testSanitize() {
+			$sql = NimbleRecord::sanitize(array('name=? AND foo=?', 'bob', 'joe'));
+			$this->assertEquals("name='bob' AND foo='joe'", $sql);
+		}
+		
+		public function testSanitizeSingleValueManyQ() {
+			$sql = NimbleRecord::sanitize(array('name LIKE ? OR summary LIKE ? OR description LIKE ?', 'foo'));
+			$this->assertEquals("name LIKE 'foo' OR summary LIKE 'foo' OR description LIKE 'foo'", $sql);
+		}
+		
 	}
 	
 ?>
