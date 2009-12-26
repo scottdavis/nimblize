@@ -277,6 +277,9 @@ class NimbleRecord {
 			$all = true;
 			$conditions[] = NimbleQuery::in(static::$primary_key_field, $input);
 		}elseif($num_args == 1){
+		  if(!array_include((string) $temp, array('first', 'all')) && !is_numeric($temp)){
+			  throw new NimbleRecordNotFound;
+			}
 			if(!array_include((string) $temp, array('first', 'all')) && is_numeric($temp)){
 				$conditions[] = NimbleQuery::condition(static::$primary_key_field, $temp);
 			}
