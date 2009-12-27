@@ -922,7 +922,7 @@ class NimbleRecord {
 						$klass = new $class($args);
 						if(!$klass->save()) {
 							$parent->saved = false;
-							throw new NimbleRecordException("Failed to save $assoc record " . implode(", ", $args));
+							throw new NimbleRecordException("Failed to save $assoc: " . implode(", ", $klass->errors));
 						}
 					}
 				break;

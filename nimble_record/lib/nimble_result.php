@@ -40,6 +40,10 @@
 		public function first() {
 			return $this->array[0];
 		}
+		
+		public function last() {
+		  return $this->array[count($this->array) - 1];
+		}
 
 		public function to_xml($options = array()) {
 			$klass = $this->array[0]->class_name();

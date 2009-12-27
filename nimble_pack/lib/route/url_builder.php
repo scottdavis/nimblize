@@ -78,7 +78,7 @@
 			$action = array_shift($args);
 			$params = $args;
 	    $cache = Cache::get_cache();
-      $cache_key = 'url_for-' . md5(serialize($args));
+      $cache_key = 'url_for-' . $controller . '-' . $action . md5(serialize($args));
       if ($cache->exists($cache_key)) {
         return $cache->get($cache_key);
       }

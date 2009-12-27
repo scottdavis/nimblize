@@ -56,9 +56,22 @@
 		* Function to create a link
 		* @param string $name Link Name
 		* @param string $url Url for the link
-	**/
-  function link_to($name, $url) {
-    return TagHelper::content_tag('a', $name, array('href' => $url));
+	  **/
+  function link_to($name, $url, $options = array()) {
+    $options = array_merge($options, array('href' => $url));
+    return TagHelper::content_tag('a', $name, $options);
+  }
+  
+	/**
+		* Function to create link to the previous page
+		* @param string $text Link Name
+	  **/  
+  function link_to_back($text = 'Back') {
+    $href = 'javascript:history.go(-1)';
+    if(isset($_SERVER['HTTP_REFERER'])) {
+      $href = $_SERVER['HTTP_REFERER'];
+    }
+    return TagHelper::content_tag('a', $text, array('href' => $href));
   }
 
 	/**
@@ -67,9 +80,9 @@
 	 * @param string $url Url for link
 	 * @param boolean $confirm Adds a javascript confirm box to the link
 	**/
-	function delete_link($name, $url, $confirm = true) {
+	function delete_link($name, $url, $confirm = true, $confirm_text = 'Are you sure?') {
 		if($confirm) {
-			$confirmtxt = 'confirm(\'Are you sure?\')';
+			$confirmtxt = "confirm('$confirm_text')";
 		}else{
 			$confirmtxt = 'true';
 		}
