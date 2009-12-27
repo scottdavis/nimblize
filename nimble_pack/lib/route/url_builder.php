@@ -77,11 +77,17 @@
 			$controller = array_shift($args);
 			$action = array_shift($args);
 			$params = $args;
-	  
+	    $cache = Cache::get_cache();
+      $cache_key = 'url_for-' . md5(serialize($args));
+      if ($cache->exists($cache_key)) {
+        return $cache->get($cache_key);
+      }
           $klass = Nimble::getInstance();
           foreach($klass->routes as $route) {
               if(strtolower($route->controller) == strtolower($controller) && strtolower($route->method) == strtolower($action)) {
-                  return self::build_url($route, $params);
+                  $result = self::build_url($route, $params);
+                  $cache->set($cache_key, $result); 
+                  return $result;
               }
           }
           throw new NimbleException('Invalid Controller / Method Pair');
