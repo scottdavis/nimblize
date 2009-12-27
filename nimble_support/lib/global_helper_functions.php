@@ -145,6 +145,19 @@
 	    return (is_array($array) && 0 !== count(array_diff_key($array, array_keys(array_keys($array)))));
 	}
 	
+	function escape_javascript($javascript) {
+  	$escape = array("\r\n"  => '\n',
+          					"\r"    => '\n',
+          					"\n"    => '\n',
+          					'"'     => '\"',
+          					"'"     => "\\'"
+      							);
+      return str_replace(array_keys($escape), array_values($escape), $javascript);
+  }
+	
+	function javascript_tag($js) {
+		return TagHelper::content_tag('script', $js, array('type' => 'text/javascript'));
+	}
 	
 	
 ?>

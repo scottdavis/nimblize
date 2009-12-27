@@ -308,8 +308,7 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 		foreach($partials as $partial) {
 			$base[] = basename($partial);
 		}
-		$base = array_flip($partial);
-		$this->assertTrue(isset($base[$name]), "No partial matching $name was found");
+		$this->assertTrue(array_include($name, $base), "No partial matching $name was found");
 	}
 	
 	public function assertResponse($code) {
