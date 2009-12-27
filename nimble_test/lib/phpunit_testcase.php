@@ -16,7 +16,8 @@ while (!empty($path_parts)) {
   if (file_exists($path)) {
     define("NIMBLE_IS_TESTING", true);
     define("NIMBLE_TEST", true);
-    require_once($path); break;    
+    require_once($path); break;
+    session_destroy();    
   } else {
     array_pop($path_parts);
   } 

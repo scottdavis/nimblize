@@ -9,8 +9,7 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 	var $controller;
 	var $controller_name;
 	
-	public function __construct() {
-	  NimbleRecord::start_transaction();	
+	public function __construct() {	
 		global $_SESSION, $_POST, $_GET;
 		$_SESSION = $_POST = $_GET = array();
 		parent::__construct();
@@ -19,8 +18,13 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 		$this->controller = new $this->controller_name;
 	}
 	
+	public function run(PHPUnit_Framework_TestResult $result = NULL) {
+    NimbleRecord::start_transaction();
+    parent::run($result);
+    NimbleRecord::rollback_transaction();	
+  }
+	
 	public function __destruct() {
-  	NimbleRecord::rollback_transaction();
 		unset($this->conroller);
 		$this->controller = new $this->controller_name;
 	}

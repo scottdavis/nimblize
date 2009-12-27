@@ -11,17 +11,11 @@ abstract class NimbleUnitTestCase extends PHPUnit_Framework_TestCase {
   private $_cached_xml = array();
   private $_redirects = array();
   
-  
-  public function __construct() {
-    parent::__construct();
+  public function run(PHPUnit_Framework_TestResult $result = NULL) {
     NimbleRecord::start_transaction();
+    parent::run($result);
+    NimbleRecord::rollback_transaction();	
   }
-  
-  public function __destruct() {
-  	NimbleRecord::rollback_transaction();	
-  }
-  
-  
   
   /**
    * Assert that an XPath query matches a node in a particular way.
