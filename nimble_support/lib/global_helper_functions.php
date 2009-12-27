@@ -30,14 +30,11 @@
 	* @param array|iterator $array
 	* @uses collect(function($value){return $value+1}, range(1,5));
 	*/
-	function collect($func, $array, $extra_args = array()) {
+	function collect($func, $array) {
 		$out = array();
 		foreach($array as $value) {
 			$options = array($value);
-			if(!empty($extra_args)) {
-				$options = array_merge($options, $extra_args);
-			}
-			array_push($out, call_user_func_array($func, $options));
+			$out[] = $func($value);
 		}
 		unset($func);
 		return $out;

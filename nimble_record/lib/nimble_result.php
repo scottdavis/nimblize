@@ -1,6 +1,6 @@
 <?php
 
-	class NimbleResult implements Countable, Iterator {
+	class NimbleResult implements ArrayAccess, Countable, Iterator {
 	 	private $array = array();
 
 		public function __construct($array, $options = array())
@@ -117,6 +117,19 @@
 		public function length() {
 			return $this->length;
 		}
+		
+		public function offsetSet($offset, $value) {
+        $this->array[$offset] = $value;
+    }
+    public function offsetExists($offset) {
+        return isset($this->array[$offset]);
+    }
+    public function offsetUnset($offset) {
+        unset($this->array[$offset]);
+    }
+    public function offsetGet($offset) {
+        return isset($this->array[$offset]) ? $this->array[$offset] : null;
+    }
 
 		
 	}

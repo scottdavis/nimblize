@@ -28,6 +28,12 @@
 				$this->assertTrue((int) $user->my_int >= 2 || (int) $user->my_int <= 6);
 			}
 		}
+		/**
+		  * @expectedException NimbleRecordNotFound
+		  */
+		public function findFailsBadInput() {
+		  $users = User::find('foo');
+		}
 		
 		public function findAllTestfromFind() {
 			$users = User::find('all');

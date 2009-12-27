@@ -183,7 +183,8 @@
 			$finder_class = static::class_as_string($name);
 			$_class = static::class_as_string($class);
 			$assoc_class = call_user_func(array($source_class, 'find_all'), array('select' => $source_class::$primary_key_field, 'conditions' => array($fk => $class->row[$_class::$primary_key_field])));
-			$ids = collect(function($a, $id_col){return $a->row[$id_col];}, $assoc_class, array($source_class::$primary_key_field));
+			$id_col = $source_class::$primary_key_field; 
+			$ids = collect(function($a)use($id_col){return $a->row[$id_col];}, $assoc_class);
 			$_source_class = new $source_class;
 			$_source_class->row[$source_class::$primary_key_field] = ' IN(' . implode(',', $ids) . ')';
 			return call_user_func_array(array('self', '_' . $type), array($_source_class, $name, $options));
