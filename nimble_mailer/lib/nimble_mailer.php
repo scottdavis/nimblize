@@ -167,12 +167,9 @@
 		private function create_headers() {
 				$date = date(DATE_RFC822, $this->time);
 				$headers  = '';
-				$headers  = "MIME-Version: 1.0\r\n";
 				$headers .= "From: " . $this->from . "\n";
 				$headers .= "Content-Type: multipart/alternative; boundary=\"" . $this->_divider . "\"; charset=ISO-8859-1\n" .
 										"Content-Transfer-Encoding: binary\n" . 
-										"X-Mailer: Thunderbird 2.0.0.22 (Macintosh/20090605)\n" .
-										"User-Agent: 	Thunderbird 2.0.0.22 (Macintosh/20090605)\n" .
 										"Date: $date";
 
 				if(isset($this->headers) && !empty($this->headers)) $headers .= $this->headers;
