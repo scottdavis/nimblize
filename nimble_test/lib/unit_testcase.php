@@ -11,7 +11,7 @@ abstract class NimbleUnitTestCase extends PHPUnit_Framework_TestCase {
   private $_cached_xml = array();
   private $_redirects = array();
   
-  public function run(PHPUnit_Framework_TestResult $result = NULL) {
+ 	public function run(PHPUnit_Framework_TestResult $result = NULL) {
     NimbleRecord::start_transaction();
     parent::run($result);
     NimbleRecord::rollback_transaction();	
