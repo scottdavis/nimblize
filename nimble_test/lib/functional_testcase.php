@@ -25,7 +25,7 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
   }
 	
 	public function __destruct() {
-		unset($this->conroller);
+		unset($this->controller);
 		$this->controller = new $this->controller_name;
 	}
 	
