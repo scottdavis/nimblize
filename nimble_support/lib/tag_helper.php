@@ -89,7 +89,7 @@
 				 										$pagination_options['param_name'] . '={page}', 
 														$url);		
 			}else{
-				if(strpos('?', $url) ===false) {
+				if(strpos('?', $url) === false) {
 					$url = $url . '?page={page}';
 				}else{
 					$url = $url . '&page={page}';

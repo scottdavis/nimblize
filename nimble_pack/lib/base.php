@@ -311,15 +311,13 @@ class Nimble
 		$title = $klass->page_title;
 
 		if(isset($klass->config['site_title'])) {
-			$title = $klass->config['site_title'] .  $klass->config['title_seperator'] . $title;
+			if(empty($title)) {
+				$title = $klass->config['site_title'];
+			}else{
+				$title = $klass->config['site_title'] .  $klass->config['title_seperator'] . $title;
+			}
 		}
-
-
-		if(isset($klass->page_title)){
-			return $title;
-		}else{
-			return '';
-		}
+		return $title;
 	}
 
 	/**
