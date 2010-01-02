@@ -89,7 +89,11 @@
 				 										$pagination_options['param_name'] . '={page}', 
 														$url);		
 			}else{
-				$url = $url . '?page={page}';
+				if(strpos('?', $url) === false) {
+					$url = $url . '?page={page}';
+				}else{
+					$url = $url . '&page={page}';
+				}
 			}
 			//Build List
 			$out = array();
