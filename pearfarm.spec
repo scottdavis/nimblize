@@ -4,8 +4,7 @@ $path = __DIR__;
 $reg_path = str_replace('/', '\/', $path);
 $reg = '/^(' . implode('|', $exclude) .')/';
 $reg = str_replace('.', '\.', $reg);
-var_dump($reg);
-$spec = PackageSpec::create(array(PackageSpec::OPT_BASEDIR => dirname(__FILE__)))
+$spec = Pearfarm_PackageSpec::create(array(Pearfarm_PackageSpec::OPT_BASEDIR => dirname(__FILE__)))
             ->setName('nimblize')
             ->setChannel('pear.nimblize.com')
             ->setSummary('Nimblize php framework')
@@ -14,7 +13,7 @@ $spec = PackageSpec::create(array(PackageSpec::OPT_BASEDIR => dirname(__FILE__))
             ->setReleaseStability('alpha')
             ->setApiVersion('0.0.1')
             ->setApiStability('alpha')
-            ->setLicense(PackageSpec::LICENSE_MIT)
+            ->setLicense(Pearfarm_PackageSpec::LICENSE_MIT)
             ->setNotes('Initial release.')
             ->addMaintainer('lead', 'Scott Davis', 'jetviper21', 'jetviper21@gmail.com')
             ->addGitFiles()
