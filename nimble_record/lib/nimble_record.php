@@ -1186,25 +1186,12 @@ class NimbleRecord {
 	public function associations() {}
 	//@codeCoverageIgnoreEnd
 
-	public function to_xml($include_head = true, $options = array()) {
-		$xw = new xmlWriter();
-		$xw->openMemory();
-
-		if ($include_head){
-			$xw->startDocument('1.0','UTF-8');
-			$xw->startElement(strtolower(static::class_name()));
-		}
-		foreach($this->row as $key => $value) {
-		$xw->writeElement($key, $value);
-		}	
-		if ($include_head){
-			$xw->endElement(); 
-		}
-		return $xw->outputMemory(true);
+	public function to_xml($options = array()) {
+		return NimbleSerializer::XML($this, $options);
 	}
 	
 	public function to_json($options = array()) {
-		return json_encode($this->row);
+		return NimbleSerializer::JSON($this, $options);
 	}
 	
 	/**

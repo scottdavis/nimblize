@@ -52,8 +52,7 @@ class SmartTable {
 			$i++;
 		}
 		$remainder = count($this->collection) % $this->cols;
-		$remainder = $this->cols - $remainder;
-		for($i=0;$i<$remainder;$i++) {
+		for($i=0;$i<$remainder -1;$i++) {
 			$this->content .= "<td class='empty'>&nbsp;</td>";
 		}
 		$this->content .= "</tr>";

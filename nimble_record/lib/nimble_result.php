@@ -46,31 +46,11 @@
 		}
 
 		public function to_xml($options = array()) {
-			$klass = $this->array[0]->class_name();
-			$plural = Inflector::pluralize($klass);
-			$xw = new xmlWriter();
-			$xw->openMemory();
-			$xw->startDocument('1.0','UTF-8');
-			$xw->startElement(strtolower($plural)); 
-				foreach($this->array as $value) {
-					$xw->startElement(strtolower($klass));
-					$xw->writeRaw($value->to_xml(false));
-					$xw->endElement();
-				}
-			$xw->endElement(); 
-			$xw->endDtd();
-			return $xw->outputMemory(true);
+			return NimbleSerializer::XML($this, $options);
 		}
 		
 		public function to_json($options = array()) {
-			$out = array();
-			
-			foreach($this->array as $obj) {
-				$out[] = $obj->row;
-			}
-			
-			$json = json_encode($out);
-			return $json;
+			return NimbleSerializer::JSON($this, $options);
 		}
 		
 	

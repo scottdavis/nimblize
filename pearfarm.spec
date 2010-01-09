@@ -6,7 +6,7 @@ $reg = '/^(' . implode('|', $exclude) .')/';
 $reg = str_replace('.', '\.', $reg);
 $spec = Pearfarm_PackageSpec::create(array(Pearfarm_PackageSpec::OPT_BASEDIR => dirname(__FILE__)))
             ->setName('nimblize')
-            ->setChannel('pear.nimblize.com')
+            ->setChannel('jetviper21.pearfarm.org')
             ->setSummary('Nimblize php framework')
             ->setDescription('Php Framework and ORM')
             ->setReleaseVersion('0.0.1')
@@ -16,6 +16,7 @@ $spec = Pearfarm_PackageSpec::create(array(Pearfarm_PackageSpec::OPT_BASEDIR => 
             ->setLicense(Pearfarm_PackageSpec::LICENSE_MIT)
             ->setNotes('Initial release.')
             ->addMaintainer('lead', 'Scott Davis', 'jetviper21', 'jetviper21@gmail.com')
+            ->addMaintainer('lead', 'John Bintz', 'johnbintz', 'john@coswellproductions.com')
             ->addGitFiles()
             ->addExecutable('nimble_scripts/nimblize')
 						->addExecutable('nimble_scripts/nimblize.bat')
