@@ -555,12 +555,12 @@ class NimbleRecord {
 		if(is_array($array)) {
 			foreach(array_keys($array) as $key) {
 				if(is_null($array[$key]) || $array[$key] == null) {
-					$array[$key] = 'NULL';
+					$array[$key] = NULL;
 				}
 			}
 		}else{
 			if(is_null($array) || $array == null) {
-				$array = 'NULL';
+				$array = NULL;
 			}else{
 				$v = $array;
 				$array = "'{$v}'";
