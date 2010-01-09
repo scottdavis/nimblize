@@ -1,10 +1,5 @@
 <?php
 
-
-
-
-
-
 class NimbleSerializer {
 	const XML = 'XML';
 	const JSON = 'JSON';
@@ -13,17 +8,17 @@ class NimbleSerializer {
 	var $single = false;
 	var $type = NULL;
 	/**
-	* This Class handles all record serializations
-	* @param mixed $collecton - takes a NimbleResult or a NimbleRecord
-	* @param string $type - XML | JSON
-	* @param array $options 
-	* Allowed Options
-	*	<ol>
-	*  <li>only</li>
-	*  <li>except</li>
-	*  <li>lamda - closure that </li>
-	* </ol>
-	*/
+		* This Class handles all record serializations
+		* @param mixed $collecton - takes a NimbleResult or a NimbleRecord
+		* @param string $type - XML | JSON
+		* @param array $options 
+		* Allowed Options
+		*	<ol>
+		*  <li>only</li>
+		*  <li>except</li>
+		*  <li>lamda - closure that </li>
+		* </ol>
+		*/
 	public function __construct($collection, $type = self::XML, $options = array()) {
 		$this->options = array_merge($this->options, $options);
 		$this->collection = $collection;
@@ -33,7 +28,10 @@ class NimbleSerializer {
 		}
 	}
 	
-	
+	/**
+		* Serializes an NimbleResult Collection to XML
+		* @return string XML
+		*/
 	public function build_collection_xml() {
 		$x = new xmlWriter();
 		$x->openMemory();
@@ -55,7 +53,10 @@ class NimbleSerializer {
 		return $xml;
 	}
 	
-	
+	/**
+		* Serializes an NimbleResult Collection to JSON
+		* @return string JSON
+		*/
 	public function build_collection_json() {
 		if($this->single) {
 			$out = $this->build_record_json($this->collection);
@@ -67,7 +68,11 @@ class NimbleSerializer {
 		}
 		return json_encode($out);
 	}
-	
+	/**
+		* Serializes an NimbleRecord to XML
+		* @param NimbleRecord $obj
+		* @return string XML
+		*/
 	public function build_record_xml($obj) {
 		$xw = new xmlWriter();
 		$xw->openMemory();
@@ -83,7 +88,11 @@ class NimbleSerializer {
 		unset($xw);
 		return $xml;
 	}
-	
+	/**
+		* Serializes an NimbleRecord to JSON
+		* @param NimbleRecord $obj
+		* @return string JSON
+		*/
 	public function build_record_json($obj) {
 		$keys = $this->prepair_keys(array_keys($obj->row));
 		$out = array();
@@ -96,7 +105,11 @@ class NimbleSerializer {
 		}
 		return $out;
 	}
-	
+	/**
+		* Handles the only and except options
+		* @param array $keys - keys from a nimble record
+		* @return array - keys to use
+		*/
 	public function prepair_keys(array $keys) {
 		if(!is_null($this->options['except'])) {
 			$keys = array_diff($keys, $this->options['except']);
@@ -107,7 +120,10 @@ class NimbleSerializer {
 		return $keys;
 	}
 	
-	
+	/**
+		* Processes the serialization based on $this->type
+		* @return string
+		*/
 	public function serialize() {
 		switch($this->type) {
 			case self::XML:
@@ -123,7 +139,10 @@ class NimbleSerializer {
 	}
 	
 	
-	
+	/**
+		* Enables serialization to act as a static method call for nice clear one liners
+		* @return string
+		*/
 	public static function __callStatic($method, $args) {
 		if(count($args) < 1) {
 			throw new Exception("invaid arguments");
