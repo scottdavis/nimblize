@@ -1,4 +1,5 @@
 <?php
+	require_once(__DIR__ . '/lib/nimble_record_command_interface.php');
 	require_once(__DIR__ . '/lib/nimble_logger.php');
 	require_once(__DIR__ . '/lib/nimble_record.php');
 	require_once(__DIR__ . '/lib/nimble_record_exception.php');

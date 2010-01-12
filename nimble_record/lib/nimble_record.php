@@ -975,7 +975,7 @@ class NimbleRecord {
 		if(strtolower($method) == 'count') {
 			$klass = get_called_class();
 			if(count($args) == 0) {
-					return call_user_func_array(array('NimbleMath', 'do_math'), array($method, get_class($this), $klass::table_name()));
+					return call_user_func_array(array('NimbleMath', 'do_method'), array($method, get_class($this), $klass::table_name()));
 			}else{
 				if(!NimbleAssociation::exists(self::class_name(), 'has_many', $args[0])) {
 					throw new NimbleRecordException('Association does not exsist');
@@ -990,7 +990,7 @@ class NimbleRecord {
 					}
 					$conditions = array_merge($conditions, $args[1]);
 				}
-					return call_user_func_array(array('NimbleMath', 'do_math'), array($method, get_class($this), static::table_name($class), $conditions));
+					return call_user_func_array(array('NimbleMath', 'do_method'), array($method, get_class($this), static::table_name($class), $conditions));
 			}
 		}
 
@@ -1015,7 +1015,7 @@ class NimbleRecord {
 				}
 				$conditions = array_merge($conditions, $args[2]);
 			}
-			return call_user_func_array(array('NimbleMath', 'do_math'), array($method, $class, $class::table_name(), $conditions));
+			return call_user_func_array(array('NimbleMath', 'do_method'), array($method, $class, $class::table_name(), $conditions));
 		}
 		
 		if(array_include($method, static::columns())) {
@@ -1053,7 +1053,7 @@ class NimbleRecord {
 		$klass = get_called_class();
 		$args[0] = isset($args[0]) ? $args[0] : array();
 		if(array_include($method, NimbleMath::$methods)) {
-			return call_user_func_array(array('NimbleMath', 'do_math'), array($method, $klass, self::table_name($klass), $args[0]));
+			return call_user_func_array(array('NimbleMath', 'do_method'), array($method, $klass, self::table_name($klass), $args[0]));
 		}
 		if(preg_match('/^find_by_([a-z0-9_]+)$/', $method, $matches)) {
 			$where = static::build_where_for_magic_find($matches, $args);

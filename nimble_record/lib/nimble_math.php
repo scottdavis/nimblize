@@ -1,9 +1,9 @@
 <?php
 
-class NimbleMath {
+class NimbleMath implements NimbleRecordCommandInterface {
 	public static $methods = 	array('max', 'sum', 'min', 'avg', 'count');
 	
-	public static function do_math($method, $class, $table, array $options = array()) {
+	public static function do_method($method, $class, $table, $options = array()) {
 		if(!array_include($method, static::$methods)) {
 			throw new NimbleException("$method is not a math method");
 		}	
