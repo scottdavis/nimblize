@@ -997,7 +997,7 @@ class NimbleRecord {
 		/**
 		* See static::$math_method_map for included methods
 		*/
-		if(array_include($method, NimbleMath::$methods)) {
+		if(array_include($method, NimbleMath::methods())) {
 			$klass = get_called_class();
 			if(empty($args) || count($args) < 2) {
 				throw new NimbleRecordException('You need to pass an association name and column');
@@ -1052,7 +1052,7 @@ class NimbleRecord {
 		$matches = array();
 		$klass = get_called_class();
 		$args[0] = isset($args[0]) ? $args[0] : array();
-		if(array_include($method, NimbleMath::$methods)) {
+		if(array_include($method, NimbleMath::methods())) {
 			return call_user_func_array(array('NimbleMath', 'do_method'), array($method, $klass, self::table_name($klass), $args[0]));
 		}
 		if(preg_match('/^find_by_([a-z0-9_]+)$/', $method, $matches)) {

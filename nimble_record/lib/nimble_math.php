@@ -3,6 +3,11 @@
 class NimbleMath implements NimbleRecordCommandInterface {
 	public static $methods = 	array('max', 'sum', 'min', 'avg', 'count');
 	
+	public static function methods() {
+		return static::$methods;
+	}
+	
+	
 	public static function do_method($method, $class, $table, $options = array()) {
 		if(!array_include($method, static::$methods)) {
 			throw new NimbleException("$method is not a math method");
