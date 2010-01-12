@@ -105,7 +105,7 @@ require_once(dirname(__FILE__) . '/config.php');
 		public function testSingleToJson() {
 			$u = User::find('first');
 			$out = NimbleSerializer::JSON($u, array('except' => array('updated_at', 'created_at')));
-			$this->assertEquals('{"id":"1","name":"names1","last_name":"NULL","address":"NULL","my_int":"1"}', $out);
+			$this->assertEquals('{"id":"1","name":"names1","last_name":"","address":"","my_int":"1"}', $out);
 		}
 		
 		
@@ -119,20 +119,20 @@ require_once(dirname(__FILE__) . '/config.php');
 		public function testOptionsExceptXml() {
 			$u = User::find('first');
 			$this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
-<user><id>1</id><name>names1</name><last_name>NULL</last_name><address>NULL</address><my_int>1</my_int></user>', NimbleSerializer::XML($u, array('except' => array('updated_at', 'created_at'))));
+<user><id>1</id><name>names1</name><last_name></last_name><address></address><my_int>1</my_int></user>', NimbleSerializer::XML($u, array('except' => array('updated_at', 'created_at'))));
 		}
 		
 		public function testCollectionToXML() {
 			$users = User::find_all();
 			$class = new NimbleSerializer($users, NimbleSerializer::XML, array('except' => array('updated_at', 'created_at')));
 			$this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
-<users><user><id>1</id><name>names1</name><last_name>NULL</last_name><address>NULL</address><my_int>1</my_int></user><user><id>2</id><name>names2</name><last_name>NULL</last_name><address>NULL</address><my_int>2</my_int></user><user><id>3</id><name>names3</name><last_name>NULL</last_name><address>NULL</address><my_int>3</my_int></user><user><id>4</id><name>names4</name><last_name>NULL</last_name><address>NULL</address><my_int>4</my_int></user><user><id>5</id><name>names5</name><last_name>NULL</last_name><address>NULL</address><my_int>5</my_int></user><user><id>6</id><name>names6</name><last_name>NULL</last_name><address>NULL</address><my_int>6</my_int></user><user><id>7</id><name>names7</name><last_name>NULL</last_name><address>NULL</address><my_int>7</my_int></user><user><id>8</id><name>names8</name><last_name>NULL</last_name><address>NULL</address><my_int>8</my_int></user><user><id>9</id><name>names9</name><last_name>NULL</last_name><address>NULL</address><my_int>9</my_int></user><user><id>10</id><name>names10</name><last_name>NULL</last_name><address>NULL</address><my_int>10</my_int></user></users>', $class->serialize());
+<users><user><id>1</id><name>names1</name><last_name></last_name><address></address><my_int>1</my_int></user><user><id>2</id><name>names2</name><last_name></last_name><address></address><my_int>2</my_int></user><user><id>3</id><name>names3</name><last_name></last_name><address></address><my_int>3</my_int></user><user><id>4</id><name>names4</name><last_name></last_name><address></address><my_int>4</my_int></user><user><id>5</id><name>names5</name><last_name></last_name><address></address><my_int>5</my_int></user><user><id>6</id><name>names6</name><last_name></last_name><address></address><my_int>6</my_int></user><user><id>7</id><name>names7</name><last_name></last_name><address></address><my_int>7</my_int></user><user><id>8</id><name>names8</name><last_name></last_name><address></address><my_int>8</my_int></user><user><id>9</id><name>names9</name><last_name></last_name><address></address><my_int>9</my_int></user><user><id>10</id><name>names10</name><last_name></last_name><address></address><my_int>10</my_int></user></users>', $class->serialize());
 		}
 		
 		public function testCollectionWithCallStaticXML() {
 			$users = User::find_all();
 			$this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
-<users><user><id>1</id><name>names1</name><last_name>NULL</last_name><address>NULL</address><my_int>1</my_int></user><user><id>2</id><name>names2</name><last_name>NULL</last_name><address>NULL</address><my_int>2</my_int></user><user><id>3</id><name>names3</name><last_name>NULL</last_name><address>NULL</address><my_int>3</my_int></user><user><id>4</id><name>names4</name><last_name>NULL</last_name><address>NULL</address><my_int>4</my_int></user><user><id>5</id><name>names5</name><last_name>NULL</last_name><address>NULL</address><my_int>5</my_int></user><user><id>6</id><name>names6</name><last_name>NULL</last_name><address>NULL</address><my_int>6</my_int></user><user><id>7</id><name>names7</name><last_name>NULL</last_name><address>NULL</address><my_int>7</my_int></user><user><id>8</id><name>names8</name><last_name>NULL</last_name><address>NULL</address><my_int>8</my_int></user><user><id>9</id><name>names9</name><last_name>NULL</last_name><address>NULL</address><my_int>9</my_int></user><user><id>10</id><name>names10</name><last_name>NULL</last_name><address>NULL</address><my_int>10</my_int></user></users>', NimbleSerializer::XML($users, array('except' => array('updated_at', 'created_at'))));
+<users><user><id>1</id><name>names1</name><last_name></last_name><address></address><my_int>1</my_int></user><user><id>2</id><name>names2</name><last_name></last_name><address></address><my_int>2</my_int></user><user><id>3</id><name>names3</name><last_name></last_name><address></address><my_int>3</my_int></user><user><id>4</id><name>names4</name><last_name></last_name><address></address><my_int>4</my_int></user><user><id>5</id><name>names5</name><last_name></last_name><address></address><my_int>5</my_int></user><user><id>6</id><name>names6</name><last_name></last_name><address></address><my_int>6</my_int></user><user><id>7</id><name>names7</name><last_name></last_name><address></address><my_int>7</my_int></user><user><id>8</id><name>names8</name><last_name></last_name><address></address><my_int>8</my_int></user><user><id>9</id><name>names9</name><last_name></last_name><address></address><my_int>9</my_int></user><user><id>10</id><name>names10</name><last_name></last_name><address></address><my_int>10</my_int></user></users>', NimbleSerializer::XML($users, array('except' => array('updated_at', 'created_at'))));
 		}
 		
 		

@@ -109,6 +109,7 @@ class Controller {
      * @param string $file The view file to render, relative to the base of the application.
      */
     public function render($file) {
+			NimbleLogger::log("RENDERING: $file");
 			if($this->has_rendered){
 				throw new NimbleException('Double Render Error: Your may only render once per action');
 			}
@@ -130,6 +131,7 @@ class Controller {
      */
     public function render_partial($file)
     {
+				NimbleLogger::log("RENDERING PARTIAL: $file");
 				$this->rendered_partials[] = $file;
         return $this->open_template(FileUtils::join(Nimble::getInstance()->config['view_path'], $file));
     }

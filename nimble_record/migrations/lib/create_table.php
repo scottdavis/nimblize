@@ -88,6 +88,14 @@
 			$this->add_column($column_name, 'integer', $options);
 		}
 		/**
+		* Adds an decimal column to the table object
+		* @param string $column_name
+		* @param array $options precision and scale are defaulted to 5,3
+		*/
+		public function decimal($column_name, $options = array('precision' => 5, 'scale' => 3)) {
+			$this->add_column($column_name, 'decimal', $options);
+		}
+		/**
 		* Adds a boolean object to the table object
 		* @param string $column_name
 		* @param array $options

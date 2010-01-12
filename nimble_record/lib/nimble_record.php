@@ -79,8 +79,7 @@ class NimbleRecord {
 	protected static $temp = array();
 	/** Method Maps */
 	protected static $magic_method_map = array('delete' => '_delete');
-	protected static $math_method_map = array('max' => '_max', 'sum' => '_sum', 'min' => '_min');
-	
+
 	var $update_mode = false;
 	var $saved;
 	var $errors;
@@ -89,87 +88,13 @@ class NimbleRecord {
 	var $row = array();
 	var $associations = array();
 
-	/**
-	* @param $options array('column' => 'name', 'conditions' => array('id' => 1))  
-	*/
-	private static function check_args_for_math_functions(array $options){
-		//verify options contains a column value
-		if(!is_array($options) || !isset($options['column'])){
-			throw new NimbleRecordException('InvalidArguments - please include a column ex. array(\'column\' => \'id\')');
-		}
-	}
-	/**
-	* Method count
-	* @uses Class::count(array('column' => 'name', 'conditions' => array('id' => 1)))
-	* @param $options Array
-	*/
-	private static function _count(array $options = array()) {
-		$defaults = array('column' => '*', 'conditions' => NULL, 'cache' => true);
-		$options = array_merge($defaults, $options);
-		static::check_args_for_math_functions($options);
-		$query = new NimbleQuery();
-		$query->select = 'count(' . $options['column'] . ') AS count_all';
-		$query->from = self::table_name();
-		if(isset($options['conditions'])) {
-			$query->where = self::build_conditions($options['conditions']);
-		}
-		$sql = $query->build();
-		return self::execute_query($sql, false, $options['cache'])->count_all;
-	}
-	/**
-	* Method sum
-	* use Class::sum(array('column' => 'name', 'conditions' => array('id' => 1)))
-	* @param $options Array
-	*/
-	private static function _sum(array $options = array('column' => NULL, 'conditions' => NULL)) {
-		static::check_args_for_math_functions($options);
-		$query = new NimbleQuery();
-		$query->from = self::table_name();
-		$query->select = 'sum(' . self::table_name() . '.' . $options['column'] . ') as sum_all'; 
-		if(isset($options['conditions'])) {
-			$query->where = self::build_conditions($options['conditions']);
-		}
-		$sql = $query->build();
-		return self::execute_query($sql, false)->sum_all;
-	}
-	/**
-	* Method max
-	* @uses Class::max(array('column' => 'name', 'conditions' => array('id' => 1)))
-	* @param $options Array
-	*/
-	private static function _max(array $options = array('column' => NULL, 'conditions' => NULL)) {
-		static::check_args_for_math_functions($options);
-		$query = new NimbleQuery();
-		$query->from = self::table_name();
-		$query->select = 'max(' . self::table_name() . '.' . $options['column'] . ') as max_all'; 
-		if(isset($options['conditions'])) {
-			$query->where = self::build_conditions($options['conditions']);
-		}
-		$sql = $query->build();
-		return self::execute_query($sql, false)->max_all;
-	}
-	/**
-	* Method min
-	* @uses Class::min(array('column' => 'name', 'conditions' => array('id' => 1)))
-	* @param $options Array
-	*/
-	private static function _min(array $options = array('column' => NULL, 'conditions' => NULL)) {
-		static::check_args_for_math_functions($options);
-		$query = new NimbleQuery();
-		$query->from = self::table_name();
-		$query->select = 'min(' . self::table_name() . '.' . $options['column'] . ') as min_all'; 
-		if(isset($options['conditions'])) {
-			$query->where = self::build_conditions($options['conditions']);
-		}
-		$sql = $query->build();
-		return self::execute_query($sql, false)->min_all;
-	}
+
 	/**
 	* Method build_conditions
 	* use self::build_conditions(array('name' => 'bob')) or self::build_conditions('id = 3')
 	* @param $conditions Array || String
 	*/
-	private static function build_conditions($conditions) {
+	public static function build_conditions($conditions) {
 			$sql = '';
 			if(is_array($conditions)){
 				$sql .= ' ' . self::build_where_from_array($conditions);
@@ -689,11 +614,10 @@ class NimbleRecord {
 	public static function execute_query($sql, $all = true, $cache = true){
 		//fetch query cache if it exsists
 		if ($cache && static::is_query_cached($sql)) {
-			array_push(static::$query_log, "CACHED: $sql");
+			NimbleLogger::log(CommandLineColor::underline_red('CACHED:') . $sql);
 			return static::fetch_query_data_from_cache($sql);
 		}else{
 			//execute query and set cache pointer
-			array_push(static::$query_log, $sql);
 			$result = static::execute($sql);
 			
 			$key = '';
@@ -754,9 +678,7 @@ class NimbleRecord {
 		if(static::test_mode()){
 			echo $sql . "\n\n";
 		}
-		if(static::$debug) {
-			array_push(self::$query_log, $sql);
-		}
+		NimbleLogger::log($sql);
 		return static::$adapter->query($sql);
 	}
 	
@@ -1053,7 +975,7 @@ class NimbleRecord {
 		if(strtolower($method) == 'count') {
 			$klass = get_called_class();
 			if(count($args) == 0) {
-				return call_user_func_array(array($klass, '_count'), array());
+					return call_user_func_array(array('NimbleMath', 'do_math'), array($method, get_class($this), $klass::table_name()));
 			}else{
 				if(!NimbleAssociation::exists(self::class_name(), 'has_many', $args[0])) {
 					throw new NimbleRecordException('Association does not exsist');
@@ -1068,13 +990,14 @@ class NimbleRecord {
 					}
 					$conditions = array_merge($conditions, $args[1]);
 				}
-				return call_user_func_array(array($class, '_count'), array($conditions));
+					return call_user_func_array(array('NimbleMath', 'do_math'), array($method, get_class($this), static::table_name($class), $conditions));
 			}
 		}
+
 		/**
 		* See static::$math_method_map for included methods
 		*/
-		if(isset(static::$math_method_map[$method])) {
+		if(array_include($method, NimbleMath::$methods)) {
 			$klass = get_called_class();
 			if(empty($args) || count($args) < 2) {
 				throw new NimbleRecordException('You need to pass an association name and column');
@@ -1092,18 +1015,7 @@ class NimbleRecord {
 				}
 				$conditions = array_merge($conditions, $args[2]);
 			}
-			return call_user_func_array(array($class, static::$math_method_map[$method]), array($conditions));
-		}
-		
-		/**
-		* See static::$magic_method_map for included methods
-		*/
-		if(isset(static::$magic_method_map[$method])) {
-			$klass = get_called_class();
-			if(empty($args)) {
-				$args = array($this->id);
-			}
-			call_user_func_array(array($klass, static::$magic_method_map[$method]), $args);
+			return call_user_func_array(array('NimbleMath', 'do_math'), array($method, $class, $class::table_name(), $conditions));
 		}
 		
 		if(array_include($method, static::columns())) {
@@ -1139,14 +1051,9 @@ class NimbleRecord {
 	public static function __callStatic($method, $args) {
 		$matches = array();
 		$klass = get_called_class();
-		if(strtolower($method) == 'count') {
-			return call_user_func_array(array($klass, '_count'), $args);
-		}
-		if(isset(static::$magic_method_map[$method])) {
-			return call_user_func_array(array($klass, static::$magic_method_map[$method]), $args);
-		}
-		if(isset(static::$math_method_map[$method])) {
-			return call_user_func_array(array($klass, static::$math_method_map[$method]), $args);
+		$args[0] = isset($args[0]) ? $args[0] : array();
+		if(array_include($method, NimbleMath::$methods)) {
+			return call_user_func_array(array('NimbleMath', 'do_math'), array($method, $klass, self::table_name($klass), $args[0]));
 		}
 		if(preg_match('/^find_by_([a-z0-9_]+)$/', $method, $matches)) {
 			$where = static::build_where_for_magic_find($matches, $args);

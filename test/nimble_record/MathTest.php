@@ -15,13 +15,6 @@ require_once(dirname(__FILE__) . '/config.php');
 		public function tearDown() {
 			NimbleRecord::rollback_transaction();
 		}
-		
- 		/**
-		* @expectedException NimbleRecordException
-		*/
-		public function testMathFunctionFailsBadArgs() {
-			User::max();
-		}
 
 		public function testMax() {
 		  $this->assertEquals(10, User::max(array('column' => 'id')));
@@ -42,7 +35,7 @@ require_once(dirname(__FILE__) . '/config.php');
 		public function testSumWithArrayOfConditions() {
 			$this->assertEquals(1, User::sum(array('column' => 'id', 'conditions' => array('id' => 1))));
 		}
- 
+
 		public function testSumWithConditions() {
 			$this->assertEquals(10, User::sum(array('column' => 'id', 'conditions' => 'id between 1 and 4')));
 		}

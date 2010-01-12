@@ -82,9 +82,9 @@ require_once(dirname(__FILE__) . '/abstract_adapter.php');
 					case 'decimal':
 						if(!empty($precision)) {
 							if(!empty($scale)) {
-								$columns_type_sql .= '(' . $precision . ',' . $scale . ')';
+								$column_type_sql .= '(' . $precision . ',' . $scale . ')';
 							}else{
-								$columns_type_sql .= '(' . $precision . ')';
+								$column_type_sql .= '(' . $precision . ')';
 							}
 						}else{
 							//@todo: throw new Exception("Error adding decimal column: precision cannot be empty if scale if specified");
