@@ -1,7 +1,12 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{REQUEST_URI} !^$ [OR]
+    RewriteCond %{REQUEST_URI} ^/config/boot\.php$ [OR]
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^(.*)$ ./config/boot.php?__url=$1 [QSA,L]
+    
+	 # Uncomment to Secure your database settings change /public/robots.txt to what ever you want to display instead
+   # RewriteCond  %{REQUEST_URI} (\/task|\.json|[^boot\.php]\.php)$
+   # RewriteRule ^(.*)$ ./public/robots.txt [L]
 </IfModule>
