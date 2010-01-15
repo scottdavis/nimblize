@@ -50,7 +50,7 @@
 					if($part === 'JOIN') {
 						$this->out[] = $this->{$var};
 					}else{
-						$this->out[] = implode(" ", array(Inflector::humanize($part), $this->{$var}));	
+						$this->out[] = implode(" ", array($part, $this->{$var}));	
 					}
 				}
 			}
@@ -66,7 +66,7 @@
 						$values = "('" . implode("', '", $this->{$var}) . "')";
 						$this->out[] = implode(" ", array($cols, $part, $values));	
 					}else{
-						$this->out[] = implode(" ", array(Inflector::humanize($part), $this->{$var}));	
+						$this->out[] = implode(" ", array($part, $this->{$var}));	
 					}
 				}
 			}
@@ -90,7 +90,7 @@
 						$this->out[] = implode(", ", $out);
 					}
 					if(!empty($this->{$var})) {{
-							$this->out[] = implode(" ", array(Inflector::humanize($part), $this->{$var}));	
+							$this->out[] = implode(" ", array($part, $this->{$var}));	
 					}
 				}
 			}
@@ -102,7 +102,7 @@
 			foreach(static::$map[self::DELETE] as $part) {
 				$var = Inflector::underscore(strtolower($part));
 				if(!empty($this->{$var})) {
-						$this->out[] = implode(" ", array(Inflector::humanize($part), $this->{$var}));	
+						$this->out[] = implode(" ", array($part, $this->{$var}));	
 				}
 			}
 		}
@@ -113,7 +113,7 @@
 			foreach(static::$map[self::TRUNCATE] as $part) {
 				$var = Inflector::underscore(strtolower($part));
 				if(!empty($this->{$var})) {
-						$this->out[] = implode(" ", array(Inflector::humanize($part), $this->{$var}));	
+						$this->out[] = implode(" ", array($part, $this->{$var}));	
 				}
 			}
 		}
