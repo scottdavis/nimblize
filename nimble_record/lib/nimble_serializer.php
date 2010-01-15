@@ -16,7 +16,7 @@ class NimbleSerializer {
 		*	<ol>
 		*  <li>only</li>
 		*  <li>except</li>
-		*  <li>lamda - closure that </li>
+		*  <li>lamda - closure</li>
 		* </ol>
 		*/
 	public function __construct($collection, $type = self::XML, $options = array()) {

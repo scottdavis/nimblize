@@ -164,7 +164,7 @@ class NimbleRecord {
 		$args = func_get_args();
 		switch(count($args)) {
 			case 1:
-				$clean = self::sanatize_input_array($args[0]);
+				$clean = static::sanatize_input_array($args[0]);
 		    if(is_array($args[0])) {
 		      $query->where = NimbleQuery::in(static::$primary_key_field, $clean);
 		    }else{
@@ -968,6 +968,11 @@ class NimbleRecord {
 			return $this->set_assoc($method, $args);
 		}
 		
+		if(isset(static::$magic_method_map[$method])) {
+			$method = static::$magic_method_map[$method];
+			return call_user_func(array(get_class($this), $method), $this->id);
+		}
+		
 		/** 
 		* count magic 
 		* Its special
@@ -1045,14 +1050,21 @@ class NimbleRecord {
 					$this->process_error_return($return);
 				}
 			}
-		}	
+			return;
+		}
+		throw new NimbleRecordException('Method: ' . $method .' does not exist on record!');	
 	}
 	
 	public static function __callStatic($method, $args) {
 		$matches = array();
 		$klass = get_called_class();
-		$args[0] = isset($args[0]) ? $args[0] : array();
+		if(isset(static::$magic_method_map[$method])) {
+			$method = static::$magic_method_map[$method];
+			return call_user_func(array($klass, $method), $args[0]);
+		}
+		
 		if(array_include($method, NimbleMath::methods())) {
+			$args[0] = isset($args[0]) ? $args[0] : array();
 			return call_user_func_array(array('NimbleMath', 'do_method'), array($method, $klass, self::table_name($klass), $args[0]));
 		}
 		if(preg_match('/^find_by_([a-z0-9_]+)$/', $method, $matches)) {
@@ -1063,6 +1075,7 @@ class NimbleRecord {
 			$where = static::build_where_for_magic_find($matches, $args);
 			return call_user_func_array(array($klass, 'find'), array('all', array('conditions' => $where)));
 		}
+		throw new NimbleRecordException('Static Method: ' . $method .' does not exist on record!');
 	}
 
 

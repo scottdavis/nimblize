@@ -87,7 +87,7 @@
 		
 		public function testNullOnNewObjectColumnCall() {
 			$user = new User();
-			$this->assertEquals(NULL, $user->name());
+			$this->assertEquals(NULL, $user->name);
 		}
 		/**
 		* @expectedException NimbleRecordException
