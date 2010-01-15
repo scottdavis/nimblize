@@ -115,10 +115,7 @@ class NimbleRecord {
 		$input['page'] = is_null($input['page']) ? 1 : $input['page'];
 		$input['conditions'] = isset($input['conditions']) ? $input['conditions'] : array();
 		$count_conditions = array();
-		if(isset($input['conditions']) && !empty($input['conditions'])) {
-			$count_conditions = array('conditions' => $input['conditions']);
-		}
-		$total_count = self::count($count_conditions);
+		$total_count = self::count($input);
 		unset($count_conditions);
 		$per_page = $input['per_page'];
 		$page = $input['page'];
