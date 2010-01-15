@@ -21,6 +21,9 @@ class NimbleMath implements NimbleRecordCommandInterface {
 		if(isset($options['joins']) && !empty($options['joins'])) {
 			$query->join = $options['joins'];
 		}
+		if(isset($options['group']) && !empty($options['group'])) {
+			$query->group_by = $options['group'];
+		}
 		if(isset($options['conditions']) && !empty($options['conditions'])) {
 			$query->where = NimbleRecord::build_conditions($options['conditions']);
 		}

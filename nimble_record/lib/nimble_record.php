@@ -219,6 +219,9 @@ class NimbleRecord {
 			if(isset($options['select'])) {
 				$query->select = $options['select'];
 			}
+			if(isset($options['group'])) {
+				$query->group_by = $options['group'];
+			}
 			if(isset($options['joins'])) {
 				$query->join = $options['joins'];
 			}
