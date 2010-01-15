@@ -703,7 +703,7 @@ class NimbleRecord {
 		$class = static::class_name();
 		$object_list = array();
 		while($result_set = $result_set_array->fetch_assoc()) {
-		  array_push($object_list, self::to_object($class, $result_set));
+		  $object_list[] = self::to_object($class, $result_set);
 		}
 		return new NimbleResult($object_list, array('key' => $key));
 	}

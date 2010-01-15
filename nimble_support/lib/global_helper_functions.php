@@ -58,7 +58,7 @@
 		* @param string $url Url for the link
 	  **/
   function link_to($name, $url, $options = array()) {
-    $options = array_merge($options, array('href' => $url));
+    $options = array_merge($options, array('href' => $url, 'title' => $name));
     return TagHelper::content_tag('a', $name, $options);
   }
   
@@ -71,7 +71,7 @@
     if(isset($_SERVER['HTTP_REFERER'])) {
       $href = $_SERVER['HTTP_REFERER'];
     }
-    return TagHelper::content_tag('a', $text, array('href' => $href));
+    return TagHelper::content_tag('a', $text, array('href' => $href, 'title' => 'back'));
   }
 
 	/**
