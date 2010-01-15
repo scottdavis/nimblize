@@ -12,16 +12,16 @@ class NimbleMath implements NimbleRecordCommandInterface {
 		if(!array_include($method, static::$methods)) {
 			throw new NimbleException("$method is not a math method");
 		}	
-		$defaults = array('column' => 'id', 'cache' => true);
+		$defaults = array('column' => 'id', 'cache' => true, 'conditions' => NULL);
 		$options = array_merge($defaults, $options);
 		static::check_args_for_math_functions($options);
 		$query = new NimbleQuery();
 		$query->select = $method . '(' . $table .'.'. $options['column'] . ') AS ' . $method;
 		$query->from = $table;
-		if(isset($options['joins'])) {
+		if(isset($options['joins']) && !empty($options['joins'])) {
 			$query->join = $options['joins'];
 		}
-		if(isset($options['conditions'])) {
+		if(isset($options['conditions']) && !empty($options['conditions'])) {
 			$query->where = NimbleRecord::build_conditions($options['conditions']);
 		}
 		$sql = $query->build();
