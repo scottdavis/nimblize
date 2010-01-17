@@ -14,7 +14,9 @@ Options are the same as finders except that 'per_page' and 'page' must me set
 	
 ##Helpers
 
-	$users = User::paginate(array('per_page' => 5, 'page' => 1, 'conditions' => array('zipcode' => 12345)))
+In the controller
+
+	$this->collection = User::paginate(array('per_page' => <per_page>, 'page' => <page_to_show>, 'conditions' => array('zipcode' => 12345)))
 	
 In the view	
 
