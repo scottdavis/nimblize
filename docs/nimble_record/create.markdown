@@ -21,7 +21,7 @@ Example:
     }
     $this->salt = static::generate_salt();
     $this->password = static::hash_password($this->password, $this->salt);
-  }
+	}
 
 	public function after_create() {
 		UserMailer::deliver_new_user($this->email, $this);
@@ -30,7 +30,7 @@ Example:
 		chmod($path, 0755);
 	}
 
-## _Create
+##_create
 
 Normaly a create doesn't throw an exception if it fails instead the $obj->saved flag is set to false
 with _create it thows an exception
