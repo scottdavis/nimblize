@@ -36,14 +36,14 @@ or
 Example:
 
 	public function before_save() {
-    if(!$this->new_record) {
-      $old = User::_find($this->id);
-      if($this->password == $old->password) {
-        return;
-      }
-    }
-    $this->salt = static::generate_salt();
-    $this->password = static::hash_password($this->password, $this->salt);
+		if(!$this->new_record) {
+		 	$old = User::_find($this->id);
+		 	if($this->password == $old->password) {
+		   	return;
+		 	}
+		}
+		$this->salt = static::generate_salt();
+		$this->password = static::hash_password($this->password, $this->salt);
 	}
 
 	public function after_create() {
