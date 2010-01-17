@@ -68,7 +68,7 @@
 			}
 		}
 		
-		public static function pagination($collection, $class_name = '', $options = array()) {
+		public static function pagination($collection, $options = array()) {
 			$pagination_options = array(
 			      'class'          => 'pagination',
 			      'previous_label' => '&laquo; Previous',
