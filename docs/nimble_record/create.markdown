@@ -17,6 +17,14 @@ or, _ throws an exception if validations failed or saved failed
 		//handle errors
 	}
 
+or
+	
+	try {
+		User::_create(array('name' => 'bob', 'password' => 'foo'));
+		//do something
+	}catch(NimbleRecordException $e) {
+		//handel errors
+	}
 	
 ##Callbacks
 
