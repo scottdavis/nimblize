@@ -33,8 +33,8 @@ or
 
 1. before_update
 2. after_update
-3. before_save - runs after before_create
-4. after_save - runs after after_create
+3. before_save - runs after before_update
+4. after_save - runs after after_update
 
 Example:
 
