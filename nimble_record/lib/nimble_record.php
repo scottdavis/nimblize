@@ -79,7 +79,8 @@ class NimbleRecord {
 	protected static $temp = array();
 	/** Method Maps */
 	protected static $magic_method_map = array('delete' => '_delete');
-
+	public static $interfaces = array('NimbleMath', 'NimblePagination');
+  protected static $interface_map = array();
 	var $update_mode = false;
 	var $saved;
 	var $errors;
@@ -102,39 +103,6 @@ class NimbleRecord {
 				$sql .= ' ' . $conditions;
 			}
 			return $sql;
-	}
-	
-	/**
-	* Paginated Finder
-	* @uses User::paginate(array('conditions' => 'foo = bar', 'page' => $_GET['page], 'per_page' => 25))
-	*/
-	
-	public static function paginate(array $input) {
-		$defaults = array('per_page' => 25, 'page' => 1);
-		$input = array_merge($defaults, $input);
-		$input['page'] = is_null($input['page']) ? 1 : $input['page'];
-		$input['conditions'] = isset($input['conditions']) ? $input['conditions'] : array();
-		$count_conditions = array();
-		$total_count = self::count($input);
-		unset($count_conditions);
-		$per_page = $input['per_page'];
-		$page = $input['page'];
-		unset($input['per_page']);
-		unset($input['page']);
-		$limit = (int) $per_page * ((int) $page - 1);
-		$limit = ($limit > 0) ? $limit : 0;
-		$limit = implode(',', array($limit, (int) $per_page));
-		$args[0] = 'all';
-		$args[1] = $input;
-		$args[1]['limit'] = $limit;
-		unset($limit);
-		unset($input);
-		$return = static::build_find_sql($args);
-		$return = self::execute_query($return[0], $return[1]);
-		$return->total_count = $total_count;
-		$return->per_page = $per_page;
-		$return->page = $page;
-		return $return;
 	}
 	
 	/**
@@ -186,7 +154,7 @@ class NimbleRecord {
 	}
 	
 	
-	private static function build_find_sql($input) {
+	public static function build_find_sql($input) {
 		$query = new NimbleQuery();
 		$query->from = self::table_name();
 		$options = is_array(end($input)) ? array_pop($input) : NULL;
@@ -1002,7 +970,8 @@ class NimbleRecord {
 		/**
 		* See static::$math_method_map for included methods
 		*/
-		if(array_include($method, NimbleMath::methods())) {
+		if(isset(static::$interface_map[$method])) {
+		  $_class = static::$interface_map[$method];
 			$klass = get_called_class();
 			if(empty($args) || count($args) < 2) {
 				throw new NimbleRecordException('You need to pass an association name and column');
@@ -1020,7 +989,7 @@ class NimbleRecord {
 				}
 				$conditions = array_merge($conditions, $args[2]);
 			}
-			return call_user_func_array(array('NimbleMath', 'do_method'), array($method, $class, $class::table_name(), $conditions));
+			return call_user_func_array(array($_class, 'do_method'), array($method, $class, $class::table_name(), $conditions));
 		}
 		
 		if(array_include($method, static::columns())) {
@@ -1063,9 +1032,10 @@ class NimbleRecord {
 			return call_user_func(array($klass, $method), $args[0]);
 		}
 		
-		if(array_include($method, NimbleMath::methods())) {
+		if(isset(static::$interface_map[$method])) {
+		  $_class = static::$interface_map[$method];
 			$args[0] = isset($args[0]) ? $args[0] : array();
-			return call_user_func_array(array('NimbleMath', 'do_method'), array($method, $klass, self::table_name($klass), $args[0]));
+			return call_user_func_array(array($_class, 'do_method'), array($method, $klass, self::table_name($klass), $args[0]));
 		}
 		if(preg_match('/^find_by_([a-z0-9_]+)$/', $method, $matches)) {
 			$where = static::build_where_for_magic_find($matches, $args);
@@ -1132,8 +1102,35 @@ class NimbleRecord {
 		}
 		$class = Inflector::classify($file);
 		$klass = new $class($db_settings);
+		static::load_interfaces();
 		static::$adapter = $klass;
 	}
+	
+	public static function load_interfaces($dir = '') {
+	  $dirs = array(__DIR__ . '/interfaces');
+	  if(!empty($dir)) {
+	    $dirs[] = $dir;
+	  }
+	  foreach($dirs as $dir) {
+	    if ($dh = opendir($dir)) {
+  			while (($file = readdir($dh)) !== false) {
+  		    	if(strpos($file, '.php') !== false) {
+              require_once(FileUtils::join($dir,$file));
+              $class = Inflector::classify(substr(basename($file), 0, -4));
+              $methods = call_user_func(array($class, 'methods'));
+              $out = array();
+              foreach($methods as $method) {
+                $out[$method] = $class;
+              }
+              static::$interface_map = array_merge(static::$interface_map, $out);
+  					}
+  		  }
+  		 	closedir($dh);
+  		}
+  		
+	  }
+	}
+	
 	
 	private static function get_available_adapters() {
 		$_adapters = array();
