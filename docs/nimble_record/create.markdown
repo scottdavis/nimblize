@@ -1,4 +1,7 @@
 #Create
+
+	Model::create(<params>)
+
 ##Creating a record
 
 	User::create(array('name' => 'bob', 'password' => 'foo'))
