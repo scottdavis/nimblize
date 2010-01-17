@@ -1,7 +1,22 @@
 #Create
 ##Creating a record
 
-	User::create(array('name' => 'bob', 'password' => 'passowrd'))
+	User::create(array('name' => 'bob', 'password' => 'foo'))
+	
+or, _ throws an exception if validations failed or saved failed
+
+	User::_create(array('name' => 'bob', 'password' => 'foo'))
+
+
+##Detecting if a record saved
+
+	$user = User::create(array('name' => 'bob', 'password' => 'foo'));
+	if($user->saved) {
+		//do something
+	}else{
+		//handle errors
+	}
+
 	
 ##Callbacks
 
@@ -29,8 +44,3 @@ Example:
 		FileUtils::mkdir_p($path);
 		chmod($path, 0755);
 	}
-
-##_create
-
-Normaly a create doesn't throw an exception if it fails instead the $obj->saved flag is set to false
-with _create it thows an exception
