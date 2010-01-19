@@ -13,7 +13,7 @@
 			$string = 'This is from the test';
 			$foo = MailerTestModel::create_foo($string);
 			$this->assertEquals($foo->from, 'sdavis@stsci.edu');
-			$this->assertEquals($foo->recipiants, array('sdavis@stsci.edu'));
+			$this->assertEquals($foo->recipients, array('sdavis@stsci.edu'));
 			$this->assertEquals($foo->subject, 'WHOA');
 			$this->assertTrue(isset($foo->_prepaired_message) && !empty($foo->_prepaired_message));
 			$this->assertIncludes($string, $foo->_prepaired_message);
@@ -29,7 +29,7 @@
 			$this->assertIncludes($string, $bar->_prepaired_message);
 			$this->assertIncludes('BAR TEMPLATE', $bar->_prepaired_message);
 			$this->assertEquals($bar->from, 'sdavis@stsci.edu');
-			$this->assertEquals($bar->recipiants, array('sdavis@stsci.edu'));
+			$this->assertEquals($bar->recipients, array('sdavis@stsci.edu'));
 			$this->assertEquals($bar->subject, 'WHOA2');
 			
 		}

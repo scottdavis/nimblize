@@ -18,10 +18,10 @@
 		var $view_path = '';
 		var $nimble = NULL;
 		//settings
-		var $recipiants = array();
+		var $recipients = array();
 		var $from = '';
 		var $subject = '';
-		var $recipiant = '';
+		var $recipient = '';
 		//optional settings
 		var $time = '';
 		var $headers = '';
@@ -33,7 +33,7 @@
 		
 		/**
 			* This class has 3 required variables that need to be set
-			* $from (string), $subject (string), $recipiant | $recipiants (string || array)
+			* $from (string), $subject (string), $recipient | $recipients (string || array)
 			* Options Variables
 			* $time (time), $headers (string)
 			*/
@@ -104,11 +104,11 @@
 			*/
 		private function load_method($method, $args) {
 			call_user_func_array(array($this, $method), $args);
-			if(!empty($this->recipiant)) {
-				$this->recipiants = array($this->recipiant);
+			if(!empty($this->recipient)) {
+				$this->recipients = array($this->recipient);
 			}
-			if(!is_array($this->recipiants) && is_string($this->recipiants)) {
-				$this->recipiants = array($this->recipiants);
+			if(!is_array($this->recipients) && is_string($this->recipients)) {
+				$this->recipients = array($this->recipients);
 			}
 		}
 		/**
@@ -215,7 +215,7 @@
 			*/
 		private function send_mail() {
 			if(static::$send_mail) {
-				foreach($this->recipiants as $to) {
+				foreach($this->recipients as $to) {
 					mail($to, $this->subject, $this->_prepaired_message, $this->create_headers());
 				}
 			}
