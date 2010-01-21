@@ -146,7 +146,7 @@ class Route
 				//	admin\MainController
 				//  admin\foo\MainController
 				$controller = Inflector::classify($controller_prefix);
-				$url_prefix = strtolower(str_replace(ucwords($controller_word), '', str_replace('\\', '/', static::parse_namespace($controller_prefix))));
+				$url_prefix = '/' . strtolower(str_replace(ucwords($controller_word), '', str_replace('\\', '/', static::parse_namespace($controller_prefix))));
 				$method = str_replace('/', '_', trim($url_prefix, '/'));
 				$a = explode('/', $url_prefix);
 				$end = array_pop($a);
