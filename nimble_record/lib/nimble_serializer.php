@@ -87,6 +87,11 @@ class NimbleSerializer {
 			}
 			$out[$key] = $value;
 		}
+		if(!is_null($this->options['methods']) && is_array($this->options['methods'])) {
+		  foreach($this->options['methods'] as $key => $value) {
+		    $out[$key] = call_user_func(array($obj, $value));
+		  }
+		}
 		if(!is_null($this->options['append'])) {
 		  foreach($this->options['append'] as $key => $value) {
 		    if(is_callable($value)) {
