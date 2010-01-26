@@ -333,7 +333,12 @@ class NimbleAssociationBuilder {
   const BELONGS_TO = 'belongs_to';
   const HAS_AND_BELONGS_TO_MANY = 'has_and_belongs_to_many';
   const HAS_ONE = 'has_one';
-  static $options = array(self::HAS_MANY => array('through', 'foreign_key', 'class_name', 'conditions', 'order', 'include', 'as', 'dependent'), self::BELONGS_TO => array('class_name', 'conditions', 'foreign_key', 'include', 'polymorphic'), self::HAS_AND_BELONGS_TO_MANY => array('class_name', 'join_table', 'foreign_key', 'association_foreign_key', 'conditions', 'order'), self::HAS_ONE => array('class_name', 'conditions', 'foreign_key', 'include', 'as', 'through'));
+  static $options = array(
+                          self::HAS_MANY => array('through', 'foreign_key', 'class_name', 'conditions', 'order', 'include', 'as', 'dependent'), 
+                          self::BELONGS_TO => array('class_name', 'conditions', 'foreign_key', 'include', 'polymorphic'), 
+                          self::HAS_AND_BELONGS_TO_MANY => array('class_name', 'join_table', 'foreign_key', 
+                                                                 'association_foreign_key', 'conditions', 'order'), 
+                          self::HAS_ONE => array('class_name', 'conditions', 'foreign_key', 'include', 'as', 'through'));
   public function __construct($class, $type, $arg) {
     if (!array_include($type, NimbleAssociation::$types)) {
       throw new NimbleRecordException('Invalid Association Type: ' . $type);
