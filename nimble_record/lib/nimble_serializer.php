@@ -74,7 +74,7 @@ class NimbleSerializer {
 	
 	
 	/**
-	 * This Function does all the heavy lifting and sets up the data structure for the serialzation
+	 * This Function does all the heavy lifting and sets up the data structure for the serialization
 	 * @param NimbleRecord $obj
 	 */
 	private function prep_for_serialization($obj) {
@@ -95,6 +95,7 @@ class NimbleSerializer {
 		    $out[$key] = $value;
 		  }
 		}
+		ksort($out);
 		return $out;
 	}
 	
