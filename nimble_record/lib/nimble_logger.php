@@ -1,4 +1,7 @@
 <?php
+/**
+  * @package NimbleRecord
+  */
 class NimbleLogger {
   public static $enabled = false;
   public static $instance = NULL;

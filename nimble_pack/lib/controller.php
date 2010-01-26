@@ -3,7 +3,7 @@
 
 	/**
  	* Controller handles user interaction with the site.
-	* @package nimble_pack
+	* @package NimblePack
 	*/
 class Controller {
 		var $nimble;

@@ -1,5 +1,8 @@
 <?php
 require_once (dirname(__FILE__) . '/abstract_adapter.php');
+/**
+ * @package NimbleRecord
+ */
 class MysqlAdapter extends AbstractAdapter {
   public static $NATIVE_DATABASE_TYPES = array('primary_key' => array('name' => NULL, 'sql' => "int(11) DEFAULT NULL auto_increment PRIMARY KEY"), 'string' => array('name' => "varchar", 'limit' => 255), 'text' => array('name' => "text"), 'integer' => array('name' => "int", 'limit' => 11), 'float' => array('name' => "decimal"), 'decimal' => array('name' => "decimal"), 'datetime' => array('name' => "datetime"), 'timestamp' => array('name' => "datetime"), 'time' => array('name' => "time"), 'date' => array('name' => "date"), 'binary' => array('name' => "blob"), 'boolean' => array('name' => "tinyint", 'limit' => 1));
   public function connect($db_settings_name = array()) {

@@ -3,7 +3,7 @@
 	require_once($dir . '/../exception.php');
   /**
   * UrlBuilder constructs a usable URL from a Route pattern.
-	* @package Route
+	* @package NimblePack
   */
   class UrlBuilder {
 

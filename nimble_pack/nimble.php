@@ -1,4 +1,7 @@
 <?php
+/**
+ * @package NimblePack
+ */
 /*
 The MIT License
 

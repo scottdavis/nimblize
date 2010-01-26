@@ -1,4 +1,7 @@
 <?php
+/**
+  * @package NimbleRecord
+  */
 class NimbleQuery {
   const SELECT = 'SELECT';
   const INSERT = 'INSERT';

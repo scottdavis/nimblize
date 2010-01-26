@@ -1,6 +1,6 @@
 <?php
 /**
- * @package nimble_record
+ * @package NimbleRecord
  * @method sum
  * @method max
  * @method min

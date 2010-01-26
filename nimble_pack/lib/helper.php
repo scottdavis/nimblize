@@ -3,7 +3,7 @@
 /**
  * Quickly define a new route.
  * A new Route can be defined in two ways:
- *
+ *  @package NimblePack
  * either by passing all of the route parameters as parameters to R():
  *   R('','TestController','index','GET');
  *

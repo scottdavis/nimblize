@@ -1,4 +1,7 @@
 <?php
+/**
+  * @package NimbleRecord
+  */
 class NimbleResult implements ArrayAccess, Countable, Iterator {
   private $array = array();
   public function __construct($array, $options = array()) {

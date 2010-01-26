@@ -1,4 +1,7 @@
 <?php
+/**
+  * @package NimbleRecord
+  */
 class NimbleFinder implements NimbleRecordCommandInterface {
   public static $methods = array('find', 'find_all');
   public static function methods() {

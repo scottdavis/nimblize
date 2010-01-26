@@ -1,4 +1,7 @@
 <?php
+/**
+  * @package NimbleRecord
+  */
 class NimbleSerializer {
   const XML = 'XML';
   const JSON = 'JSON';

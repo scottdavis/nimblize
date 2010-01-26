@@ -1,5 +1,8 @@
 <?php
 require_once (dirname(__FILE__) . '/abstract_adapter.php');
+/**
+ * @package NimbleRecord
+ */
 class Sqlite3Adapter extends AbstractAdapter {
   public function connect($options) {
     if (empty($options)) {

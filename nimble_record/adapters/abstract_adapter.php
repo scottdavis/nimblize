@@ -1,6 +1,8 @@
 <?php
 require_once (dirname(__FILE__) . '/../base.php');
-
+/**
+ * @package NimbleRecord
+ */
 abstract class AbstractAdapter {
   protected $open_transactions = 0;
   protected $logger = NULL;

@@ -1,4 +1,7 @@
 <?php
+/**
+  * @package NimbleRecord
+  */
 class NimbleMath implements NimbleRecordCommandInterface {
   public static $methods = array('max', 'sum', 'min', 'avg', 'count');
   public static function methods() {

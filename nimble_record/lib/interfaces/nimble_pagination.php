@@ -1,4 +1,7 @@
 <?php
+/**
+ * @package NimbleRecord
+ */
 class NimblePagination implements NimbleRecordCommandInterface {
   public static $methods = array('paginate');
   public static function methods() {

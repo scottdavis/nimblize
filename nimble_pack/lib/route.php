@@ -2,7 +2,7 @@
 
 	/**
  	* Rotes control how HTTP requests are handled by the application.
-	* @package Nimble
+	* @package NimblePack
  	*/
 class Route
 {

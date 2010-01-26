@@ -2,6 +2,7 @@
 /**
  * This class handles all the validations for models
  * each validation is called with a magic method
+ * @package NimbleRecord
  */
 class NimbleValidation {
   public static function _methods() {

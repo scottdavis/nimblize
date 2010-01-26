@@ -1,7 +1,7 @@
 <?php
 	
 	require_once(dirname(__FILE__) . '/form_helper/form.php');
-	
+	require_once(dirname(__FILE__) . '/form_helper/remote.php');
 
 	function error_messages_for($class) {
 		if(empty($class->errors)) {

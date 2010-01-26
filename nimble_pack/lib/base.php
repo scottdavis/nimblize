@@ -10,7 +10,7 @@ require_once(dirname(__FILE__) . '/route/url_builder.php');
 /**
  * Nimble is the base class in the application.
  * This class provides methods to add & call routes, parse URLs, and load plugins.
- * @package Nimble
+ * @package NimblePack
  */
 class Nimble
 {
