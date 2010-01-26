@@ -3,7 +3,7 @@
 
 /**
 * Form Builder class to assist in building forms from objects
-* @package Support
+* @package NimbleSupport
 * @uses <?= $form = new Form(array('method' => 'POST', 'path' => url_for('MyController', 'create'), 'object' => new Task)); ?>
 * @uses <?= $form->text_field('title') ?>
 */

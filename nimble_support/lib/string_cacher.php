@@ -1,6 +1,6 @@
 <?php
 	/**
-	* @package Support
+	* @package NimbleSupport
 	* Cacheing for single requests
 	* @todo add apc and xcache cache calls if apc is enabled
 	*/

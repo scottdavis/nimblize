@@ -2,7 +2,7 @@
 	require_once(dirname(__FILE__) . '/base.php');
 	/**
 	* Asset tag helpers
-	* @package Support
+	* @package NimbleSupport
 	* @todo cacheing and combining
 	*/
 	class AssetTag extends TagHelper {

@@ -1,9 +1,9 @@
 <?php
 	
 	/**
-	*  @package Support
-	*  A Tag helping class
-	*/
+	  *  @package NimbleSupport
+	  *  A Tag helping class
+	  */
 	class TagHelper {
 		private static $BOOLEAN_ATTRS = array('disabled', 'readonly', 'multiple', 'checked'); 
 		/**

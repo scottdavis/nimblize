@@ -1,6 +1,6 @@
 <?php
 	/**
-	* @package Support
+	* @package NimbleSupport
 	*/
 	class FileUtils {
 		

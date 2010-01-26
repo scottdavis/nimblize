@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package NimbleSupport
+ */
 class SmartTable {
 	public function __construct($collection, $cols=2, $tr_class_name='', $table_options = array()) {
 		$this->collection = $collection;

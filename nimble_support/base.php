@@ -1,4 +1,7 @@
 <?php
+/**
+ * @package NimbleSupport
+ */
 	require_once(__DIR__ . '/lib/file_utils.php');
 	require_once(__DIR__ . '/lib/inflector.php');
 	require_once(__DIR__ . '/lib/date_helper.php');

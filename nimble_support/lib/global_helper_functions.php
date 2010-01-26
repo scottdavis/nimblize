@@ -1,7 +1,7 @@
 <?php
 
 	/**
-	* @package support
+	* @package NimbleSupport
 	* This File contains conveniat wrappers for helper functions
 	* For more information on a function see its alias class method
 	*/
@@ -159,5 +159,21 @@
 		return TagHelper::content_tag('script', $js, array('type' => 'text/javascript'));
 	}
 	
+	/**
+  * cycles a value in an iterator
+  * @uses cycle('odd', 'even')
+  */
+  function cycle() {
+  	$args = func_get_args();
+  	$class = Cycler::getInstance();
+  	$key = md5(serialize($args));
+  	if(!$class->cycler_exsits($key)) {
+  		$class->set_cycler($key, $args);
+  		return $class->get_cycler($key);
+  	}else{
+  		return $class->get_cycler($key);
+  	}
+
+  }
 	
 ?>

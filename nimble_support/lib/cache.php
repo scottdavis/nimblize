@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package NimbleSupport
+ */
 require_once(dirname(__FILE__) . '/inflector.php');
 
 class Cache {

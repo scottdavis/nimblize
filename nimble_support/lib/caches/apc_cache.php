@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package NimbleSupport
+ */
 require_once(dirname(__FILE__) . '/cache_interface.php');
 
 class ApcCache implements CacheInterface {

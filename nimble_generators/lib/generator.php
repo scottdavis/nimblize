@@ -5,7 +5,7 @@ require_once(dirname(__FILE__) . '/../../nimble_support/lib/command_line_colors.
 
 /**
  * Class for generating the components of a Nimble skeleton.
- * @package Generators
+ * @package NimbleGenerators
  */
 class Generator {
 	public static $template_path, $script_path, $nimble_root;

@@ -1,6 +1,6 @@
 <?php
 	/**
-	* @package Support
+	* @package NimbleSupport
 	* Loads in all support classes
 	*/
 	$dir = __DIR__;

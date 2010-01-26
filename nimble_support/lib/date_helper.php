@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package NimbleSupport
+ */
 class DateHelper {
 	
 	public static $formats = array(

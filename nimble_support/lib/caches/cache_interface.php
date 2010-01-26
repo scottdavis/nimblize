@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package NimbleSupport
+ */
 interface CacheInterface {
   public static function get_instance();  
   
