@@ -83,5 +83,26 @@ Example:
 
 	$this->header('Content-type: application/json', 200);
 
+###Format
 
+The routing interface provides a nice feature that allows you to append .<extension> to a url this is handy when making xml or json api's
+	
+Example:
+
+	switch($this->format) {
+		case 'xml':
+			/do something for xml
+		break;
+		case 'json':
+		 	//do something for json
+		break;
+		case 'atom':
+			//do something for atom
+		break;
+		case 'rss':
+			//do something for rss
+		break;
+		default:
+			// if no format or format is html 
+		break;
 	
