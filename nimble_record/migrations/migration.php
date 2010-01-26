@@ -43,6 +43,7 @@
 		* Creates a create_table object for creating a table
 		* @param string $table_name
 		* @param array $options
+		* @return CreateTable
 		*/
 		public function create_table($table_name, $options = array()) {
 			return new CreateTable($table_name, $options, $this);
@@ -51,6 +52,7 @@
 		* Creates a alter_table object for altering a table
 		* @param string $table_name
 		* @param array $options
+		* @return AlterTable
 		*/
 		public function alter_table($table_name, $options = array()) {
 			return new AlterTable($table_name, $options, $this);

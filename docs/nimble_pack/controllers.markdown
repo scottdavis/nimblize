@@ -105,4 +105,5 @@ Example:
 		default:
 			// if no format or format is html 
 		break;
+	}
 	
