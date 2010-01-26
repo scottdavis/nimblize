@@ -192,18 +192,11 @@ class Generator {
 			$out = array();
 
 			$out[] = '  /**';
-			$out[] = "   * ${action}";
-			if ($id) {
-				$out[] = "   * @param \$id string The unique identifier for this object.";
-			}
-			$out[] = "   */";
-			if ($id) {
-				$out[] = "  public function {$action}(\$id) {";
-			} else {
-				$out[] = "  public function {$action}() {";
-			}
+			$out[] = "    * ${action}";
+			$out[] = "    */";
+			$out[] = "  public function {$action}() {";
 			$out[] = '';
-			$out[] = '}';
+			$out[] = '  }';
 			$out[] = '';
 
 			return implode("\n", $out);
@@ -257,7 +250,7 @@ class Generator {
 		private static function mailer_method($name) {
 			$out = "\n";
 			$out .= "   public function " . $name . '($to)' . " {\n";
-			$out .= '	  	$this->recipiants = $to;' . "\n";
+			$out .= '	  	$this->recipients = $to;' . "\n";
 			$out .= '	  	$this->from = \'\';' . "\n";
 			$out .= '	  	$this->subject = \'\';' . "\n";
 			$out .= "	  }\n";
