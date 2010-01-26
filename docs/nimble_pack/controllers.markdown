@@ -4,6 +4,10 @@ Controller live in app/controllers
 
 All controllers extend `\ApplicationController`
 
+##Exposing variables to views
+All class variables ex `$this->foo` are copied into a local scope for the rendered view so `$this->foo`
+in the controller becomes `$foo` in the view
+
 ##Before and After Filters
 Before Filters run before the controller method is called
 After Filters run after the controller method is called
