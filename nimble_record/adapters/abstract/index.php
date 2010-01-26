@@ -1,9 +1,5 @@
 <?php
-
-namespace ActivePhp;
-
-	class Index {
-		
-	}
-
+namespaceActivePhp;
+class Index {
+}
 ?>
