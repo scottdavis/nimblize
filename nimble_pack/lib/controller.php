@@ -145,9 +145,7 @@ class Controller {
     {
         ob_start();
         if(file_exists($__name)){
-        	foreach(get_object_vars($this) as $key => $value) {
-          	$$key = $value;
-          }
+          extract(get_object_vars($this));
 					require($__name);
 				}else if(empty($__name)){
 					return;

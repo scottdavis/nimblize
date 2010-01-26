@@ -177,7 +177,11 @@ class Nimble
 					$dir = str_replace('Controller', '', $conf->controller);
 					$dir = str_replace('\\', '/', $dir);
 					$dir = strtolower(Inflector::underscore($dir));
-					$view = FileUtils::join($dir, $conf->method . '.php');
+					$__format = '.php';
+					if($this->klass->format != 'html') {
+					  $__format = '.' . $this->klass->format;
+					}
+					$view = FileUtils::join($dir, $conf->method . $__format);
 					$this->klass->render($view);
 				}
 

@@ -39,7 +39,22 @@
 			$this->Nimble->add_url('', "MyTestController", "test2");	
 			$this->Nimble->dispatch();
 			$this->assertTrue($this->Nimble->klass->has_rendered);
+		}
 		
+		public function testAutoRenderFormatXml() {
+		  $this->Nimble->url = ".xml";
+			$this->Nimble->add_url('', "MyTestController", "test");	
+			$this->Nimble->dispatch();
+			$this->assertTrue(strpos($this->Nimble->klass->template, 'test.xml') !== false);
+			$this->assertTrue($this->Nimble->klass->has_rendered);
+		}
+		
+		public function testAutoRenderFormatJson() {
+		  $this->Nimble->url = ".json";
+			$this->Nimble->add_url('', "MyTestController", "test");	
+			$this->Nimble->dispatch();
+			$this->assertTrue(strpos($this->Nimble->klass->template, 'test.json') !== false);
+			$this->assertTrue($this->Nimble->klass->has_rendered);
 		}
 		
 		/**
