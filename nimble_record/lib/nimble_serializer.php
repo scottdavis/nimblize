@@ -3,7 +3,7 @@
 class NimbleSerializer {
 	const XML = 'XML';
 	const JSON = 'JSON';
-	var $options = array('only' => NULL, 'except' => NULL, 'include' => NULL, 'lamda' => NULL);
+	var $options = array('only' => NULL, 'except' => NULL, 'include' => NULL, 'lamda' => NULL, 'append' => NULL, 'methods' => NULL);
 	var $collection = NULL;
 	var $single = false;
 	var $type = NULL;
@@ -17,6 +17,8 @@ class NimbleSerializer {
 		*  <li>only</li>
 		*  <li>except</li>
 		*  <li>lamda - closure</li>
+		*  <li>append - key, value pair or key, closure pair <code> array('foo' => function($obj) {return $obj->user->bar;}) </code></li>
+		*  <li>methods - calls a method on the database object requires key, value format ex. name => 'get_user_name'
 		* </ol>
 		*/
 	public function __construct($collection, $type = self::XML, $options = array()) {
@@ -68,22 +70,47 @@ class NimbleSerializer {
 		}
 		return json_encode($out);
 	}
+	
+	
+	
+	/**
+	 * This Function does all the heavy lifting and sets up the data structure for the serialzation
+	 * @param NimbleRecord $obj
+	 */
+	private function prep_for_serialization($obj) {
+	  $keys = $this->prepair_keys(array_keys($obj->row));
+		$out = array();
+		foreach($keys as $key) {
+			$value = $obj->row[$key];
+			if(is_callable($this->options['lamda'])) {
+				list($key, $value) = $this->options['lamda']($key, $value);
+			}
+			$out[$key] = $value;
+		}
+		if(!is_null($this->options['append'])) {
+		  foreach($this->options['append'] as $key => $value) {
+		    if(is_callable($value)) {
+		      $value = $value($obj);
+		    }
+		    $out[$key] = $value;
+		  }
+		}
+		return $out;
+	}
+	
+	
 	/**
 		* Serializes an NimbleRecord to XML
 		* @param NimbleRecord $obj
 		* @return string XML
 		*/
 	public function build_record_xml($obj) {
+	  $data = $this->prep_for_serialization($obj);
 		$xw = new xmlWriter();
 		$xw->openMemory();
-		$keys = $this->prepair_keys(array_keys($obj->row));
-		foreach($keys as $key) {
-			$value = $obj->row[$key];
-			if(is_callable($this->options['lamda'])) {
-				list($key, $value) = $this->options['lamda']($key, $value);
-			}
+		foreach($data as $key => $value) {
 			$xw->writeElement($key, $value);
-		}		
+		}
 		$xml = $xw->outputMemory(true);
 		unset($xw);
 		return $xml;
@@ -94,16 +121,7 @@ class NimbleSerializer {
 		* @return string JSON
 		*/
 	public function build_record_json($obj) {
-		$keys = $this->prepair_keys(array_keys($obj->row));
-		$out = array();
-		foreach($keys as $key) {
-			$value = $obj->row[$key];
-			if(is_callable($this->options['lamda'])) {
-				list($key, $value) = $this->options['lamda']($key, $value);
-			}
-			$out[$key] = $value;
-		}
-		return $out;
+    return $this->prep_for_serialization($obj);
 	}
 	/**
 		* Handles the only and except options
