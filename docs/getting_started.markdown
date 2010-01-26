@@ -45,7 +45,7 @@ Migrate
 	
 `script/db migrate <version number>` - migrates to a version
 	
-`script/db migrate up` migrates up to the max version
+`script/db migrate (up|down)` migrates up to the max version
 	
 Stories (test data laoder)
 
