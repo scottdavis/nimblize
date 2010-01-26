@@ -138,21 +138,21 @@ class Controller {
 
     /**
      * Open a view template file, inject the controller's properties into that file, and execute the file, capturing and returning the output.
-     * @param string $name The view file to render, relative to the base of the application.
+     * @param string $__name The view file to render, relative to the base of the application.
      * @return string The rendered view file.
      */
-    private function open_template($name)
+    private function open_template($__name)
     {
         ob_start();
-        if(file_exists($name)){
+        if(file_exists($__name)){
         	foreach(get_object_vars($this) as $key => $value) {
           	$$key = $value;
           }
-					require($name);
-				}else if(empty($name)){
+					require($__name);
+				}else if(empty($__name)){
 					return;
         } else {
-            throw new NimbleException('View ['.$name.'] Not Found');
+            throw new NimbleException('View ['.$__name.'] Not Found');
         }
         return trim(ob_get_clean());
     }
