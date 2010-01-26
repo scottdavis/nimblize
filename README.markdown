@@ -12,7 +12,7 @@ create your application skeleton
 
 	nimblize <your app name>
 
-Also see [Getting started](http://github.com/jetviper21/nimblize/docs/getting_started.markdown)
+Also see [Getting started](http://github.com/jetviper21/nimblize/blob/master/docs/getting_started.markdown)
 
 ###Database settings and enviroments
 
