@@ -130,42 +130,39 @@ class Route
      *
      * @param string $controller_prefix The controller class name's prefix.
      */
-    public static function resources($controller_prefix)
-    {
+    public static function resources($controller_prefix) {
+      // admin\Main
 
-				// admin\Main
-	
-	
-				$controller_word = 'controller';
-				//does it already contain controller
-				if(substr(strtolower($controller_prefix), -1 * strlen($controller_word)) != $controller_word) {
-					$controller_prefix .=  ucwords($controller_word);
-				}
-				
-				//  \MainController
-				//	admin\MainController
-				//  admin\foo\MainController
-				$controller = Inflector::classify($controller_prefix);
-				$url_prefix = '/' . strtolower(str_replace(ucwords($controller_word), '', str_replace('\\', '/', static::parse_namespace($controller_prefix))));
-				$method = str_replace('/', '_', trim($url_prefix, '/'));
-				$a = explode('/', $url_prefix);
-				$end = array_pop($a);
-				$url_prefix = implode('/', $a);
-				$singular = implode('/', array($url_prefix, Inflector::singularize($end)));
-				$plural = implode('/', array($url_prefix, Inflector::pluralize($end))); 				
-        R($singular . '/add')->controller($controller)->action('add')->on('GET')->short_url($method . '_add');
-        R($singular . '/:id/edit')->controller($controller)->action('edit')->on('GET')->short_url($method . '_edit');
-				
-        $actions = array('index' => 'GET', 'create' => 'POST');
-        foreach($actions as $action => $_method) {
-					$_action = empty($method) ? '' : $method . '_' . $action;
-        	R($plural)->controller($controller)->action($action)->on($_method)->short_url($_action);
-        }
-        $actionss = array('update' => 'PUT', 'delete' => 'DELETE', 'show' => 'GET');
-        foreach($actionss as $action => $_method) {
-					$_action = empty($method) ? '' : $method . '_' . $action;
-        	R($singular . '/:id')->controller($controller)->action($action)->on($_method)->short_url($_action);
-        }
+      $controller_word = 'controller';
+      //does it already contain controller
+      if(substr(strtolower($controller_prefix), -1 * strlen($controller_word)) != $controller_word) {
+      	$controller_prefix .=  ucwords($controller_word);
+      }
+
+      //  \MainController
+      //	admin\MainController
+      //  admin\foo\MainController
+      $controller = Inflector::classify($controller_prefix);
+      $url_prefix = strtolower(str_replace(ucwords($controller_word), '', str_replace('\\', '/', static::parse_namespace($controller_prefix))));
+      $method = str_replace('/', '_', trim($url_prefix, '/'));
+      $a = explode('/', $url_prefix);
+      $end = array_pop($a);
+      $url_prefix = implode('/', $a);
+      $singular = implode('/', array($url_prefix, Inflector::singularize($end)));
+      $plural = implode('/', array($url_prefix, Inflector::pluralize($end))); 				
+      R($singular . '/add')->controller($controller)->action('add')->on('GET')->short_url($method . '_add');
+      R($singular . '/:id/edit')->controller($controller)->action('edit')->on('GET')->short_url($method . '_edit');
+
+      $actions = array('index' => 'GET', 'create' => 'POST');
+      foreach($actions as $action => $_method) {
+      	$_action = empty($method) ? '' : $method . '_' . $action;
+      	R($plural)->controller($controller)->action($action)->on($_method)->short_url($_action);
+      }
+      $actionss = array('update' => 'PUT', 'delete' => 'DELETE', 'show' => 'GET');
+      foreach($actionss as $action => $_method) {
+      	$_action = empty($method) ? '' : $method . '_' . $action;
+      	R($singular . '/:id')->controller($controller)->action($action)->on($_method)->short_url($_action);
+      }
 
     }
 }
