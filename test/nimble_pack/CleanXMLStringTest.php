@@ -1,5 +1,5 @@
 <?php
-	require_once(dirname(__FILE__) . '/config.php');
+require_once(dirname(__FILE__) . '/config.php');
 require_once('PHPUnit/Framework.php');
 
 function clean_xml_string($source) {
@@ -15,7 +15,9 @@ function clean_xml_string($source) {
 function callback_replace_non_xml_entities($matches) {
   return (in_array($matches[0], array("&quot;", "&amp;", "&apos;", "&lt;", "&gt;")) ? $matches[0] : "");
 }
-
+/**
+* @package FrameworkTest
+*/
 class CleanXMLStringTest extends PHPUnit_Framework_TestCase {
   function providerTestCleanXMLString() {
     return array(

@@ -1,4 +1,7 @@
 <?php
+/**
+* @package FrameworkTest
+*/
  class Club extends NimbleRecord {
 	
 	

@@ -3,7 +3,9 @@
 		define("NIMBLE_IS_TESTING", true);
 	}
 	require_once(dirname(__FILE__) . '/config.php');
-
+	/**
+  * @package FrameworkTest
+  */
 	class TestMigration extends Migration {
 		public $tables = array("users", "photos", "comments");
 

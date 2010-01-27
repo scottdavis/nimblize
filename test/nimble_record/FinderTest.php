@@ -1,7 +1,9 @@
 <?php
 
 	require_once(dirname(__FILE__) . '/test_config.php');
-
+  /**
+  * @package FrameworkTest
+  */
 	class FinderTest extends PHPUnit_Framework_TestCase {
 		
 		public function setUp() {

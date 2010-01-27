@@ -1,8 +1,10 @@
 <?php
 	/**
 	* This test can only be ran by its self
-	* @package Test
-	*/
+	* 
+  * @package FrameworkTest
+  */
+
 
 
 	require_once(dirname(__FILE__) . '/config.php');

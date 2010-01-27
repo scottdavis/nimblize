@@ -1,5 +1,7 @@
 <?php
-
+/**
+* @package FrameworkTest
+*/
 	class Photo extends NimbleRecord {
 		
 		public static $white_list = array('title', 'user_id');

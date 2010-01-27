@@ -1,6 +1,8 @@
 <?php
 	require_once(dirname(__FILE__) . '/test_config.php');
-
+  /**
+  * @package FrameworkTest
+  */
 	class AssociationsTest extends PHPUnit_Framework_TestCase {
 	
 		public function testBelongsTo() {

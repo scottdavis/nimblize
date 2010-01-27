@@ -2,7 +2,9 @@
 
 require_once('PHPUnit/Framework.php');
 require_once('nimble_support/lib/cache.php');
-
+/**
+* @package FrameworkTest
+*/
 class CacheTest extends PHPUnit_Framework_TestCase {
   function testRegisterCache() {
     $a = (object)array('test' => 'test2');

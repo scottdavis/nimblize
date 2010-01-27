@@ -1,5 +1,7 @@
 <?php
-
+/**
+* @package FrameworkTest
+*/
 class Comment extends NimbleRecord {
 	
 	public function validations() {

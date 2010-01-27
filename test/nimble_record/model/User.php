@@ -1,5 +1,7 @@
 <?php
-
+/**
+* @package FrameworkTest
+*/
 	class User extends NimbleRecord {
 		
 		var $test_before_create = false;

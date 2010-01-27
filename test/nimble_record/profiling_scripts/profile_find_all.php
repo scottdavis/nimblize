@@ -2,9 +2,9 @@
 
 	/**
 	* Run profile_create.php before running this
-	*
+	* @package FrameworkTest
 	*/
-	
+
 	function echo_memory_usage() { 
 	   $mem_usage = memory_get_usage(true); 
 	   if ($mem_usage < 1024) {

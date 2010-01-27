@@ -1,7 +1,9 @@
 <?php
 
 require_once(dirname(__FILE__) . '/config.php');
-
+/**
+* @package FrameworkTest
+*/
 class InflectorTest extends PHPUnit_Framework_TestCase {
   function setUp() {
     Cache::get_cache()->clear(); 

@@ -4,7 +4,6 @@ require_once('PHPUnit/Framework.php');
 require_once(dirname(__FILE__) . '/config.php');
   /**
   * @package FrameworkTest
-	* @todo add conditions checking
   */
   class MathTest extends PHPUnit_Framework_TestCase {
 		

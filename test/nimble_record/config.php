@@ -1,4 +1,7 @@
 <?php
+/**
+* @package FrameworkTest
+*/
 	require_once('PHPUnit/Framework.php');
 	require_once(__DIR__ . '/../../nimblize.php');
 	require_once(__DIR__ . '/../../nimble_record/migrations/migration.php');

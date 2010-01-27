@@ -1,6 +1,8 @@
 <?php
 	require_once(dirname(__FILE__) . '/config.php');
-	
+	/**
+  * @package FrameworkTest
+  */
 	class TableBuilderTest extends PHPUnit_Framework_TestCase {
 		public function testBuildTable() {
 			$users = User::find('all');

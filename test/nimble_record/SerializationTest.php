@@ -1,6 +1,8 @@
 <?php
 require_once(dirname(__FILE__) . '/config.php');
-
+/**
+* @package FrameworkTest
+*/
 	class SerializationTest extends PHPUnit_Framework_TestCase { 
 		
 		public function setUp() {
