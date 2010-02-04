@@ -9,10 +9,10 @@ abstract class NimbleFunctionalTestCase extends PHPUnit_Framework_TestCase {
 	var $controller;
 	var $controller_name;
 	
-	public function __construct() {	
+	public function __construct($name = NULL, array $data = array(), $dataName = '') {     
 		global $_SESSION, $_POST, $_GET;
 		$_SESSION = $_POST = $_GET = array();
-		parent::__construct();
+		parent::__construct($name, $data, $dataName);
 		$class = get_class($this);
 		$this->controller_name = str_replace('Test', '', $class);
 		$this->controller = new $this->controller_name;
